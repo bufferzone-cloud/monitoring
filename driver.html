@@ -65,9 +65,23 @@
       color: white;
       font-size: 24px;
     }
+    .driver-info {
+      flex: 1;
+    }
     .driver-info h3 {
       color: #1e3a2a;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .driver-city {
+      font-size: 14px;
+      font-weight: 400;
+      color: #5a7a62;
+      background: #f0f7f0;
+      padding: 4px 10px;
+      border-radius: 20px;
     }
     .driver-info p {
       color: #5a7a62;
@@ -253,7 +267,10 @@
     <div class="driver-header">
       <div class="driver-avatar"><i class="fas fa-user"></i></div>
       <div class="driver-info">
-        <h3 id="driverNameDisplay">Loading...</h3>
+        <h3>
+          <span id="driverNameDisplay">Loading...</span>
+          <span id="driverCityDisplay" class="driver-city">—</span>
+        </h3>
         <p id="driverEmailDisplay"></p>
       </div>
     </div>
@@ -372,6 +389,8 @@
       if (snap.exists()) {
         driverData = snap.val();
         document.getElementById('driverNameDisplay').textContent = `${driverData.firstName || ''} ${driverData.lastName || 'Driver'}`;
+        // Update city display
+        document.getElementById('driverCityDisplay').textContent = driverData.city || '—';
       }
     });
 
@@ -394,23 +413,36 @@
           if (driverMarker) map.removeLayer(driverMarker);
           driverMarker = L.marker([lat, lng]).addTo(map).bindPopup('You are here');
           map.setView([lat, lng], 18);
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            const data = await res.json();
-            const road = data.address?.road || data.address?.path || 'Unknown';
-            const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown';
-            if (currentUser) {
-              await update(ref(db, 'drivers/' + currentUser.uid), { lat, lng, road, city, lastLocationUpdate: Date.now() });
-            }
-          } catch (e) {}
+          await updateLocationToFirebase(lat, lng);
         },
         (err) => console.warn(err),
         { enableHighAccuracy: true, maximumAge: 60000 }
       );
     }
+    // Also update every minute explicitly
     setInterval(() => {
-      if (navigator.geolocation) navigator.geolocation.getCurrentPosition(() => {});
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          await updateLocationToFirebase(pos.coords.latitude, pos.coords.longitude);
+        });
+      }
     }, 60000);
+  }
+
+  async function updateLocationToFirebase(lat, lng) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      const road = data.address?.road || data.address?.path || data.address?.suburb || 'Unknown';
+      const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown';
+      if (currentUser) {
+        await update(ref(db, 'drivers/' + currentUser.uid), { lat, lng, road, city, lastLocationUpdate: Date.now() });
+        document.getElementById('driverCityDisplay').textContent = city;
+      }
+    } catch (e) {
+      // fallback: just update lat/lng
+      if (currentUser) await update(ref(db, 'drivers/' + currentUser.uid), { lat, lng, lastLocationUpdate: Date.now() });
+    }
   }
 
   function loadAssignedCar() {
@@ -431,6 +463,18 @@
       document.getElementById('startShiftBtn').style.display = 'block';
       document.getElementById('endShiftSection').style.display = 'none';
     }
+  }
+
+  // Format time as HH:MM
+  function formatTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatDuration(ms) {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
   }
 
   // Start shift
@@ -470,18 +514,21 @@
     document.getElementById('spinnerModal').style.display = 'flex';
     setTimeout(async () => {
       const shift = currentShift;
+      const endTime = Date.now();
       const fuelConsumed = shift.startFuel - endFuel;
       const expenses = shift.fuelMoney + shift.foodMoney + shift.extraMoney;
       const profit = revenue - expenses;
+      const durationMs = endTime - shift.startTime;
 
       const report = {
         driverId: currentUser.uid,
         driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
         carId: shift.carId, carName: shift.carName, plate: shift.plate,
-        startTime: shift.startTime, endTime: Date.now(),
+        startTime: shift.startTime, endTime,
         startFuel: shift.startFuel, endFuel, fuelConsumed, distance, revenue,
         fuelMoney: shift.fuelMoney, foodMoney: shift.foodMoney, extraMoney: shift.extraMoney,
         totalExpenses: expenses, profit,
+        durationMs,
         timestamp: Date.now()
       };
 
@@ -500,11 +547,14 @@
 
       document.getElementById('spinnerModal').style.display = 'none';
       
-      // Summary with ZMW
+      // Summary with times and duration
       document.getElementById('summaryContent').innerHTML = `
+        <div class="summary-line"><span>Shift start:</span><span>${formatTime(shift.startTime)}</span></div>
+        <div class="summary-line"><span>Shift end:</span><span>${formatTime(endTime)}</span></div>
+        <div class="summary-line"><span>Duration:</span><span>${formatDuration(durationMs)}</span></div>
         <div class="summary-line"><span>Start fuel:</span><span>${shift.startFuel} L</span></div>
         <div class="summary-line"><span>End fuel:</span><span>${endFuel} L</span></div>
-        <div class="summary-line"><span>Fuel consumed:</span><span>${fuelConsumed.toFixed(1)} L</span></div>
+        <div class="summary-line"><span>Fuel used:</span><span>${fuelConsumed.toFixed(1)} L</span></div>
         <div class="summary-line"><span>Distance:</span><span>${distance} km</span></div>
         <div class="summary-line"><span>Revenue:</span><span>ZMW ${revenue.toLocaleString()}</span></div>
         <div class="summary-line"><span>Expenses:</span><span>ZMW ${expenses.toLocaleString()}</span></div>
@@ -566,6 +616,7 @@
       <div class="report-card">
         <div class="report-date">${formatDate(r.startTime)}</div>
         <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
+        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime - r.startTime))})</span></div>
         <div class="summary-line"><span>Start fuel:</span><span>${r.startFuel} L</span></div>
         <div class="summary-line"><span>End fuel:</span><span>${r.endFuel} L</span></div>
         <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed.toFixed(1)} L</span></div>
@@ -587,9 +638,9 @@
   document.getElementById('downloadAllReportsCsv').addEventListener('click', async () => {
     const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
     const reports = snap.val() ? Object.values(snap.val()) : [];
-    let csv = "Date,Car,Plate,StartFuel,EndFuel,FuelConsumed,Distance,Revenue,Expenses,Profit,FuelMoney,FoodMoney,ExtraMoney\n";
+    let csv = "Date,Car,Plate,StartTime,EndTime,Duration,StartFuel,EndFuel,FuelConsumed,Distance,Revenue,Expenses,Profit,FuelMoney,FoodMoney,ExtraMoney\n";
     reports.forEach(r => {
-      csv += `"${new Date(r.startTime).toLocaleDateString()}",${r.carName},${r.plate},${r.startFuel},${r.endFuel},${r.fuelConsumed},${r.distance},${r.revenue},${r.totalExpenses},${r.profit},${r.fuelMoney},${r.foodMoney},${r.extraMoney}\n`;
+      csv += `"${new Date(r.startTime).toLocaleDateString()}",${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime - r.startTime))}",${r.startFuel},${r.endFuel},${r.fuelConsumed},${r.distance},${r.revenue},${r.totalExpenses},${r.profit},${r.fuelMoney},${r.foodMoney},${r.extraMoney}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
