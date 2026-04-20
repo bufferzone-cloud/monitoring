@@ -1,6 +1,6 @@
 {
   "name": "Driver Daily Monitoring",
-  "short_name": "Driver Monitor",
+  "short_name": "Zamlift Monitor",
   "description": "Admin and driver fleet management system",
   "start_url": "/monitoring/index.html",
   "scope": "/monitoring/",
