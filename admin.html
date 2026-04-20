@@ -350,7 +350,7 @@
 </head>
 <body>
 <div id="app">
-  <!-- Map Wrapper with floating controls -->
+  <!-- Map Wrapper -->
   <div id="mapWrapper">
     <div id="mapContainer"></div>
     <!-- City Selector -->
@@ -380,14 +380,12 @@
         <p id="adminEmailDisplay"></p>
       </div>
     </div>
-
     <div class="action-grid">
       <div class="action-btn" data-page="drivers"><i class="fas fa-users"></i><span>Drivers</span></div>
       <div class="action-btn" data-page="cars"><i class="fas fa-car"></i><span>Cars</span></div>
       <div class="action-btn" data-page="assign"><i class="fas fa-exchange-alt"></i><span>Assign</span></div>
       <div class="action-btn" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
     </div>
-
     <div class="section-title"><i class="fas fa-location-dot"></i> Drivers closest to you</div>
     <div id="driverProximityList"></div>
     <button class="outline-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -522,9 +520,8 @@
   let driverMarkers = {};
   let currentCity = "Lusaka";
   let emergencies = [];
-  let emergencyListener = null;
 
-  // Auth
+  // Auth protection
   onAuthStateChanged(auth, (user) => {
     if (!user || !user.email.startsWith('admin@')) {
       window.location.href = 'index.html';
@@ -542,6 +539,8 @@
     navigator.geolocation?.getCurrentPosition(pos => {
       adminLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       if (currentCity === "Lusaka") map.setView([adminLocation.lat, adminLocation.lng], 13);
+      L.marker([adminLocation.lat, adminLocation.lng]).addTo(map).bindPopup('You (Admin)');
+      updateProximityList();
     });
   }
 
@@ -611,7 +610,7 @@
   // Emergency listening
   function listenEmergencies() {
     const reportsRef = ref(db, 'driverReports');
-    emergencyListener = onValue(reportsRef, (snap) => {
+    onValue(reportsRef, (snap) => {
       emergencies = snap.val() ? Object.entries(snap.val()).map(([id, e]) => ({ id, ...e })) : [];
       document.getElementById('emergencyCount').textContent = emergencies.length;
     });
@@ -645,7 +644,6 @@
         </div>
       `;
     }).join('');
-    // Attach call/track events
     document.querySelectorAll('.call-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const phone = btn.dataset.phone;
@@ -675,7 +673,11 @@
     });
     document.getElementById('driverProximityList').innerHTML = withCoords.slice(0,5).map(d => {
       const car = cars.find(c => c.assignedDriver === d.id);
-      return `<div class="driver-item" onclick="showDriverModal('${d.id}')">... </div>`;
+      return `<div class="driver-item" onclick="showDriverModal('${d.id}')">
+        <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
+        <div style="font-size:14px;">${car ? car.name + ' (' + car.plate + ')' : 'No car'}</div>
+        <div style="font-size:13px; color:#5a7a62;"><i class="fas fa-map-pin"></i> ${d.road || 'Unknown'}, ${d.city || ''}</div>
+      </div>`;
     }).join('');
   }
 
@@ -727,33 +729,65 @@
     `).join('') || '<p>No reports</p>';
   }
 
-  // Render functions (cars, drivers, assignments) — abbreviated for brevity but fully implemented
+  // Render drivers page
   function renderDriversPage() {
-    document.getElementById('driversListContainer').innerHTML = drivers.map(d => `
-      <div class="card-item" onclick="showDriverModal('${d.id}')">${d.firstName} ${d.lastName}</div>`).join('');
+    const cont = document.getElementById('driversListContainer');
+    cont.innerHTML = drivers.map(d => `
+      <div class="card-item" onclick="showDriverModal('${d.id}')">
+        <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
+        <div>${d.email} · ${d.phone || ''}</div>
+        <div style="color:#2e5c3e;">NRC: ${d.nrc || ''}</div>
+      </div>
+    `).join('');
   }
+
+  // Render cars page
   function renderCarsPage() {
-    document.getElementById('carsListContainer').innerHTML = cars.map(c => `
-      <div class="card-item"><i class="fas fa-car-side car-icon"></i> ${c.name} (${c.plate})</div>`).join('');
+    const cont = document.getElementById('carsListContainer');
+    cont.innerHTML = cars.map(c => {
+      const driver = drivers.find(d => d.id === c.assignedDriver);
+      return `
+        <div class="card-item" style="display:flex; align-items:center;">
+          <i class="fas fa-car-side car-icon"></i>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:18px;">${c.name}</div>
+            <div style="color:#2e5c3e;">${c.plate}</div>
+            <div style="font-size:14px;">Assigned: ${driver ? driver.firstName : 'None'}</div>
+            <div style="font-size:13px;">Fuel used: ${c.totalFuelConsumed || 0} L · Dist: ${c.totalDistance || 0} km</div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
+
+  // Assign selects and list
   function renderAssignSelects() {
     const dSel = document.getElementById('selectDriver');
     const cSel = document.getElementById('selectCar');
     dSel.innerHTML = '<option value="">Select Driver</option>' + drivers.map(d => `<option value="${d.id}">${d.firstName} ${d.lastName}</option>`).join('');
     cSel.innerHTML = '<option value="">Select Car</option>' + cars.map(c => `<option value="${c.id}">${c.name} (${c.plate})</option>`).join('');
   }
+
   function renderAssignmentsList() {
-    document.getElementById('assignmentsList').innerHTML = drivers.map(d => {
+    const cont = document.getElementById('assignmentsList');
+    cont.innerHTML = drivers.map(d => {
       const car = cars.find(c => c.assignedDriver === d.id);
-      return `<div class="card-item">${d.firstName} ${d.lastName} — ${car ? car.name : 'None'} ${car ? `<button onclick="removeAssignment('${d.id}')">Remove</button>`:''}</div>`;
+      return `
+        <div class="card-item">
+          <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
+          <div>Car: ${car ? car.name + ' (' + car.plate + ')' : 'None'}</div>
+          ${car ? `<button class="outline-btn" onclick="removeAssignment('${d.id}')">Remove Assignment</button>` : ''}
+        </div>
+      `;
     }).join('');
   }
-  window.removeAssignment = async (driverId) => {
+
+  window.removeAssignment = async function(driverId) {
     const car = cars.find(c => c.assignedDriver === driverId);
     if (car) await update(ref(db, `cars/${car.id}`), { assignedDriver: null });
   };
 
-  // Reports page with times
+  // Reports page
   document.getElementById('loadReportsBtn').addEventListener('click', async () => {
     const period = document.getElementById('reportPeriodSelect').value;
     const cont = document.getElementById('reportsListContainer');
@@ -786,11 +820,103 @@
     `).join('') || '<p>No reports.</p>';
   });
 
-  // Navigation & forms (similar to previous, omitted for length but included in final)
-  // ... (all event listeners for pages, add driver/car, assign, logout, CSV)
+  document.getElementById('downloadReportsCsv').addEventListener('click', async () => {
+    let csv = "Date,Driver,Car,Plate,Start,End,Duration,Fuel(L),Distance(km),Revenue(ZMW),Profit(ZMW)\n";
+    for (let d of drivers) {
+      const snap = await get(ref(db, `shiftReports/${d.id}`));
+      if (snap.exists()) {
+        Object.values(snap.val()).forEach(r => {
+          csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime-r.startTime))}",${r.fuelConsumed},${r.distance},${r.revenue},${r.profit}\n`;
+        });
+      }
+    }
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'all_reports.csv';
+    a.click();
+  });
+
+  // Navigation
+  document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = btn.dataset.page;
+      document.getElementById(page + 'Page').classList.add('active');
+    });
+  });
+  function closeAllPages() {
+    document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+  }
+  document.getElementById('closeDriversPage').onclick = closeAllPages;
+  document.getElementById('closeCarsPage').onclick = closeAllPages;
+  document.getElementById('closeAssignPage').onclick = closeAllPages;
+  document.getElementById('closeReportsPage').onclick = closeAllPages;
+
+  // Toggle forms
+  document.getElementById('toggleAddDriverForm').onclick = () => {
+    document.getElementById('addDriverForm').style.display = 
+      document.getElementById('addDriverForm').style.display === 'block' ? 'none' : 'block';
+  };
+  document.getElementById('toggleAddCarForm').onclick = () => {
+    document.getElementById('addCarForm').style.display = 
+      document.getElementById('addCarForm').style.display === 'block' ? 'none' : 'block';
+  };
+  document.getElementById('toggleAssignForm').onclick = () => {
+    document.getElementById('assignForm').style.display = 
+      document.getElementById('assignForm').style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Create driver
+  document.getElementById('createDriverBtn').onclick = async () => {
+    const email = document.getElementById('driverEmail').value;
+    const pass = document.getElementById('driverPassword').value;
+    if (pass !== document.getElementById('driverConfirmPassword').value) return alert('Passwords mismatch');
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      const uid = cred.user.uid;
+      await set(ref(db, 'drivers/' + uid), {
+        firstName: document.getElementById('driverFirstName').value,
+        lastName: document.getElementById('driverLastName').value,
+        nrc: document.getElementById('driverNRC').value,
+        email, phone: document.getElementById('driverPhone').value,
+        lat: null, lng: null
+      });
+      document.getElementById('addDriverForm').style.display = 'none';
+      await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
+    } catch(e) { alert(e.message); }
+  };
+
+  // Add car
+  document.getElementById('addCarBtn').onclick = async () => {
+    const name = document.getElementById('carName').value;
+    const plate = document.getElementById('carPlate').value;
+    const newRef = push(ref(db, 'cars'));
+    await set(newRef, { name, plate, assignedDriver: null, totalFuelConsumed: 0, totalDistance: 0 });
+    document.getElementById('addCarForm').style.display = 'none';
+  };
+
+  // Assign car
+  document.getElementById('confirmAssignBtn').onclick = async () => {
+    const driverId = document.getElementById('selectDriver').value;
+    const carId = document.getElementById('selectCar').value;
+    if (!driverId || !carId) return alert('Select both');
+    const prevCar = cars.find(c => c.assignedDriver === driverId);
+    if (prevCar) await update(ref(db, `cars/${prevCar.id}`), { assignedDriver: null });
+    await update(ref(db, `cars/${carId}`), { assignedDriver: driverId });
+    document.getElementById('assignForm').style.display = 'none';
+  };
+
+  // Search driver
+  document.getElementById('searchDriverInput').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    const filtered = drivers.filter(d => (d.firstName+' '+d.lastName).toLowerCase().includes(q));
+    document.getElementById('driversListContainer').innerHTML = filtered.map(d => `
+      <div class="card-item" onclick="showDriverModal('${d.id}')">${d.firstName} ${d.lastName}</div>
+    `).join('');
+  });
 
   // Logout
-  document.getElementById('logoutBtn').onclick = () => signOut(auth);
+  document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
 </script>
 </body>
 </html>
