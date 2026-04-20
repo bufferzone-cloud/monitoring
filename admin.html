@@ -96,6 +96,8 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+    .emergency-float-btn.pulse {
       animation: pulse-red 1.5s infinite;
     }
     @keyframes pulse-red {
@@ -485,6 +487,15 @@
   </div>
 </div>
 
+<!-- Car Detail Modal -->
+<div class="modal-overlay" id="carModal">
+  <div class="modal-card">
+    <h3 id="modalCarName" style="color:#1e3a2a;"></h3>
+    <p id="modalCarDetails"></p>
+    <button class="outline-btn" onclick="document.getElementById('carModal').style.display='none'">Close</button>
+  </div>
+</div>
+
 <!-- Driver Reports Modal -->
 <div class="modal-overlay" id="driverReportsModal">
   <div class="modal-card">
@@ -520,6 +531,8 @@
   let driverMarkers = {};
   let currentCity = "Lusaka";
   let emergencies = [];
+  let unreadEmergencyCount = 0;
+  let lastReadEmergencyTimestamp = 0;
 
   // Auth protection
   onAuthStateChanged(auth, (user) => {
@@ -607,18 +620,36 @@
     }
   });
 
-  // Emergency listening
+  // Emergency listening with unread tracking
   function listenEmergencies() {
     const reportsRef = ref(db, 'driverReports');
     onValue(reportsRef, (snap) => {
-      emergencies = snap.val() ? Object.entries(snap.val()).map(([id, e]) => ({ id, ...e })) : [];
-      document.getElementById('emergencyCount').textContent = emergencies.length;
+      const allEmergencies = snap.val() ? Object.entries(snap.val()).map(([id, e]) => ({ id, ...e })) : [];
+      emergencies = allEmergencies;
+      // Count unread (those with timestamp > lastReadEmergencyTimestamp)
+      unreadEmergencyCount = emergencies.filter(e => e.timestamp > lastReadEmergencyTimestamp).length;
+      updateEmergencyUI();
     });
+  }
+
+  function updateEmergencyUI() {
+    const badge = document.getElementById('emergencyCount');
+    const btn = document.getElementById('emergencyFloatBtn');
+    badge.textContent = unreadEmergencyCount;
+    if (unreadEmergencyCount > 0) {
+      btn.classList.add('pulse');
+    } else {
+      btn.classList.remove('pulse');
+    }
   }
 
   document.getElementById('emergencyFloatBtn').addEventListener('click', () => {
     document.getElementById('emergencyPage').classList.add('active');
     renderEmergencyList();
+    // Mark all as read
+    lastReadEmergencyTimestamp = Date.now();
+    unreadEmergencyCount = 0;
+    updateEmergencyUI();
   });
   document.getElementById('closeEmergencyPage').addEventListener('click', () => {
     document.getElementById('emergencyPage').classList.remove('active');
@@ -627,10 +658,12 @@
   function renderEmergencyList() {
     const cont = document.getElementById('emergencyListContainer');
     if (emergencies.length === 0) {
-      cont.innerHTML = '<p>No active emergencies.</p>';
+      cont.innerHTML = '<p>No emergencies.</p>';
       return;
     }
-    cont.innerHTML = emergencies.map(e => {
+    // Show newest first
+    const sorted = [...emergencies].sort((a,b) => b.timestamp - a.timestamp);
+    cont.innerHTML = sorted.map(e => {
       const driver = drivers.find(d => d.id === e.driverId);
       return `
         <div class="emergency-card">
@@ -729,6 +762,30 @@
     `).join('') || '<p>No reports</p>';
   }
 
+  // Car modal (with totals)
+  window.showCarModal = async function(carId) {
+    const car = cars.find(c => c.id === carId);
+    const driver = drivers.find(d => d.id === car?.assignedDriver);
+    // Calculate total income for this car from all reports
+    let totalIncome = 0;
+    for (let d of drivers) {
+      const snap = await get(ref(db, `shiftReports/${d.id}`));
+      if (snap.exists()) {
+        Object.values(snap.val()).forEach(r => {
+          if (r.carId === carId) totalIncome += r.revenue || 0;
+        });
+      }
+    }
+    document.getElementById('modalCarName').textContent = `${car.name} (${car.plate})`;
+    document.getElementById('modalCarDetails').innerHTML = `
+      <p><i class="fas fa-user"></i> Assigned driver: ${driver ? driver.firstName + ' ' + driver.lastName : 'None'}</p>
+      <p><i class="fas fa-gas-pump"></i> Total fuel consumed: ${car.totalFuelConsumed || 0} L</p>
+      <p><i class="fas fa-road"></i> Total distance: ${car.totalDistance || 0} km</p>
+      <p><i class="fas fa-money-bill"></i> Total income: ZMW ${totalIncome.toLocaleString()}</p>
+    `;
+    document.getElementById('carModal').style.display = 'flex';
+  };
+
   // Render drivers page
   function renderDriversPage() {
     const cont = document.getElementById('driversListContainer');
@@ -741,19 +798,18 @@
     `).join('');
   }
 
-  // Render cars page
+  // Render cars page (clickable)
   function renderCarsPage() {
     const cont = document.getElementById('carsListContainer');
     cont.innerHTML = cars.map(c => {
       const driver = drivers.find(d => d.id === c.assignedDriver);
       return `
-        <div class="card-item" style="display:flex; align-items:center;">
+        <div class="card-item" style="display:flex; align-items:center;" onclick="showCarModal('${c.id}')">
           <i class="fas fa-car-side car-icon"></i>
           <div style="flex:1;">
             <div style="font-weight:700; font-size:18px;">${c.name}</div>
             <div style="color:#2e5c3e;">${c.plate}</div>
             <div style="font-size:14px;">Assigned: ${driver ? driver.firstName : 'None'}</div>
-            <div style="font-size:13px;">Fuel used: ${c.totalFuelConsumed || 0} L · Dist: ${c.totalDistance || 0} km</div>
           </div>
         </div>
       `;
