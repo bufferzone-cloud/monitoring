@@ -3,356 +3,675 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Driver Daily Monitoring · Admin</title>
+  <title>Admin · Driver Daily Monitoring</title>
   <!-- Fonts & Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
-  <!-- Leaflet -->
+  <!-- Leaflet CSS + JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Leaflet Routing Machine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
   <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
-      authDomain: "monitoring-1a105.firebaseapp.com",
-      databaseURL: "https://monitoring-1a105-default-rtdb.firebaseio.com",
-      projectId: "monitoring-1a105",
-      storageBucket: "monitoring-1a105.firebasestorage.app",
-      messagingSenderId: "1095363656731",
-      appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe",
-      measurementId: "G-2CJHNPR6YZ"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    window.auth = auth; window.db = db;
-    window.firebaseRef = ref; window.firebaseSet = set; window.firebasePush = push;
-    window.firebaseOnValue = onValue; window.firebaseUpdate = update; window.firebaseGet = get; window.firebaseChild = child;
-    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  </script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: #f2f5f9; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-    #app { max-width: 420px; width: 100%; background: white; min-height: 100vh; box-shadow: 0 0 30px rgba(0,0,0,0.02); position: relative; overflow-x: hidden; display: flex; flex-direction: column; }
-    
-    /* ----- LOGIN SCREEN (exactly as described) ----- */
-    #loginScreen { background: #f0f5fa; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 24px; }
-    .welcome-big { font-size: 32px; font-weight: 700; color: #0b2b4a; line-height: 1.2; margin-bottom: 8px; }
-    .welcome-sub { color: #4a6a85; margin-bottom: 40px; font-weight: 400; }
-    .login-toggle-btn { background: white; border-radius: 60px; padding: 16px 24px; font-weight: 600; color: #0b2b4a; text-align: center; box-shadow: 0 6px 14px rgba(0,0,0,0.02); cursor: pointer; border: 1px solid #e2eaf2; }
-    .login-dropdown { background: white; border-radius: 32px; padding: 24px 20px; margin-top: 16px; box-shadow: 0 12px 24px rgba(0,0,0,0.04); display: none; transition: all 0.2s; }
-    .pill-input-group { background: #f5f9ff; border-radius: 50px; padding: 6px 20px; margin-bottom: 16px; display: flex; align-items: center; border: 1px solid #e2eaf2; }
-    .pill-input-group i { color: #6b84a0; width: 28px; }
-    .pill-input-group input { background: transparent; border: none; padding: 16px 0; font-size: 16px; outline: none; width: 100%; }
-    .login-action-btn { background: #0b2b4a; color: white; border: none; border-radius: 50px; padding: 16px; font-weight: 700; font-size: 16px; width: 100%; cursor: pointer; }
-    
-    /* ----- MAIN APP (matching the picture style) ----- */
-    #mainApp { display: none; flex-direction: column; background: #ffffff; }
-    .status-row { display: flex; justify-content: space-between; padding: 14px 20px 6px; color: #1e293b; font-weight: 500; font-size: 15px; }
-    .header-welcome { padding: 0 20px; }
-    .header-welcome h3 { font-size: 24px; font-weight: 700; color: #0b2b4a; }
-    .admin-location { display: flex; align-items: center; gap: 8px; color: #3a6b92; font-size: 14px; margin: 6px 0 16px; }
-    .search-card { background: #f8fafc; margin: 0 20px 16px; border-radius: 40px; padding: 4px; display: flex; border: 1px solid #e6edf4; }
-    .search-card input { flex: 1; background: transparent; border: none; padding: 16px 20px; font-size: 15px; outline: none; }
-    .search-card button { background: #0b2b4a; border: none; border-radius: 40px; padding: 12px 24px; color: white; font-weight: 600; }
-    .map-thumb { height: 180px; margin: 0 20px 16px; border-radius: 28px; overflow: hidden; border: 1px solid #e2eaf2; box-shadow: 0 6px 12px rgba(0,0,0,0.02); }
-    .feature-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; padding: 0 20px; margin-bottom: 20px; }
-    .feature-tile { background: #ffffff; border-radius: 20px; padding: 14px 4px; text-align: center; border: 1px solid #ecf2f8; box-shadow: 0 4px 8px rgba(0,0,0,0.01); }
-    .feature-tile i { font-size: 24px; color: #0b2b4a; margin-bottom: 6px; }
-    .feature-tile span { display: block; font-size: 13px; font-weight: 600; color: #1e3a5f; }
-    .recent-card { background: white; margin: 8px 20px 24px; border-radius: 28px; padding: 20px; border: 1px solid #ecf2f8; box-shadow: 0 6px 12px rgba(0,0,0,0.02); }
-    .recent-header { display: flex; justify-content: space-between; font-weight: 700; color: #0b2b4a; margin-bottom: 16px; }
-    .activity-item { display: flex; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f4fa; }
-    .activity-icon { width: 44px; height: 44px; background: #fef3e2; border-radius: 30px; display: flex; align-items: center; justify-content: center; color: #c2410c; }
-    .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 420px; margin: 0 auto; background: white; display: flex; justify-content: space-around; padding: 14px 20px 24px; border-top: 1px solid #e9eef3; border-radius: 30px 30px 0 0; }
-    .nav-item { text-align: center; color: #7e8b9c; font-size: 13px; font-weight: 500; }
-    .nav-item.active { color: #0b2b4a; font-weight: 700; }
-    .nav-item i { font-size: 22px; display: block; margin-bottom: 5px; }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      background: #f2f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    #app {
+      max-width: 420px;
+      width: 100%;
+      background: #ffffff;
+      min-height: 100vh;
+      box-shadow: 0 0 30px rgba(0,0,0,0.02);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 20px 6px;
+      color: #1e293b;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    /* Header */
+    .header-section {
+      padding: 0 20px;
+    }
+
+    .header-section h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0b2b4a;
+    }
+
+    .admin-location {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #3a6b92;
+      font-size: 14px;
+      margin: 8px 0 18px;
+    }
+
+    /* Search bar */
+    .search-container {
+      margin: 0 20px 20px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-container input {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid #e2eaf2;
+      border-radius: 40px;
+      padding: 14px 20px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .search-container button {
+      background: #0b2b4a;
+      border: none;
+      border-radius: 40px;
+      padding: 0 24px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Map thumbnail */
+    .map-thumb {
+      height: 190px;
+      margin: 0 20px 20px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid #e2eaf2;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.02);
+    }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 20px;
+    }
+
+    .feature-item {
+      background: white;
+      border-radius: 22px;
+      padding: 14px 4px;
+      text-align: center;
+      border: 1px solid #ecf2f8;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.01);
+      cursor: pointer;
+    }
+
+    .feature-item i {
+      font-size: 24px;
+      color: #0b2b4a;
+      margin-bottom: 6px;
+    }
+
+    .feature-item span {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e3a5f;
+    }
+
+    /* Recent activities card */
+    .recent-card {
+      background: white;
+      margin: 0 20px 24px;
+      border-radius: 28px;
+      padding: 20px;
+      border: 1px solid #ecf2f8;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.02);
+    }
+
+    .recent-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      color: #0b2b4a;
+      margin-bottom: 16px;
+    }
+
+    .activity-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f4fa;
+    }
+
+    .activity-icon {
+      width: 46px;
+      height: 46px;
+      background: #fef3e2;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c2410c;
+    }
+
+    /* Bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 420px;
+      margin: 0 auto;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 14px 20px 24px;
+      border-top: 1px solid #e9eef3;
+      border-radius: 30px 30px 0 0;
+    }
+
+    .nav-item {
+      text-align: center;
+      color: #7e8b9c;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: #0b2b4a;
+      font-weight: 700;
+    }
+
+    .nav-item i {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
     /* Page views */
-    .page-view { padding: 8px 20px 90px; display: none; }
-    .page-view.active { display: block; }
-    .driver-card-custom { background: white; border-radius: 28px; padding: 20px; margin-bottom: 16px; border: 1px solid #e7eef6; }
-    .driver-name-lg { font-size: 20px; font-weight: 700; }
-    .location-words-badge { background: #f0f7ff; border-radius: 50px; padding: 10px 16px; margin: 12px 0; }
-    .fuel-yesterday-card { background: #fafdff; border-radius: 24px; padding: 16px; border: 1px dashed #bdd3e8; }
-    .track-btn-large { background: #0b2b4a; border: none; border-radius: 50px; padding: 16px; font-weight: 700; color: white; width: 100%; margin-top: 16px; }
-    
-    /* Modal & tracking */
-    .modal-mask { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.2); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-panel { background: white; border-radius: 36px; padding: 24px; width: 90%; max-width: 380px; }
-    .tracking-fullscreen { position: fixed; top:0; left:0; width:100%; height:100%; background: white; z-index: 950; display: none; flex-direction: column; }
-    .tracking-map-container { height: 60vh; width: 100%; }
-    .driver-info-footer { padding: 20px; background: white; }
-    .direction-pill { background: #0b2b4a; color: white; border: none; border-radius: 60px; padding: 18px; font-weight: 700; margin: 12px 20px; width: calc(100% - 40px); }
-    .close-track-btn { position: absolute; top: 20px; right: 20px; background: white; border-radius: 50px; padding: 10px 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 1001; font-weight: 600; }
-    
-    .csv-download-btn { background: #eef3f9; border-radius: 40px; padding: 10px 18px; border: none; margin-left: 12px; }
+    .page-view {
+      padding: 8px 20px 90px;
+      display: none;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    /* Driver card style */
+    .driver-card {
+      background: white;
+      border-radius: 28px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #e7eef6;
+    }
+
+    .driver-name {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .car-info {
+      color: #2c577c;
+      margin: 6px 0;
+    }
+
+    .location-badge {
+      background: #f0f7ff;
+      border-radius: 50px;
+      padding: 10px 16px;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+
+    .fuel-card {
+      background: #fafdff;
+      border-radius: 24px;
+      padding: 16px;
+      border: 1px dashed #bdd3e8;
+    }
+
+    .track-btn {
+      background: #0b2b4a;
+      border: none;
+      border-radius: 50px;
+      padding: 16px;
+      font-weight: 700;
+      color: white;
+      width: 100%;
+      margin-top: 18px;
+      cursor: pointer;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 36px;
+      padding: 24px;
+      width: 90%;
+      max-width: 380px;
+    }
+
+    /* Tracking fullscreen */
+    .tracking-view {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 950;
+      display: none;
+      flex-direction: column;
+    }
+
+    .track-map {
+      height: 60vh;
+      width: 100%;
+    }
+
+    .driver-info-panel {
+      padding: 20px;
+      background: white;
+    }
+
+    .direction-pill {
+      background: #0b2b4a;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      padding: 18px;
+      font-weight: 700;
+      margin: 12px 20px;
+      width: calc(100% - 40px);
+      cursor: pointer;
+    }
+
+    .close-track {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 50px;
+      padding: 10px 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      z-index: 1001;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .csv-btn {
+      background: #eef3f9;
+      border-radius: 40px;
+      padding: 10px 20px;
+      border: none;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      background: #0b2b4a;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 16px;
+      border-radius: 40px;
+      border: 1px solid #dde3ea;
+      margin-bottom: 14px;
+    }
   </style>
 </head>
 <body>
 <div id="app">
-  <!-- LOGIN SCREEN (drop-down animation style) -->
-  <div id="loginScreen">
-    <div class="welcome-big">Welcome to<br>Driver Daily<br>Monitoring System</div>
-    <div class="welcome-sub">Admin portal · fleet intelligence</div>
-    <div class="login-toggle-btn" id="toggleLoginForm">🔐 Tap to login</div>
-    <div class="login-dropdown" id="loginDropdown">
-      <div class="pill-input-group"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder="Email" value="admin@monitoring.com"></div>
-      <div class="pill-input-group"><i class="fas fa-lock"></i><input type="password" id="loginPassword" placeholder="Password" value="123456"></div>
-      <button class="login-action-btn" id="loginSubmitBtn">Login →</button>
+  <!-- Status & Header -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span>
+  </div>
+  <div class="header-section">
+    <h2>Welcome, Admin</h2>
+    <div class="admin-location"><i class="fas fa-map-pin"></i> <span id="adminLocationText">Senopati, Jakarta Selatan</span></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-container">
+    <input type="text" placeholder="Search driver..." id="searchInput">
+    <button id="searchBtn"><i class="fas fa-search"></i></button>
+  </div>
+
+  <!-- HOME PAGE -->
+  <div id="homePage" class="page-view active">
+    <div class="map-thumb" id="homeMap"></div>
+    <div class="feature-grid">
+      <div class="feature-item" data-nav="drivers"><i class="fas fa-users"></i><span>Drivers</span></div>
+      <div class="feature-item" data-nav="cars"><i class="fas fa-car-side"></i><span>Cars</span></div>
+      <div class="feature-item" data-nav="fuel"><i class="fas fa-gas-pump"></i><span>Fuel</span></div>
+      <div class="feature-item" data-nav="reports"><i class="fas fa-flag"></i><span>Reports</span></div>
+    </div>
+    <div class="recent-card">
+      <div class="recent-header"><span>⚠️ Recent driver reports</span><span>See all</span></div>
+      <div id="recentActivitiesList"></div>
     </div>
   </div>
 
-  <!-- MAIN APPLICATION (after auth) -->
-  <div id="mainApp">
-    <div class="status-row"><span>9:41</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span></div>
-    <div class="header-welcome">
-      <h3>Welcome, Admin</h3>
-      <div class="admin-location"><i class="fas fa-map-pin"></i> <span id="adminCurrentLocText">Senopati, Jakarta Selatan</span></div>
-    </div>
-    <div class="search-card">
-      <input type="text" placeholder="Search driver..." id="globalSearchInput">
-      <button id="globalSearchBtn"><i class="fas fa-search"></i></button>
-    </div>
-    
-    <!-- HOME PAGE -->
-    <div id="homePage" class="page-view active">
-      <div class="map-thumb" id="homeLeafletMap"></div>
-      <div class="feature-row">
-        <div class="feature-tile" data-feat="drivers"><i class="fas fa-users"></i><span>Drivers</span></div>
-        <div class="feature-tile" data-feat="cars"><i class="fas fa-car-side"></i><span>Cars</span></div>
-        <div class="feature-tile" data-feat="fuel"><i class="fas fa-gas-pump"></i><span>Fuel</span></div>
-        <div class="feature-tile" data-feat="reports"><i class="fas fa-flag"></i><span>Reports</span></div>
-      </div>
-      <div class="recent-card">
-        <div class="recent-header"><span>⚠️ Recent driver reports</span><span>See all</span></div>
-        <div id="recentActivitiesContainer"></div>
-      </div>
-    </div>
-    
-    <!-- MAP PAGE -->
-    <div id="mapPage" class="page-view">
-      <div style="height:300px; border-radius:28px; overflow:hidden; margin:10px 0;" id="fullPageMap"></div>
-      <p style="color:#2c4b6b; margin-top:12px;">📍 Live tracking view · all drivers</p>
-    </div>
-    
-    <!-- REPORTS PAGE (daily/weekly/monthly + CSV) -->
-    <div id="reportsPage" class="page-view">
-      <h3 style="margin:16px 0 8px;">📊 Reports</h3>
-      <div style="display:flex; gap:8px; margin-bottom:20px;">
-        <select id="reportPeriodSelect" style="flex:1; padding:14px; border-radius:40px; border:1px solid #d0dde9;"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
-        <button id="downloadCsvBtn" class="csv-download-btn"><i class="fas fa-download"></i> CSV</button>
-      </div>
-      <div id="reportsDataDisplay" style="background:#f9fcff; border-radius:24px; padding:16px;">Select period to view</div>
-    </div>
-    
-    <!-- DRIVERS PAGE -->
-    <div id="driversPage" class="page-view">
-      <div style="display:flex; justify-content:space-between; margin:16px 0;"><h3>👥 Drivers</h3><button id="addDriverShowModal" style="background:#0b2b4a; color:white; border:none; border-radius:40px; padding:10px 20px;">+ Add</button></div>
-      <div id="driversListContainer"></div>
-    </div>
-    
-    <!-- BOTTOM NAV -->
-    <div class="bottom-nav-bar">
-      <div class="nav-item active" data-nav="home"><i class="fas fa-home"></i><span>Home</span></div>
-      <div class="nav-item" data-nav="map"><i class="fas fa-map"></i><span>Map</span></div>
-      <div class="nav-item" data-nav="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
-      <div class="nav-item" data-nav="drivers"><i class="fas fa-id-card"></i><span>Drivers</span></div>
-    </div>
+  <!-- MAP PAGE -->
+  <div id="mapPage" class="page-view">
+    <div style="height: 320px; border-radius: 28px; overflow: hidden; margin: 10px 0;" id="fullMap"></div>
+    <p style="color:#2c4b6b;">📍 Live tracking · all drivers</p>
   </div>
-  
-  <!-- MODALS & TRACKING -->
-  <div class="modal-mask" id="modalOverlay"><div class="modal-panel" id="modalContent"></div></div>
-  <div class="tracking-fullscreen" id="trackingFullView">
-    <div class="close-track-btn" id="closeTrackingView"><i class="fas fa-times"></i> Close</div>
-    <div class="tracking-map-container" id="trackingMap"></div>
-    <div class="driver-info-footer" id="trackingDriverInfo">Driver info</div>
-    <button class="direction-pill" id="directionRoutingBtn"><i class="fas fa-route"></i> Route from admin to driver</button>
+
+  <!-- REPORTS PAGE -->
+  <div id="reportsPage" class="page-view">
+    <h3 style="margin: 20px 0;">📊 Reports</h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <select id="reportPeriod" style="flex:1; padding:14px; border-radius:40px; border:1px solid #d0dde9;">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      <button id="downloadCsvBtn" class="csv-btn"><i class="fas fa-download"></i> CSV</button>
+    </div>
+    <div id="reportDisplay" style="background:#f9fcff; border-radius:24px; padding:20px;">Select period to load</div>
+  </div>
+
+  <!-- DRIVERS PAGE -->
+  <div id="driversPage" class="page-view">
+    <div style="display: flex; justify-content: space-between; margin: 20px 0;">
+      <h3>👥 Drivers</h3>
+      <button id="addDriverBtn" class="add-btn">+ Add</button>
+    </div>
+    <div id="driversListContainer"></div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-nav="home"><i class="fas fa-home"></i><span>Home</span></div>
+    <div class="nav-item" data-nav="map"><i class="fas fa-map"></i><span>Map</span></div>
+    <div class="nav-item" data-nav="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
+    <div class="nav-item" data-nav="drivers"><i class="fas fa-id-card"></i><span>Drivers</span></div>
   </div>
 </div>
 
+<!-- Modals -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<!-- Tracking Fullscreen View -->
+<div class="tracking-view" id="trackingView">
+  <div class="close-track" id="closeTracking"><i class="fas fa-times"></i> Close</div>
+  <div class="track-map" id="trackMap"></div>
+  <div class="driver-info-panel" id="trackDriverInfo">Driver information</div>
+  <button class="direction-pill" id="directionBtn"><i class="fas fa-route"></i> Route from admin to driver</button>
+</div>
+
 <script type="module">
-  // ----- Firebase & State -----
-  const auth = window.auth; const db = window.db;
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
+    authDomain: "monitoring-1a105.firebaseapp.com",
+    databaseURL: "https://monitoring-1a105-default-rtdb.firebaseio.com",
+    projectId: "monitoring-1a105",
+    storageBucket: "monitoring-1a105.firebasestorage.app",
+    messagingSenderId: "1095363656731",
+    appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe",
+    measurementId: "G-2CJHNPR6YZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  // Protect route
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.email.startsWith('admin@')) {
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Global state
   let homeMap, fullMap, trackMap;
-  let adminCoords = [-6.2088, 106.8456]; // Jakarta default
-  let driversList = [];
+  let driversData = [];
+  let adminCoords = [-6.2088, 106.8456]; // default Jakarta
   let currentDriver = null;
-  
-  // UI elements
-  const loginScreen = document.getElementById('loginScreen');
-  const mainApp = document.getElementById('mainApp');
-  const toggleLogin = document.getElementById('toggleLoginForm');
-  const loginDropdown = document.getElementById('loginDropdown');
-  const loginSubmit = document.getElementById('loginSubmitBtn');
-  
-  toggleLogin.addEventListener('click', ()=>{
-    loginDropdown.style.display = loginDropdown.style.display === 'block' ? 'none' : 'block';
-  });
-  
-  loginSubmit.addEventListener('click', async ()=>{
-    const email = document.getElementById('loginEmail').value;
-    const pass = document.getElementById('loginPassword').value;
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch(e) { alert('Login failed: '+e.message); }
-  });
-  
-  onAuthStateChanged(auth, (user)=>{
-    if(user && user.email === 'admin@monitoring.com') {
-      loginScreen.style.display = 'none';
-      mainApp.style.display = 'flex';
-      initMapsAndData();
-    } else {
-      loginScreen.style.display = 'flex';
-      mainApp.style.display = 'none';
-    }
-  });
-  
-  function initMapsAndData() {
-    if (!homeMap) {
-      homeMap = L.map('homeLeafletMap').setView([-7.7829, 110.3671], 18);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(homeMap);
-      L.marker([-7.7829, 110.3671]).addTo(homeMap).bindPopup('Driver Casey').openPopup();
-      fullMap = L.map('fullPageMap').setView([-7.7829, 110.3671], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(fullMap);
-    }
-    loadDriversAndReports();
-    setupRealtimeListeners();
-    navigator.geolocation?.getCurrentPosition(pos=> { adminCoords = [pos.coords.latitude, pos.coords.longitude]; });
+
+  // Initialize maps
+  function initMaps() {
+    if (homeMap) homeMap.remove();
+    homeMap = L.map('homeMap').setView([-7.7829, 110.3671], 18);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(homeMap);
+    L.marker([-7.7829, 110.3671]).addTo(homeMap).bindPopup('Driver Casey').openPopup();
+
+    if (fullMap) fullMap.remove();
+    fullMap = L.map('fullMap').setView([-7.7829, 110.3671], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(fullMap);
   }
-  
-  function loadDriversAndReports() {
-    const driversRef = window.firebaseRef(db, 'drivers');
-    window.firebaseOnValue(driversRef, (snap)=>{
-      driversList = snap.val() ? Object.entries(snap.val()).map(([id, d])=> ({id, ...d})) : [];
-      renderDriversPage();
+
+  // Load drivers from Firebase
+  function loadDrivers() {
+    const driversRef = ref(db, 'drivers');
+    onValue(driversRef, (snapshot) => {
+      driversData = [];
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        for (let id in data) {
+          driversData.push({ id, ...data[id] });
+        }
+      }
+      renderDriversList();
       renderRecentActivities();
     });
-    const reportsRef = window.firebaseRef(db, 'driverReports');
-    window.firebaseOnValue(reportsRef, (snap)=>{
-      const reps = snap.val() ? Object.values(snap.val()) : [];
-      renderRecentActivities(reps);
-    });
   }
-  
-  function renderRecentActivities(reports = []) {
-    const cont = document.getElementById('recentActivitiesContainer');
-    cont.innerHTML = reports.slice(0,3).map(r=> `
-      <div class="activity-item"><div class="activity-icon"><i class="fas fa-exclamation-triangle"></i></div><div><strong>${r.type||'Emergency'}</strong><br><small>${r.message||'Assistance needed'}</small></div></div>
-    `).join('') || '<div class="activity-item">No active alerts</div>';
-  }
-  
-  function renderDriversPage() {
+
+  // Render drivers in list
+  function renderDriversList() {
     const container = document.getElementById('driversListContainer');
-    container.innerHTML = driversList.map(d=> `
-      <div class="driver-card-custom" data-id="${d.id}">
-        <div class="driver-name-lg">${d.firstName||'Casey'} ${d.lastName||'Kaspol'}</div>
-        <div style="color:#2c577c;">🚗 ${d.vehicleName||'Toyota Avanza'} · ${d.plate||'B 1234 CD'}</div>
-        <div class="location-words-badge"><i class="fas fa-location-dot"></i> ${d.road||'Jalan Raya'} · ${d.city||'Yogyakarta'}</div>
-        <div class="fuel-yesterday-card">
+    if (!container) return;
+    container.innerHTML = driversData.map(d => `
+      <div class="driver-card" data-id="${d.id}">
+        <div class="driver-name">${d.firstName || 'Casey'} ${d.lastName || 'Kaspol'}</div>
+        <div class="car-info">🚗 ${d.vehicleName || 'Toyota Avanza'} · ${d.plate || 'B 1234 CD'}</div>
+        <div class="location-badge"><i class="fas fa-location-dot"></i> ${d.road || 'Jalan Raya'} · ${d.city || 'Yogyakarta'}</div>
+        <div class="fuel-card">
           <div style="font-weight:700;">⛽ Yesterday's fuel</div>
-          <div>${d.carName||'Avanza'} (${d.plate||'B 1234'}) · Start: 45L · Revenue: 850k · Dist: 120km · End: 12L</div>
+          <div>${d.vehicleName || 'Avanza'} (${d.plate || 'B 1234'}) · Start: 45L · Revenue: 850k · Dist: 120km · End: 12L</div>
         </div>
-        <button class="track-btn-large driver-track-btn" data-id="${d.id}">📍 Track driver</button>
+        <button class="track-btn driver-track" data-id="${d.id}">📍 Track driver</button>
       </div>
     `).join('');
-    document.querySelectorAll('.driver-track-btn').forEach(b=> b.addEventListener('click', (e)=>{
-      const id = b.dataset.id; currentDriver = driversList.find(d=> d.id === id);
-      openTracking(currentDriver);
-    }));
+
+    document.querySelectorAll('.driver-track').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.dataset.id;
+        currentDriver = driversData.find(d => d.id === id);
+        openTrackingView(currentDriver);
+      });
+    });
   }
-  
-  function openTracking(driver) {
-    document.getElementById('trackingFullView').style.display = 'flex';
+
+  function renderRecentActivities() {
+    const refReports = ref(db, 'driverReports');
+    onValue(refReports, (snap) => {
+      const reports = snap.exists() ? Object.values(snap.val()) : [];
+      const container = document.getElementById('recentActivitiesList');
+      container.innerHTML = reports.slice(0, 3).map(r => `
+        <div class="activity-row">
+          <div class="activity-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div><strong>${r.type || 'Emergency'}</strong><br><small>${r.message || 'Assistance needed'}</small></div>
+        </div>
+      `).join('') || '<div class="activity-row">No active alerts</div>';
+    });
+  }
+
+  function openTrackingView(driver) {
+    document.getElementById('trackingView').style.display = 'flex';
     if (trackMap) trackMap.remove();
-    trackMap = L.map('trackingMap').setView([-7.783, 110.367], 18);
+    trackMap = L.map('trackMap').setView([-7.783, 110.367], 18);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(trackMap);
-    L.marker([-7.783, 110.367]).addTo(trackMap).bindPopup(driver?.firstName||'Driver');
-    document.getElementById('trackingDriverInfo').innerHTML = `
-      <strong>${driver?.firstName||'Casey'} ${driver?.lastName||'Kaspol'}</strong><br>
-      📞 ${driver?.phone||'+62 812-3456'} · ✉️ ${driver?.email||'casey@monitor.com'}<br>
-      🚘 ${driver?.vehicleName||'Toyota'} (${driver?.plate||'B 1234'})
+    L.marker([-7.783, 110.367]).addTo(trackMap).bindPopup(driver?.firstName || 'Driver');
+
+    document.getElementById('trackDriverInfo').innerHTML = `
+      <strong>${driver?.firstName || 'Casey'} ${driver?.lastName || 'Kaspol'}</strong><br>
+      📞 ${driver?.phone || '+62 812-3456'} · ✉️ ${driver?.email || 'casey@monitor.com'}<br>
+      🚘 ${driver?.vehicleName || 'Toyota'} (${driver?.plate || 'B 1234'})
     `;
   }
-  document.getElementById('closeTrackingView').onclick = ()=> document.getElementById('trackingFullView').style.display = 'none';
-  document.getElementById('directionRoutingBtn').onclick = ()=>{
-    if(trackMap) L.Routing.control({ waypoints: [L.latLng(adminCoords[0], adminCoords[1]), L.latLng(-7.783,110.367)], routeWhileDragging: true }).addTo(trackMap);
-  };
-  
+
   // Navigation
-  document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=>{
-    document.querySelectorAll('.nav-item').forEach(i=> i.classList.remove('active')); n.classList.add('active');
-    const page = n.dataset.nav;
-    document.querySelectorAll('.page-view').forEach(p=> p.classList.remove('active'));
-    document.getElementById(page+'Page').classList.add('active');
-    if(page==='map') setTimeout(()=> fullMap?.invalidateSize(), 100);
-  }));
-  document.querySelectorAll('.feature-tile').forEach(f=> f.addEventListener('click', ()=>{
-    const feat = f.dataset.feat;
-    if(feat==='drivers') document.querySelector('[data-nav="drivers"]').click();
-    else if(feat==='reports') document.querySelector('[data-nav="reports"]').click();
-    else alert(feat+' section');
-  }));
-  
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      const page = item.dataset.nav;
+      document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+      document.getElementById(page + 'Page').classList.add('active');
+      if (page === 'map') setTimeout(() => fullMap?.invalidateSize(), 100);
+    });
+  });
+
+  document.querySelectorAll('.feature-item').forEach(f => {
+    f.addEventListener('click', () => {
+      const nav = f.dataset.nav;
+      if (nav === 'drivers') document.querySelector('[data-nav="drivers"]').click();
+      else if (nav === 'reports') document.querySelector('[data-nav="reports"]').click();
+      else alert(nav + ' section (feature)');
+    });
+  });
+
   // Add driver modal
-  document.getElementById('addDriverShowModal').addEventListener('click', ()=>{
+  document.getElementById('addDriverBtn').addEventListener('click', () => {
     const modal = document.getElementById('modalOverlay');
     document.getElementById('modalContent').innerHTML = `
-      <h3>➕ Add driver & vehicle</h3>
-      <div style="margin:16px 0"><input id="newFName" placeholder="First name" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <div><input id="newLName" placeholder="Last name" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <div><input id="newNRC" placeholder="NRC" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <div><input id="newEmail" placeholder="Email" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <div><input id="newPass" type="password" placeholder="Password" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <div><input id="newVehName" placeholder="Vehicle name" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <div><input id="newPlate" placeholder="Number plate" style="width:100%;padding:14px;border-radius:40px;border:1px solid #ccc;margin-bottom:10px"></div>
-      <button id="saveNewDriverBtn" class="login-action-btn">Create driver</button>
-      <button style="margin-top:8px; background:transparent;" onclick="document.getElementById('modalOverlay').style.display='none'">Cancel</button>
+      <h3>➕ Add Driver & Vehicle</h3>
+      <input class="form-input" id="newFName" placeholder="First name">
+      <input class="form-input" id="newLName" placeholder="Last name">
+      <input class="form-input" id="newNRC" placeholder="NRC">
+      <input class="form-input" id="newEmail" placeholder="Email">
+      <input class="form-input" id="newPass" type="password" placeholder="Password">
+      <input class="form-input" id="newVehName" placeholder="Vehicle name">
+      <input class="form-input" id="newPlate" placeholder="Number plate">
+      <button class="track-btn" id="saveDriver">Create Driver</button>
+      <button style="margin-top:10px; background:transparent; border:none;" onclick="document.getElementById('modalOverlay').style.display='none'">Cancel</button>
     `;
     modal.style.display = 'flex';
-    document.getElementById('saveNewDriverBtn').onclick = async ()=>{
-      const email = document.getElementById('newEmail').value; const pass = document.getElementById('newPass').value;
+    document.getElementById('saveDriver').onclick = async () => {
+      const email = document.getElementById('newEmail').value;
+      const pass = document.getElementById('newPass').value;
       try {
-        const cred = await window.createUserWithEmailAndPassword(auth, email, pass);
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
         const uid = cred.user.uid;
-        await window.firebaseSet(window.firebaseRef(db, 'drivers/'+uid), {
-          firstName: document.getElementById('newFName').value, lastName: document.getElementById('newLName').value,
-          nrc: document.getElementById('newNRC').value, email, vehicleName: document.getElementById('newVehName').value,
-          plate: document.getElementById('newPlate').value, road: 'Jl. Magelang', city: 'Sleman'
+        await set(ref(db, 'drivers/' + uid), {
+          firstName: document.getElementById('newFName').value,
+          lastName: document.getElementById('newLName').value,
+          nrc: document.getElementById('newNRC').value,
+          email: email,
+          vehicleName: document.getElementById('newVehName').value,
+          plate: document.getElementById('newPlate').value,
+          road: 'Jl. Magelang',
+          city: 'Sleman'
         });
         modal.style.display = 'none';
-        await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
-      } catch(e) { alert(e.message); }
+      } catch (e) { alert(e.message); }
     };
   });
-  
-  // Reports CSV
-  document.getElementById('downloadCsvBtn').addEventListener('click', ()=>{
-    const period = document.getElementById('reportPeriodSelect').value;
+
+  // CSV download
+  document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+    const period = document.getElementById('reportPeriod').value;
     let csv = "Date,Driver,FuelStart,FuelEnd,Distance,Revenue\n";
     csv += "2026-04-19,Casey,45L,12L,120km,Rp850k\n2026-04-18,Alex,50L,15L,140km,Rp920k";
-    const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `report_${period}.csv`; a.click();
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `report_${period}.csv`;
+    a.click();
   });
-  
-  // Search
-  document.getElementById('globalSearchBtn').addEventListener('click', ()=>{
-    const q = document.getElementById('globalSearchInput').value.toLowerCase();
-    const filtered = driversList.filter(d=> (d.firstName+' '+d.lastName).toLowerCase().includes(q));
-    document.getElementById('driversListContainer').innerHTML = filtered.map(d=> ` ... `).join('');
+
+  // Direction routing
+  document.getElementById('directionBtn').addEventListener('click', () => {
+    if (trackMap) {
+      L.Routing.control({
+        waypoints: [L.latLng(adminCoords[0], adminCoords[1]), L.latLng(-7.783, 110.367)],
+        routeWhileDragging: true
+      }).addTo(trackMap);
+    }
   });
-  
-  // Simulate driver emergency report
-  setTimeout(()=> window.firebasePush(window.firebaseRef(db, 'driverReports'), {type:'Breakdown', message:'Engine trouble near Condong Catur', timestamp: Date.now()}), 2000);
+
+  document.getElementById('closeTracking').addEventListener('click', () => {
+    document.getElementById('trackingView').style.display = 'none';
+  });
+
+  // Search driver
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = driversData.filter(d => (d.firstName + ' ' + d.lastName).toLowerCase().includes(q));
+    const container = document.getElementById('driversListContainer');
+    container.innerHTML = filtered.map(d => `
+      <div class="driver-card"> ... </div>
+    `).join('');
+  });
+
+  // Simulate a driver report for demo
+  setTimeout(() => {
+    push(ref(db, 'driverReports'), {
+      type: 'Breakdown',
+      message: 'Engine trouble near Condong Catur',
+      timestamp: Date.now()
+    });
+  }, 2000);
+
+  // Initialize everything
+  initMaps();
+  loadDrivers();
+  navigator.geolocation?.getCurrentPosition(pos => { adminCoords = [pos.coords.latitude, pos.coords.longitude]; });
 </script>
 </body>
 </html>
