@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Driver · Daily Monitoring</title>
+  <!-- Font Awesome (dark green icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    #app {
+      max-width: 450px;
+      width: 100%;
+      background: #ffffff;
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0,0,0,0.02);
+    }
+
+    /* Map Section (70%) */
+    #mapContainer {
+      height: 70vh;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Bottom Panel (30%) */
+    #bottomPanel {
+      flex: 1;
+      background: #ffffff;
+      border-top: 1px solid #e0e8e0;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 14px 80px;
+      overflow-y: auto;
+    }
+
+    .driver-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .driver-avatar {
+      width: 50px;
+      height: 50px;
+      background: #2e5c3e;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .driver-info h3 {
+      color: #1e3a2a;
+      font-weight: 700;
+    }
+
+    .driver-info p {
+      color: #5a7a62;
+      font-size: 14px;
+    }
+
+    .car-badge {
+      background: #f0f7f0;
+      border-radius: 30px;
+      padding: 8px 16px;
+      margin: 10px 0;
+      display: inline-block;
+      border: 1px solid #c0dcc0;
+      color: #1e3a2a;
+      font-weight: 500;
+    }
+
+    .section-title {
+      font-weight: 700;
+      color: #1e3a2a;
+      margin: 16px 0 10px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 30px;
+      border: 1.5px solid #cbdcd0;
+      font-size: 15px;
+      background: white;
+    }
+
+    .green-pill-btn {
+      background: #2e5c3e;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 14px 20px;
+      font-weight: 700;
+      font-size: 16px;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .emergency-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .emergency-btn {
+      background: white;
+      border: 1.5px solid #b53b3b;
+      border-radius: 30px;
+      padding: 12px 4px;
+      color: #b53b3b;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .emergency-btn i {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1.5px solid #2e5c3e;
+      border-radius: 40px;
+      padding: 12px;
+      color: #2e5c3e;
+      font-weight: 600;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .toast-msg {
+      background: #2e5c3e;
+      color: white;
+      padding: 12px;
+      border-radius: 30px;
+      text-align: center;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- MAP -->
+  <div id="mapContainer"></div>
+
+  <!-- BOTTOM PANEL -->
+  <div id="bottomPanel">
+    <div class="driver-header">
+      <div class="driver-avatar"><i class="fas fa-user"></i></div>
+      <div class="driver-info">
+        <h3 id="driverNameDisplay">Loading...</h3>
+        <p id="driverEmailDisplay"></p>
+      </div>
+    </div>
+
+    <div id="assignedCarDisplay" class="car-badge">
+      <i class="fas fa-car"></i> <span id="carDetails">No car assigned</span>
+    </div>
+
+    <!-- Daily Report Form -->
+    <div class="section-title">📋 Today's Report</div>
+    <div class="form-group">
+      <input type="number" id="startFuel" class="form-input" placeholder="Starting Fuel (litres)" step="0.1">
+    </div>
+    <div class="form-group">
+      <input type="number" id="endFuel" class="form-input" placeholder="Ending Fuel (litres)" step="0.1">
+    </div>
+    <div class="form-group">
+      <input type="number" id="distance" class="form-input" placeholder="Distance (km)" step="0.1">
+    </div>
+    <div class="form-group">
+      <input type="number" id="revenue" class="form-input" placeholder="Revenue Generated (Rp)" step="1000">
+    </div>
+    <div class="form-group">
+      <input type="number" id="extraFuelMoney" class="form-input" placeholder="Extra Fuel/Food given (Rp)">
+    </div>
+    <button class="green-pill-btn" id="submitReportBtn"><i class="fas fa-paper-plane"></i> Submit Daily Report</button>
+
+    <!-- Emergency buttons -->
+    <div class="section-title">⚠️ Request Assistance</div>
+    <div class="emergency-grid">
+      <div class="emergency-btn" id="breakdownBtn"><i class="fas fa-tools"></i> Breakdown</div>
+      <div class="emergency-btn" id="fuelEmergencyBtn"><i class="fas fa-gas-pump"></i> Fuel</div>
+      <div class="emergency-btn" id="otherEmergencyBtn"><i class="fas fa-ambulance"></i> Emergency</div>
+    </div>
+
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <div id="messageToast" style="display:none;"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
+    authDomain: "monitoring-1a105.firebaseapp.com",
+    databaseURL: "https://monitoring-1a105-default-rtdb.firebaseio.com",
+    projectId: "monitoring-1a105",
+    storageBucket: "monitoring-1a105.firebasestorage.app",
+    messagingSenderId: "1095363656731",
+    appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  let map;
+  let currentUser = null;
+  let driverData = null;
+  let assignedCar = null;
+  let driverLocation = { lat: -6.2088, lng: 106.8456 }; // default
+
+  // Protect route: only non-admin emails
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (user.email.startsWith('admin@')) {
+      // Admins should not be here
+      window.location.href = 'admin.html';
+      return;
+    }
+    currentUser = user;
+    document.getElementById('driverNameDisplay').textContent = user.displayName || 'Driver';
+    document.getElementById('driverEmailDisplay').textContent = user.email;
+    
+    // Load driver data from Firebase
+    const driverRef = ref(db, 'drivers/' + user.uid);
+    onValue(driverRef, (snap) => {
+      if (snap.exists()) {
+        driverData = snap.val();
+        document.getElementById('driverNameDisplay').textContent = `${driverData.firstName || ''} ${driverData.lastName || ''}`;
+        // Load assigned car
+        loadAssignedCar();
+      }
+    });
+
+    // Initialize map
+    initMap();
+    startLocationTracking();
+  });
+
+  function initMap() {
+    map = L.map('mapContainer').setView([driverLocation.lat, driverLocation.lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  }
+
+  function startLocationTracking() {
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          driverLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          map.setView([driverLocation.lat, driverLocation.lng], 18);
+          // Update marker
+          if (window.driverMarker) map.removeLayer(window.driverMarker);
+          window.driverMarker = L.marker([driverLocation.lat, driverLocation.lng]).addTo(map)
+            .bindPopup('You are here').openPopup();
+          // Save location to Firebase
+          if (currentUser) {
+            update(ref(db, 'drivers/' + currentUser.uid), {
+              lat: driverLocation.lat,
+              lng: driverLocation.lng,
+              lastUpdated: Date.now()
+            });
+            // Reverse geocode to get road/city (optional, simplified)
+          }
+        },
+        (err) => console.warn('Geolocation error:', err),
+        { enableHighAccuracy: true, maximumAge: 10000 }
+      );
+    }
+  }
+
+  function loadAssignedCar() {
+    // Find car assigned to this driver
+    const carsRef = ref(db, 'cars');
+    onValue(carsRef, (snap) => {
+      const cars = snap.val() ? Object.values(snap.val()) : [];
+      assignedCar = cars.find(c => c.assignedDriver === currentUser.uid);
+      const carSpan = document.getElementById('carDetails');
+      if (assignedCar) {
+        carSpan.innerHTML = `${assignedCar.name} (${assignedCar.plate})`;
+      } else {
+        carSpan.textContent = 'No car assigned';
+      }
+    });
+  }
+
+  // Submit daily report
+  document.getElementById('submitReportBtn').addEventListener('click', async () => {
+    const startFuel = parseFloat(document.getElementById('startFuel').value);
+    const endFuel = parseFloat(document.getElementById('endFuel').value);
+    const distance = parseFloat(document.getElementById('distance').value);
+    const revenue = parseFloat(document.getElementById('revenue').value);
+    const extra = parseFloat(document.getElementById('extraFuelMoney').value) || 0;
+
+    if (isNaN(startFuel) || isNaN(endFuel) || isNaN(distance) || isNaN(revenue)) {
+      alert('Please fill all required fields');
+      return;
+    }
+
+    const reportData = {
+      driverId: currentUser.uid,
+      driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
+      carId: assignedCar ? assignedCar.id : null,
+      carName: assignedCar ? assignedCar.name : 'N/A',
+      plate: assignedCar ? assignedCar.plate : 'N/A',
+      startFuel,
+      endFuel,
+      fuelConsumed: startFuel - endFuel,
+      distance,
+      revenue,
+      extraGiven: extra,
+      timestamp: Date.now(),
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    try {
+      // Save to reports/daily/{driverId}/{timestamp}
+      const reportRef = push(ref(db, `dailyReports/${currentUser.uid}`));
+      await set(reportRef, reportData);
+      
+      // Also update car totals
+      if (assignedCar) {
+        const carRef = ref(db, `cars/${assignedCar.id}`);
+        const snap = await get(carRef);
+        const carData = snap.val() || {};
+        await update(carRef, {
+          totalFuelConsumed: (carData.totalFuelConsumed || 0) + (startFuel - endFuel),
+          totalDistance: (carData.totalDistance || 0) + distance
+        });
+      }
+
+      showMessage('Report submitted successfully!');
+      // Clear form
+      document.getElementById('startFuel').value = '';
+      document.getElementById('endFuel').value = '';
+      document.getElementById('distance').value = '';
+      document.getElementById('revenue').value = '';
+      document.getElementById('extraFuelMoney').value = '';
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  });
+
+  // Emergency buttons
+  document.getElementById('breakdownBtn').addEventListener('click', () => sendEmergency('breakdown', 'Vehicle breakdown'));
+  document.getElementById('fuelEmergencyBtn').addEventListener('click', () => sendEmergency('fuel', 'Out of fuel'));
+  document.getElementById('otherEmergencyBtn').addEventListener('click', () => sendEmergency('emergency', 'General emergency'));
+
+  async function sendEmergency(type, defaultMsg) {
+    const msg = prompt('Additional details (optional):', defaultMsg);
+    if (msg === null) return;
+    try {
+      const alertRef = push(ref(db, 'driverReports'));
+      await set(alertRef, {
+        driverId: currentUser.uid,
+        driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
+        type: type,
+        message: msg,
+        location: driverLocation,
+        timestamp: Date.now()
+      });
+      showMessage('Emergency alert sent to admin');
+    } catch (e) {
+      alert('Failed to send: ' + e.message);
+    }
+  }
+
+  function showMessage(text) {
+    const toast = document.getElementById('messageToast');
+    toast.textContent = text;
+    toast.style.display = 'block';
+    toast.className = 'toast-msg';
+    setTimeout(() => toast.style.display = 'none', 3000);
+  }
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  });
+</script>
+</body>
+</html>
