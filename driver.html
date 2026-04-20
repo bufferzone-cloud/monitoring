@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Driver · Daily Monitoring</title>
-  <!-- Font Awesome (dark green icons) -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -45,14 +45,14 @@
       border-top: 1px solid #e0e8e0;
       display: flex;
       flex-direction: column;
-      padding: 16px 14px 80px;
+      padding: 16px 14px 20px;
       overflow-y: auto;
     }
     .driver-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .driver-avatar {
       width: 50px;
@@ -77,7 +77,7 @@
       background: #f0f7f0;
       border-radius: 30px;
       padding: 10px 18px;
-      margin: 10px 0;
+      margin: 8px 0;
       border: 1px solid #c0dcc0;
       color: #1e3a2a;
       font-weight: 500;
@@ -93,7 +93,7 @@
       font-size: 16px;
       width: 100%;
       cursor: pointer;
-      margin: 10px 0;
+      margin: 8px 0;
     }
     .outline-btn {
       background: white;
@@ -105,6 +105,25 @@
       width: 100%;
       cursor: pointer;
       margin: 8px 0;
+    }
+    .red-pulse-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 14px 20px;
+      font-weight: 700;
+      font-size: 16px;
+      width: 100%;
+      cursor: pointer;
+      margin: 8px 0;
+      animation: pulse-red 1.5s infinite;
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
     }
     .dropdown-form {
       background: #f4f9f4;
@@ -144,6 +163,8 @@
       margin-bottom: 4px;
       font-size: 18px;
     }
+
+    /* Modals */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -173,21 +194,61 @@
       margin: 20px auto;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .summary-line {
-      padding: 8px 0;
-      border-bottom: 1px solid #e0e8e0;
+
+    /* Reports Page */
+    .page-view {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: white;
+      z-index: 150;
+      overflow-y: auto;
+      padding: 20px 16px 90px;
+      display: none;
     }
-    .report-item {
+    .page-view.active { display: block; }
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #2e5c3e;
+      cursor: pointer;
+    }
+    .report-card {
       background: #f8fbf8;
-      border-radius: 16px;
-      padding: 12px;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #d0e0d0;
+    }
+    .report-date {
+      font-weight: 700;
+      color: #1e3a2a;
       margin-bottom: 8px;
+    }
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #c0dcc0;
+    }
+    .profit-positive {
+      color: #2e5c3e;
+      font-weight: 700;
     }
   </style>
 </head>
 <body>
 <div id="app">
+  <!-- Map (70%) -->
   <div id="mapContainer"></div>
+
+  <!-- Bottom Panel (30%) -->
   <div id="bottomPanel">
     <div class="driver-header">
       <div class="driver-avatar"><i class="fas fa-user"></i></div>
@@ -201,33 +262,30 @@
       <i class="fas fa-car"></i> <span id="carDetails">No car assigned</span>
     </div>
 
-    <!-- Reports button above logout -->
-    <button class="outline-btn" id="reportsBtn"><i class="fas fa-file-alt"></i> My Reports</button>
-
     <!-- Shift controls -->
     <div id="shiftControlArea">
       <button class="pill-btn" id="startShiftBtn"><i class="fas fa-play"></i> Start Shift</button>
       <div id="startShiftForm" class="dropdown-form">
         <input type="number" id="startFuelInput" class="form-input" placeholder="Starting Fuel (litres)" step="0.1">
-        <input type="number" id="fuelMoneyInput" class="form-input" placeholder="Amount given for fuel (Rp)" step="1000">
-        <input type="number" id="foodMoneyInput" class="form-input" placeholder="Amount given for food (Rp)" step="1000">
-        <input type="number" id="extraMoneyInput" class="form-input" placeholder="Extra money (Rp)" step="1000">
+        <input type="number" id="fuelMoneyInput" class="form-input" placeholder="Fuel money given (ZMW)" step="10">
+        <input type="number" id="foodMoneyInput" class="form-input" placeholder="Food money given (ZMW)" step="10">
+        <input type="number" id="extraMoneyInput" class="form-input" placeholder="Extra money (ZMW)" step="10">
         <button class="pill-btn" id="confirmStartShift">Confirm Start Shift</button>
       </div>
 
       <div id="endShiftSection" style="display:none;">
-        <button class="pill-btn" id="endShiftBtn"><i class="fas fa-stop"></i> End Shift</button>
+        <button class="red-pulse-btn" id="endShiftBtn"><i class="fas fa-stop-circle"></i> End Shift</button>
         <div id="endShiftForm" class="dropdown-form">
           <input type="number" id="endFuelInput" class="form-input" placeholder="Ending Fuel (litres)" step="0.1">
           <input type="number" id="distanceInput" class="form-input" placeholder="Distance travelled (km)" step="0.1">
-          <input type="number" id="revenueInput" class="form-input" placeholder="Revenue generated (Rp)" step="1000">
+          <input type="number" id="revenueInput" class="form-input" placeholder="Revenue generated (ZMW)" step="10">
           <button class="pill-btn" id="confirmEndShift">Submit & End Shift</button>
         </div>
       </div>
     </div>
 
     <!-- Emergency buttons -->
-    <div style="margin-top: 8px;">
+    <div style="margin-top: 4px;">
       <div style="font-weight: 600; color: #1e3a2a; margin-bottom: 8px;">⚠️ Emergency</div>
       <div class="emergency-grid">
         <div class="emergency-btn" id="breakdownBtn"><i class="fas fa-tools"></i> Breakdown</div>
@@ -236,11 +294,34 @@
       </div>
     </div>
 
-    <button class="outline-btn" id="logoutBtn" style="margin-top: 16px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <!-- My Reports button (navigates to full page) -->
+    <button class="outline-btn" id="reportsPageBtn"><i class="fas fa-file-alt"></i> My Reports</button>
+    <button class="outline-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </div>
 
-<!-- Modals -->
+<!-- Reports Full Page -->
+<div id="reportsPage" class="page-view">
+  <div class="page-header">
+    <button class="back-btn" id="closeReportsPage"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="color:#1e3a2a;">Shift Reports</h2>
+  </div>
+  <div id="reportsListContainer"></div>
+  <button class="pill-btn" id="downloadAllReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
+</div>
+
+<!-- Emergency Modal -->
+<div class="modal-overlay" id="emergencyModal">
+  <div class="modal-card">
+    <h3 id="emergencyTitle" style="color:#b53b3b;">Emergency</h3>
+    <p id="emergencySubtitle" style="margin-bottom:16px;">Provide additional details</p>
+    <textarea id="emergencyMessage" class="form-input" rows="3" placeholder="Describe the situation..."></textarea>
+    <button class="pill-btn" id="sendEmergencyBtn" style="background:#b53b3b;">Send Alert</button>
+    <button class="outline-btn" onclick="document.getElementById('emergencyModal').style.display='none'">Cancel</button>
+  </div>
+</div>
+
+<!-- Summary Modal -->
 <div class="modal-overlay" id="summaryModal">
   <div class="modal-card">
     <h3 style="color:#1e3a2a;">Shift Summary</h3>
@@ -249,15 +330,7 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="reportsModal">
-  <div class="modal-card">
-    <h3 style="color:#1e3a2a;">My Shift Reports</h3>
-    <div id="reportsList"></div>
-    <button class="pill-btn" id="downloadReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
-    <button class="outline-btn" onclick="document.getElementById('reportsModal').style.display='none'">Close</button>
-  </div>
-</div>
-
+<!-- Spinner Modal -->
 <div class="modal-overlay" id="spinnerModal">
   <div class="modal-card" style="text-align:center;">
     <div class="spinner"></div>
@@ -284,22 +357,18 @@
   const auth = getAuth(app);
   const db = getDatabase(app);
 
-  let map;
-  let currentUser = null;
-  let driverData = null;
-  let assignedCar = null;
-  let currentShift = null; // { startTime, startFuel, fuelMoney, foodMoney, extra }
+  let map, driverMarker;
+  let currentUser = null, driverData = null, assignedCar = null, currentShift = null;
   let locationWatchId = null;
 
-  // Auth check
+  // Auth
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = 'index.html'; return; }
     if (user.email.startsWith('admin@')) { window.location.href = 'admin.html'; return; }
     currentUser = user;
     document.getElementById('driverEmailDisplay').textContent = user.email;
     
-    const driverRef = ref(db, 'drivers/' + user.uid);
-    onValue(driverRef, (snap) => {
+    onValue(ref(db, 'drivers/' + user.uid), (snap) => {
       if (snap.exists()) {
         driverData = snap.val();
         document.getElementById('driverNameDisplay').textContent = `${driverData.firstName || ''} ${driverData.lastName || 'Driver'}`;
@@ -313,7 +382,7 @@
   });
 
   function initMap() {
-    map = L.map('mapContainer').setView([-6.2088, 106.8456], 15);
+    map = L.map('mapContainer').setView([-15.3875, 28.3228], 13); // Zambia default
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
   }
 
@@ -321,37 +390,26 @@
     if (navigator.geolocation) {
       locationWatchId = navigator.geolocation.watchPosition(
         async (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          if (window.driverMarker) map.removeLayer(window.driverMarker);
-          window.driverMarker = L.marker([lat, lng]).addTo(map).bindPopup('You are here');
+          const lat = pos.coords.latitude, lng = pos.coords.longitude;
+          if (driverMarker) map.removeLayer(driverMarker);
+          driverMarker = L.marker([lat, lng]).addTo(map).bindPopup('You are here');
           map.setView([lat, lng], 18);
-          
-          // Reverse geocode for road and city (using Nominatim)
           try {
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             const data = await res.json();
-            const road = data.address?.road || data.address?.pedestrian || data.address?.path || 'Unknown road';
-            const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown city';
+            const road = data.address?.road || data.address?.path || 'Unknown';
+            const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown';
             if (currentUser) {
-              await update(ref(db, 'drivers/' + currentUser.uid), {
-                lat, lng, road, city, lastLocationUpdate: Date.now()
-              });
+              await update(ref(db, 'drivers/' + currentUser.uid), { lat, lng, road, city, lastLocationUpdate: Date.now() });
             }
-          } catch (e) { console.warn('Geocode error', e); }
+          } catch (e) {}
         },
         (err) => console.warn(err),
         { enableHighAccuracy: true, maximumAge: 60000 }
       );
     }
-    // Also update every minute explicitly
     setInterval(() => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          const lat = pos.coords.latitude, lng = pos.coords.longitude;
-          // Update location in DB (already done by watch, but ensure)
-        });
-      }
+      if (navigator.geolocation) navigator.geolocation.getCurrentPosition(() => {});
     }, 60000);
   }
 
@@ -359,18 +417,12 @@
     onValue(ref(db, 'cars'), (snap) => {
       const cars = snap.val() ? Object.values(snap.val()) : [];
       assignedCar = cars.find(c => c.assignedDriver === currentUser?.uid);
-      const carSpan = document.getElementById('carDetails');
-      if (assignedCar) {
-        carSpan.innerHTML = `${assignedCar.name} (${assignedCar.plate})`;
-      } else {
-        carSpan.textContent = 'No car assigned';
-      }
+      document.getElementById('carDetails').innerHTML = assignedCar ? `${assignedCar.name} (${assignedCar.plate})` : 'No car assigned';
     });
   }
 
   async function checkActiveShift() {
-    const shiftRef = ref(db, `activeShifts/${currentUser.uid}`);
-    const snap = await get(shiftRef);
+    const snap = await get(ref(db, `activeShifts/${currentUser.uid}`));
     if (snap.exists()) {
       currentShift = snap.val();
       document.getElementById('startShiftBtn').style.display = 'none';
@@ -381,29 +433,23 @@
     }
   }
 
-  // Start shift flow
+  // Start shift
   document.getElementById('startShiftBtn').addEventListener('click', () => {
     document.getElementById('startShiftForm').style.display = 'block';
   });
-
   document.getElementById('confirmStartShift').addEventListener('click', async () => {
     const startFuel = parseFloat(document.getElementById('startFuelInput').value);
-    const fuelMoney = parseFloat(document.getElementById('fuelMoneyInput').value) || 0;
-    const foodMoney = parseFloat(document.getElementById('foodMoneyInput').value) || 0;
-    const extra = parseFloat(document.getElementById('extraMoneyInput').value) || 0;
     if (isNaN(startFuel)) return alert('Enter starting fuel');
-
     const shiftData = {
       startTime: Date.now(),
       startFuel,
-      fuelMoney,
-      foodMoney,
-      extraMoney: extra,
+      fuelMoney: parseFloat(document.getElementById('fuelMoneyInput').value) || 0,
+      foodMoney: parseFloat(document.getElementById('foodMoneyInput').value) || 0,
+      extraMoney: parseFloat(document.getElementById('extraMoneyInput').value) || 0,
       carId: assignedCar?.id || null,
       carName: assignedCar?.name || 'N/A',
       plate: assignedCar?.plate || 'N/A'
     };
-    
     await set(ref(db, `activeShifts/${currentUser.uid}`), shiftData);
     currentShift = shiftData;
     document.getElementById('startShiftForm').style.display = 'none';
@@ -415,7 +461,6 @@
   document.getElementById('endShiftBtn').addEventListener('click', () => {
     document.getElementById('endShiftForm').style.display = 'block';
   });
-
   document.getElementById('confirmEndShift').addEventListener('click', async () => {
     const endFuel = parseFloat(document.getElementById('endFuelInput').value);
     const distance = parseFloat(document.getElementById('distanceInput').value);
@@ -423,42 +468,26 @@
     if (isNaN(endFuel) || isNaN(distance) || isNaN(revenue)) return alert('Fill all fields');
 
     document.getElementById('spinnerModal').style.display = 'flex';
-
-    // Simulate processing delay
     setTimeout(async () => {
       const shift = currentShift;
       const fuelConsumed = shift.startFuel - endFuel;
-      const totalExpenses = shift.fuelMoney + shift.foodMoney + shift.extraMoney;
-      const profit = revenue - totalExpenses;
+      const expenses = shift.fuelMoney + shift.foodMoney + shift.extraMoney;
+      const profit = revenue - expenses;
 
       const report = {
         driverId: currentUser.uid,
         driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
-        carId: shift.carId,
-        carName: shift.carName,
-        plate: shift.plate,
-        startTime: shift.startTime,
-        endTime: Date.now(),
-        startFuel: shift.startFuel,
-        endFuel,
-        fuelConsumed,
-        distance,
-        revenue,
-        fuelMoney: shift.fuelMoney,
-        foodMoney: shift.foodMoney,
-        extraMoney: shift.extraMoney,
-        totalExpenses,
-        profit,
+        carId: shift.carId, carName: shift.carName, plate: shift.plate,
+        startTime: shift.startTime, endTime: Date.now(),
+        startFuel: shift.startFuel, endFuel, fuelConsumed, distance, revenue,
+        fuelMoney: shift.fuelMoney, foodMoney: shift.foodMoney, extraMoney: shift.extraMoney,
+        totalExpenses: expenses, profit,
         timestamp: Date.now()
       };
 
-      // Save report
       await push(ref(db, `shiftReports/${currentUser.uid}`), report);
-      
-      // Remove active shift
       await set(ref(db, `activeShifts/${currentUser.uid}`), null);
       
-      // Update car totals
       if (assignedCar) {
         const carRef = ref(db, `cars/${assignedCar.id}`);
         const carSnap = await get(carRef);
@@ -471,82 +500,101 @@
 
       document.getElementById('spinnerModal').style.display = 'none';
       
-      // Show summary
-      const summaryDiv = document.getElementById('summaryContent');
-      summaryDiv.innerHTML = `
-        <div class="summary-line"><strong>Start fuel:</strong> ${shift.startFuel} L</div>
-        <div class="summary-line"><strong>End fuel:</strong> ${endFuel} L</div>
-        <div class="summary-line"><strong>Fuel consumed:</strong> ${fuelConsumed.toFixed(1)} L</div>
-        <div class="summary-line"><strong>Distance:</strong> ${distance} km</div>
-        <div class="summary-line"><strong>Revenue:</strong> Rp ${revenue.toLocaleString()}</div>
-        <div class="summary-line"><strong>Expenses:</strong> Rp ${totalExpenses.toLocaleString()}</div>
-        <div class="summary-line"><strong>Profit:</strong> Rp ${profit.toLocaleString()}</div>
+      // Summary with ZMW
+      document.getElementById('summaryContent').innerHTML = `
+        <div class="summary-line"><span>Start fuel:</span><span>${shift.startFuel} L</span></div>
+        <div class="summary-line"><span>End fuel:</span><span>${endFuel} L</span></div>
+        <div class="summary-line"><span>Fuel consumed:</span><span>${fuelConsumed.toFixed(1)} L</span></div>
+        <div class="summary-line"><span>Distance:</span><span>${distance} km</span></div>
+        <div class="summary-line"><span>Revenue:</span><span>ZMW ${revenue.toLocaleString()}</span></div>
+        <div class="summary-line"><span>Expenses:</span><span>ZMW ${expenses.toLocaleString()}</span></div>
+        <div class="summary-line"><span class="profit-positive">Profit:</span><span class="profit-positive">ZMW ${profit.toLocaleString()}</span></div>
       `;
       document.getElementById('summaryModal').style.display = 'flex';
       
-      // Reset UI
+      // Reset
       currentShift = null;
       document.getElementById('endShiftForm').style.display = 'none';
       document.getElementById('startShiftBtn').style.display = 'block';
       document.getElementById('endShiftSection').style.display = 'none';
-      document.getElementById('startFuelInput').value = '';
-      document.getElementById('fuelMoneyInput').value = '';
-      document.getElementById('foodMoneyInput').value = '';
-      document.getElementById('extraMoneyInput').value = '';
-      document.getElementById('endFuelInput').value = '';
-      document.getElementById('distanceInput').value = '';
-      document.getElementById('revenueInput').value = '';
+      ['startFuelInput','fuelMoneyInput','foodMoneyInput','extraMoneyInput','endFuelInput','distanceInput','revenueInput'].forEach(id => document.getElementById(id).value = '');
     }, 1500);
   });
 
-  // Emergency
-  async function sendEmergency(type, defaultMsg) {
-    const msg = prompt('Additional details (optional):', defaultMsg);
-    if (msg === null) return;
+  // Emergency with styled modal
+  let currentEmergencyType = '';
+  function openEmergencyModal(type, title) {
+    currentEmergencyType = type;
+    document.getElementById('emergencyTitle').innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${title}`;
+    document.getElementById('emergencyMessage').value = '';
+    document.getElementById('emergencyModal').style.display = 'flex';
+  }
+  document.getElementById('breakdownBtn').addEventListener('click', () => openEmergencyModal('breakdown', 'Breakdown'));
+  document.getElementById('fuelEmergencyBtn').addEventListener('click', () => openEmergencyModal('fuel', 'Fuel Emergency'));
+  document.getElementById('otherEmergencyBtn').addEventListener('click', () => openEmergencyModal('emergency', 'Emergency'));
+  
+  document.getElementById('sendEmergencyBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('emergencyMessage').value.trim();
+    if (!msg) return alert('Please describe the emergency');
     await push(ref(db, 'driverReports'), {
       driverId: currentUser.uid,
       driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
-      type, message: msg, timestamp: Date.now()
+      type: currentEmergencyType,
+      message: msg,
+      timestamp: Date.now()
     });
+    document.getElementById('emergencyModal').style.display = 'none';
     alert('Emergency sent to admin');
-  }
-  document.getElementById('breakdownBtn').addEventListener('click', () => sendEmergency('breakdown', 'Vehicle breakdown'));
-  document.getElementById('fuelEmergencyBtn').addEventListener('click', () => sendEmergency('fuel', 'Out of fuel'));
-  document.getElementById('otherEmergencyBtn').addEventListener('click', () => sendEmergency('emergency', 'General emergency'));
+  });
 
-  // Reports modal
-  document.getElementById('reportsBtn').addEventListener('click', async () => {
-    const modal = document.getElementById('reportsModal');
-    const listDiv = document.getElementById('reportsList');
-    listDiv.innerHTML = '<div class="spinner"></div>';
-    modal.style.display = 'flex';
+  // Reports page
+  document.getElementById('reportsPageBtn').addEventListener('click', async () => {
+    document.getElementById('reportsPage').classList.add('active');
+    const container = document.getElementById('reportsListContainer');
+    container.innerHTML = '<div class="spinner"></div>';
     
-    const reportsRef = ref(db, `shiftReports/${currentUser.uid}`);
-    const snap = await get(reportsRef);
+    const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
     const reports = snap.val() ? Object.values(snap.val()) : [];
     reports.sort((a,b) => b.timestamp - a.timestamp);
     
-    listDiv.innerHTML = reports.map(r => `
-      <div class="report-item">
-        <div><strong>${new Date(r.startTime).toLocaleDateString()}</strong></div>
-        <div>${r.carName} (${r.plate})</div>
-        <div>Fuel: ${r.startFuel}L → ${r.endFuel}L, Dist: ${r.distance}km</div>
-        <div>Revenue: Rp ${r.revenue?.toLocaleString()}, Profit: Rp ${r.profit?.toLocaleString()}</div>
+    const formatDate = (ts) => {
+      const d = new Date(ts);
+      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    };
+    
+    container.innerHTML = reports.map(r => `
+      <div class="report-card">
+        <div class="report-date">${formatDate(r.startTime)}</div>
+        <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
+        <div class="summary-line"><span>Start fuel:</span><span>${r.startFuel} L</span></div>
+        <div class="summary-line"><span>End fuel:</span><span>${r.endFuel} L</span></div>
+        <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed.toFixed(1)} L</span></div>
+        <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
+        <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue.toLocaleString()}</span></div>
+        <div class="summary-line"><span>Expenses:</span><span>ZMW ${r.totalExpenses.toLocaleString()}</span></div>
+        <div class="summary-line"><span class="profit-positive">Profit:</span><span class="profit-positive">ZMW ${r.profit.toLocaleString()}</span></div>
+        <div style="margin-top:8px; font-size:13px; color:#5a7a62;">
+          <i class="fas fa-gas-pump"></i> Fuel money: ZMW ${r.fuelMoney} · Food: ZMW ${r.foodMoney} · Extra: ZMW ${r.extraMoney}
+        </div>
       </div>
-    `).join('') || '<p>No reports yet</p>';
+    `).join('') || '<p>No reports yet.</p>';
+  });
+  
+  document.getElementById('closeReportsPage').addEventListener('click', () => {
+    document.getElementById('reportsPage').classList.remove('active');
   });
 
-  document.getElementById('downloadReportsCsv').addEventListener('click', async () => {
+  document.getElementById('downloadAllReportsCsv').addEventListener('click', async () => {
     const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
     const reports = snap.val() ? Object.values(snap.val()) : [];
-    let csv = "Date,Car,Plate,StartFuel,EndFuel,FuelConsumed,Distance,Revenue,Expenses,Profit\n";
+    let csv = "Date,Car,Plate,StartFuel,EndFuel,FuelConsumed,Distance,Revenue,Expenses,Profit,FuelMoney,FoodMoney,ExtraMoney\n";
     reports.forEach(r => {
-      csv += `"${new Date(r.startTime).toLocaleDateString()}",${r.carName},${r.plate},${r.startFuel},${r.endFuel},${r.fuelConsumed},${r.distance},${r.revenue},${r.totalExpenses},${r.profit}\n`;
+      csv += `"${new Date(r.startTime).toLocaleDateString()}",${r.carName},${r.plate},${r.startFuel},${r.endFuel},${r.fuelConsumed},${r.distance},${r.revenue},${r.totalExpenses},${r.profit},${r.fuelMoney},${r.foodMoney},${r.extraMoney}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `driver_reports_${currentUser.uid}.csv`;
+    a.download = `driver_${currentUser.uid}_reports.csv`;
     a.click();
   });
 
