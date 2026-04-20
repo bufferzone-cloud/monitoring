@@ -4,14 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Admin · Driver Daily Monitoring</title>
-  <!-- Font Awesome (dark green icons) -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Leaflet Routing Machine (for direction) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
   <style>
     * {
       margin: 0;
@@ -19,7 +16,6 @@
       box-sizing: border-box;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
-
     body {
       background: #ffffff;
       display: flex;
@@ -27,7 +23,6 @@
       align-items: flex-start;
       min-height: 100vh;
     }
-
     #app {
       max-width: 450px;
       width: 100%;
@@ -38,69 +33,73 @@
       flex-direction: column;
       box-shadow: 0 0 20px rgba(0,0,0,0.02);
     }
-
-    /* ----- Map Section (70% height) ----- */
     #mapContainer {
       height: 70vh;
       width: 100%;
       position: relative;
       z-index: 1;
     }
-
-    /* ----- Bottom Panel (30%) ----- */
     #bottomPanel {
       flex: 1;
       background: #ffffff;
       border-top: 1px solid #e0e8e0;
       display: flex;
       flex-direction: column;
-      padding: 12px 12px 80px;
+      padding: 16px 14px 20px;
       overflow-y: auto;
     }
-
-    /* Four square action buttons */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .admin-avatar {
+      width: 50px;
+      height: 50px;
+      background: #2e5c3e;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+    .admin-info h3 {
+      color: #1e3a2a;
+      font-weight: 700;
+    }
+    .admin-info p {
+      color: #5a7a62;
+      font-size: 14px;
+    }
     .action-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
       gap: 8px;
-      margin-bottom: 16px;
+      margin: 8px 0;
     }
-
     .action-btn {
-      background: #ffffff;
-      border: 1.5px solid #2e5c3e; /* dark green border */
+      background: white;
+      border: 1.5px solid #2e5c3e;
       border-radius: 16px;
       padding: 12px 4px;
       text-align: center;
       color: #2e5c3e;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
-      transition: background 0.2s;
     }
-
     .action-btn i {
       display: block;
-      font-size: 24px;
-      margin-bottom: 6px;
-      color: #2e5c3e;
+      font-size: 20px;
+      margin-bottom: 4px;
     }
-
-    .action-btn.active {
-      background: #2e5c3e;
-      color: white;
-    }
-    .action-btn.active i {
-      color: white;
-    }
-
-    /* Driver list (closest to admin) */
-    .driver-list-title {
+    .section-title {
       font-weight: 700;
-      color: #1a3a2a;
-      margin: 8px 0 10px;
+      color: #1e3a2a;
+      margin: 16px 0 8px;
     }
-
     .driver-item {
       background: #f8fbf8;
       border-radius: 18px;
@@ -109,63 +108,7 @@
       border-left: 5px solid #2e5c3e;
       cursor: pointer;
     }
-
-    .driver-name {
-      font-weight: 700;
-      color: #1e3a2a;
-    }
-
-    .driver-car {
-      font-size: 14px;
-      color: #3a6b4a;
-    }
-
-    .driver-location {
-      font-size: 13px;
-      color: #5a7a62;
-      margin-top: 4px;
-    }
-
-    /* ----- Page Views (full screen overlays) ----- */
-    .page-view {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 100;
-      overflow-y: auto;
-      padding: 20px 16px 90px;
-      display: none;
-    }
-
-    .page-view.active {
-      display: block;
-    }
-
-    .page-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .back-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #2e5c3e;
-      cursor: pointer;
-    }
-
-    h2 {
-      color: #1e3a2a;
-      font-weight: 700;
-    }
-
-    /* Green pill button */
-    .green-pill-btn {
+    .pill-btn {
       background: #2e5c3e;
       color: white;
       border: none;
@@ -175,49 +118,46 @@
       font-size: 16px;
       width: 100%;
       cursor: pointer;
-      margin-bottom: 16px;
+      margin: 8px 0;
     }
-
-    /* Dropdown form */
+    .outline-btn {
+      background: white;
+      border: 1.5px solid #2e5c3e;
+      color: #2e5c3e;
+      border-radius: 40px;
+      padding: 12px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      margin: 8px 0;
+    }
     .dropdown-form {
       background: #f4f9f4;
       border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 20px;
+      padding: 18px;
+      margin: 12px 0;
       display: none;
     }
-
-    .form-input {
+    .form-input, .form-select {
       width: 100%;
       padding: 14px 18px;
       border-radius: 30px;
-      border: 1px solid #cbdcd0;
+      border: 1.5px solid #cbdcd0;
       margin-bottom: 12px;
       font-size: 15px;
       background: white;
     }
-
-    /* Cards */
-    .card-item {
-      background: #f8fbf8;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 1px solid #d0e0d0;
-    }
-
-    /* Modal popup */
+    /* Modals */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.3);
       backdrop-filter: blur(2px);
       z-index: 200;
       display: none;
       align-items: center;
       justify-content: center;
     }
-
     .modal-card {
       background: white;
       border-radius: 32px;
@@ -227,133 +167,218 @@
       max-height: 80vh;
       overflow-y: auto;
     }
-
-    /* Table for reports */
-    .report-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0;
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2e5c3e;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
     }
-    .report-table th, .report-table td {
-      padding: 12px 8px;
-      text-align: left;
-      border-bottom: 1px solid #d0e0d0;
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Pages */
+    .page-view {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: white;
+      z-index: 150;
+      overflow-y: auto;
+      padding: 20px 16px 90px;
+      display: none;
     }
-
-    .download-csv {
-      background: #2e5c3e;
-      color: white;
+    .page-view.active { display: block; }
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      background: none;
       border: none;
-      border-radius: 30px;
-      padding: 12px 20px;
-      margin-top: 16px;
+      font-size: 24px;
+      color: #2e5c3e;
       cursor: pointer;
     }
-
-    /* Utilities */
-    .text-green { color: #2e5c3e; }
-    .bg-green { background: #2e5c3e; color: white; }
+    .card-item {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #d0e0d0;
+    }
+    .report-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #d0e0d0;
+    }
+    .report-date {
+      font-weight: 700;
+      color: #1e3a2a;
+      margin-bottom: 8px;
+    }
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #c0dcc0;
+    }
+    .profit-positive {
+      color: #2e5c3e;
+      font-weight: 700;
+    }
+    .horizontal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .horizontal-buttons button {
+      flex: 1;
+    }
+    .car-icon {
+      font-size: 32px;
+      color: #2e5c3e;
+      margin-right: 12px;
+    }
   </style>
 </head>
 <body>
 <div id="app">
-  <!-- MAP (70%) -->
+  <!-- Map (70%) -->
   <div id="mapContainer"></div>
 
-  <!-- BOTTOM PANEL (30%) -->
+  <!-- Bottom Panel (30%) -->
   <div id="bottomPanel">
+    <div class="admin-header">
+      <div class="admin-avatar"><i class="fas fa-user-cog"></i></div>
+      <div class="admin-info">
+        <h3 id="adminNameDisplay">Admin</h3>
+        <p id="adminEmailDisplay"></p>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
     <div class="action-grid">
       <div class="action-btn" data-page="drivers"><i class="fas fa-users"></i><span>Drivers</span></div>
       <div class="action-btn" data-page="cars"><i class="fas fa-car"></i><span>Cars</span></div>
-      <div class="action-btn" data-page="assignments"><i class="fas fa-exchange-alt"></i><span>Assign</span></div>
+      <div class="action-btn" data-page="assign"><i class="fas fa-exchange-alt"></i><span>Assign</span></div>
       <div class="action-btn" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
     </div>
-    <div class="driver-list-title">🚗 Drivers closest to you</div>
+
+    <!-- Closest drivers list -->
+    <div class="section-title"><i class="fas fa-location-dot"></i> Drivers closest to you</div>
     <div id="driverProximityList"></div>
-  </div>
 
-  <!-- ========== PAGE VIEWS ========== -->
-
-  <!-- DRIVERS PAGE -->
-  <div id="driversPage" class="page-view">
-    <div class="page-header">
-      <button class="back-btn" onclick="closePageView()"><i class="fas fa-arrow-left"></i></button>
-      <h2>Drivers</h2>
-    </div>
-    <button class="green-pill-btn" id="toggleCreateDriverForm"><i class="fas fa-plus-circle"></i> Create Driver</button>
-    <div id="createDriverForm" class="dropdown-form">
-      <input class="form-input" id="driverFirstName" placeholder="First Name">
-      <input class="form-input" id="driverLastName" placeholder="Last Name">
-      <input class="form-input" id="driverNRC" placeholder="NRC">
-      <input class="form-input" id="driverEmail" placeholder="Email">
-      <input class="form-input" id="driverPhone" placeholder="Phone Number">
-      <input class="form-input" id="driverPassword" type="password" placeholder="Password">
-      <input class="form-input" id="driverConfirmPassword" type="password" placeholder="Confirm Password">
-      <button class="green-pill-btn" id="createDriverBtn">Create Account</button>
-    </div>
-    <input class="form-input" id="searchDriverInput" placeholder="Search driver...">
-    <div id="driversListContainer"></div>
-  </div>
-
-  <!-- CARS PAGE -->
-  <div id="carsPage" class="page-view">
-    <div class="page-header">
-      <button class="back-btn" onclick="closePageView()"><i class="fas fa-arrow-left"></i></button>
-      <h2>Cars / Vehicles</h2>
-    </div>
-    <button class="green-pill-btn" id="toggleAddCarForm"><i class="fas fa-plus-circle"></i> Add Vehicle</button>
-    <div id="addCarForm" class="dropdown-form">
-      <input class="form-input" id="carName" placeholder="Vehicle Name (e.g. Avanza)">
-      <input class="form-input" id="carPlate" placeholder="Number Plate">
-      <button class="green-pill-btn" id="addCarBtn">Add Vehicle</button>
-    </div>
-    <div id="carsListContainer"></div>
-  </div>
-
-  <!-- ASSIGNMENTS PAGE -->
-  <div id="assignmentsPage" class="page-view">
-    <div class="page-header">
-      <button class="back-btn" onclick="closePageView()"><i class="fas fa-arrow-left"></i></button>
-      <h2>Assignments</h2>
-    </div>
-    <p style="margin-bottom:16px;">Assign car to driver / suspend</p>
-    <div id="assignmentsContainer"></div>
-  </div>
-
-  <!-- REPORTS PAGE -->
-  <div id="reportsPage" class="page-view">
-    <div class="page-header">
-      <button class="back-btn" onclick="closePageView()"><i class="fas fa-arrow-left"></i></button>
-      <h2>Reports</h2>
-    </div>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
-      <select id="reportTypeSelect" class="form-input" style="width:auto; flex:1;">
-        <option value="driver">Driver Reports</option>
-        <option value="car">Car Reports</option>
-        <option value="fuel">Fuel Reports</option>
-        <option value="full">Full Report</option>
-      </select>
-      <select id="reportPeriodSelect" class="form-input" style="width:auto;">
-        <option value="today">Today</option>
-        <option value="daily">Select Day</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
-    </div>
-    <button class="green-pill-btn" id="loadReportBtn">Load Report</button>
-    <div id="reportTableContainer"></div>
-    <button class="download-csv" id="downloadReportCsv"><i class="fas fa-download"></i> Download CSV</button>
+    <button class="outline-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </div>
 
-<!-- MODAL POPUP (for driver/car details) -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-card" id="modalContent"></div>
+<!-- ========== PAGE VIEWS ========== -->
+
+<!-- Drivers Page -->
+<div id="driversPage" class="page-view">
+  <div class="page-header">
+    <button class="back-btn" id="closeDriversPage"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="color:#1e3a2a;">All Drivers</h2>
+  </div>
+  <button class="pill-btn" id="toggleAddDriverForm"><i class="fas fa-plus-circle"></i> Add Driver</button>
+  <div id="addDriverForm" class="dropdown-form">
+    <input type="text" id="driverFirstName" class="form-input" placeholder="First Name">
+    <input type="text" id="driverLastName" class="form-input" placeholder="Last Name">
+    <input type="text" id="driverNRC" class="form-input" placeholder="NRC">
+    <input type="email" id="driverEmail" class="form-input" placeholder="Email">
+    <input type="tel" id="driverPhone" class="form-input" placeholder="Phone">
+    <input type="password" id="driverPassword" class="form-input" placeholder="Password">
+    <input type="password" id="driverConfirmPassword" class="form-input" placeholder="Confirm Password">
+    <button class="pill-btn" id="createDriverBtn">Create Driver</button>
+  </div>
+  <input type="text" id="searchDriverInput" class="form-input" placeholder="Search driver...">
+  <div id="driversListContainer"></div>
+</div>
+
+<!-- Cars Page -->
+<div id="carsPage" class="page-view">
+  <div class="page-header">
+    <button class="back-btn" id="closeCarsPage"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="color:#1e3a2a;">Vehicles</h2>
+  </div>
+  <button class="pill-btn" id="toggleAddCarForm"><i class="fas fa-plus-circle"></i> Add Vehicle</button>
+  <div id="addCarForm" class="dropdown-form">
+    <input type="text" id="carName" class="form-input" placeholder="Vehicle Name (e.g. Toyota Avanza)">
+    <input type="text" id="carPlate" class="form-input" placeholder="Number Plate">
+    <button class="pill-btn" id="addCarBtn">Add Vehicle</button>
+  </div>
+  <div id="carsListContainer"></div>
+</div>
+
+<!-- Assign Page -->
+<div id="assignPage" class="page-view">
+  <div class="page-header">
+    <button class="back-btn" id="closeAssignPage"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="color:#1e3a2a;">Assignments</h2>
+  </div>
+  <button class="pill-btn" id="toggleAssignForm"><i class="fas fa-link"></i> Assign Car to Driver</button>
+  <div id="assignForm" class="dropdown-form">
+    <select id="selectDriver" class="form-select">
+      <option value="">Select Driver</option>
+    </select>
+    <select id="selectCar" class="form-select">
+      <option value="">Select Car</option>
+    </select>
+    <button class="pill-btn" id="confirmAssignBtn">Assign</button>
+  </div>
+  <div class="section-title">Current Assignments</div>
+  <div id="assignmentsList"></div>
+</div>
+
+<!-- Reports Page -->
+<div id="reportsPage" class="page-view">
+  <div class="page-header">
+    <button class="back-btn" id="closeReportsPage"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="color:#1e3a2a;">All Reports</h2>
+  </div>
+  <div style="display:flex; gap:8px; margin-bottom:16px;">
+    <select id="reportPeriodSelect" class="form-select" style="flex:1;">
+      <option value="all">All Time</option>
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+    </select>
+    <button class="pill-btn" id="loadReportsBtn" style="width:auto;">Load</button>
+  </div>
+  <div id="reportsListContainer"></div>
+  <button class="pill-btn" id="downloadReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
+  <div style="margin-top:20px; color:#5a7a62;"><i class="fas fa-history"></i> Audit: all reports are stored securely.</div>
+</div>
+
+<!-- Driver Detail Modal -->
+<div class="modal-overlay" id="driverModal">
+  <div class="modal-card">
+    <h3 id="modalDriverName" style="color:#1e3a2a;"></h3>
+    <p id="modalDriverDetails"></p>
+    <div class="horizontal-buttons">
+      <button class="pill-btn" id="modalTrackBtn"><i class="fas fa-location-dot"></i> Track</button>
+      <button class="outline-btn" id="modalReportsBtn"><i class="fas fa-file-alt"></i> Reports</button>
+    </div>
+    <button class="outline-btn" onclick="document.getElementById('driverModal').style.display='none'">Close</button>
+  </div>
+</div>
+
+<!-- Driver Reports Modal (shows reports for selected driver) -->
+<div class="modal-overlay" id="driverReportsModal">
+  <div class="modal-card">
+    <h3 style="color:#1e3a2a;">Driver Reports</h3>
+    <div id="driverReportsContent"></div>
+    <button class="outline-btn" onclick="document.getElementById('driverReportsModal').style.display='none'">Close</button>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
   import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -370,242 +395,298 @@
   const auth = getAuth(app);
   const db = getDatabase(app);
 
-  // Protect route
+  let map;
+  let adminLocation = { lat: -15.3875, lng: 28.3228 }; // Default Zambia
+  let drivers = [];
+  let cars = [];
+  let driverMarkers = {};
+
+  // Auth protection
   onAuthStateChanged(auth, (user) => {
     if (!user || !user.email.startsWith('admin@')) {
       window.location.href = 'index.html';
+    } else {
+      document.getElementById('adminEmailDisplay').textContent = user.email;
+      initMap();
+      loadData();
     }
   });
 
-  // Global state
-  let map;
-  let adminLocation = { lat: -6.2088, lng: 106.8456 }; // default Jakarta
-  let drivers = [];
-  let cars = [];
-  let assignments = [];
-
-  // Initialize Leaflet map (70% height)
   function initMap() {
-    map = L.map('mapContainer').setView([adminLocation.lat, adminLocation.lng], 15);
+    map = L.map('mapContainer').setView([adminLocation.lat, adminLocation.lng], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    // Try to get admin's real location
+    // Get admin location
     navigator.geolocation?.getCurrentPosition(pos => {
       adminLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      map.setView([adminLocation.lat, adminLocation.lng], 15);
-      L.marker([adminLocation.lat, adminLocation.lng]).addTo(map).bindPopup('You (Admin)').openPopup();
-      updateDriverProximityList();
+      map.setView([adminLocation.lat, adminLocation.lng], 13);
+      L.marker([adminLocation.lat, adminLocation.lng]).addTo(map).bindPopup('You (Admin)');
+      updateProximityList();
     });
   }
 
-  // Fetch data
   function loadData() {
-    onValue(ref(db, 'drivers'), snap => {
+    // Drivers
+    onValue(ref(db, 'drivers'), (snap) => {
       drivers = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({ id, ...d })) : [];
-      updateDriverProximityList();
+      updateMapMarkers();
+      updateProximityList();
       renderDriversPage();
-      renderAssignments();
+      renderAssignSelects();
+      renderAssignmentsList();
     });
-    onValue(ref(db, 'cars'), snap => {
+    // Cars
+    onValue(ref(db, 'cars'), (snap) => {
       cars = snap.val() ? Object.entries(snap.val()).map(([id, c]) => ({ id, ...c })) : [];
       renderCarsPage();
-      renderAssignments();
-    });
-    onValue(ref(db, 'assignments'), snap => {
-      assignments = snap.val() ? Object.entries(snap.val()).map(([id, a]) => ({ id, ...a })) : [];
+      renderAssignSelects();
+      renderAssignmentsList();
     });
   }
 
-  // Calculate distance and sort drivers closest to admin
-  function updateDriverProximityList() {
-    const listDiv = document.getElementById('driverProximityList');
+  function updateMapMarkers() {
+    // Clear old markers
+    Object.values(driverMarkers).forEach(m => map.removeLayer(m));
+    driverMarkers = {};
+    drivers.forEach(d => {
+      if (d.lat && d.lng) {
+        const marker = L.marker([d.lat, d.lng]).addTo(map)
+          .bindPopup(`${d.firstName} ${d.lastName}<br>${d.road || ''}, ${d.city || ''}`);
+        driverMarkers[d.id] = marker;
+      }
+    });
+  }
+
+  function updateProximityList() {
     const withCoords = drivers.filter(d => d.lat && d.lng);
     withCoords.sort((a, b) => {
       const distA = getDistance(adminLocation.lat, adminLocation.lng, a.lat, a.lng);
       const distB = getDistance(adminLocation.lat, adminLocation.lng, b.lat, b.lng);
       return distA - distB;
     });
+    const listDiv = document.getElementById('driverProximityList');
     listDiv.innerHTML = withCoords.slice(0, 5).map(d => {
       const assignedCar = cars.find(c => c.assignedDriver === d.id);
       return `
-        <div class="driver-item" onclick="showDriverDetails('${d.id}')">
-          <div class="driver-name">${d.firstName} ${d.lastName}</div>
-          <div class="driver-car">${assignedCar ? assignedCar.name + ' (' + assignedCar.plate + ')' : 'No car assigned'}</div>
-          <div class="driver-location"><i class="fas fa-map-pin"></i> ${d.road || 'Unknown'}, ${d.city || ''}</div>
+        <div class="driver-item" onclick="showDriverModal('${d.id}')">
+          <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
+          <div style="font-size:14px;">${assignedCar ? assignedCar.name + ' (' + assignedCar.plate + ')' : 'No car'}</div>
+          <div style="font-size:13px; color:#5a7a62;"><i class="fas fa-map-pin"></i> ${d.road || 'Unknown'}, ${d.city || ''}</div>
         </div>
       `;
     }).join('');
   }
 
   function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; const dLat = (lat2-lat1)*Math.PI/180;
+    const R = 6371;
+    const dLat = (lat2-lat1)*Math.PI/180;
     const dLon = (lon2-lon1)*Math.PI/180;
     const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // Render drivers list in Drivers page
+  // Render Drivers Page
   function renderDriversPage() {
     const cont = document.getElementById('driversListContainer');
     cont.innerHTML = drivers.map(d => `
-      <div class="card-item" onclick="showDriverDetails('${d.id}')">
-        <strong>${d.firstName} ${d.lastName}</strong><br>
-        ${d.email} · ${d.phone || ''}<br>
-        <span class="text-green">NRC: ${d.nrc || ''}</span>
+      <div class="card-item" onclick="showDriverModal('${d.id}')">
+        <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
+        <div>${d.email} · ${d.phone || ''}</div>
+        <div style="color:#2e5c3e;">NRC: ${d.nrc || ''}</div>
       </div>
     `).join('');
   }
 
-  // Show driver details modal (with track & report)
-  window.showDriverDetails = function(driverId) {
+  window.showDriverModal = function(driverId) {
     const driver = drivers.find(d => d.id === driverId);
     const assignedCar = cars.find(c => c.assignedDriver === driverId);
-    const modal = document.getElementById('modalOverlay');
-    document.getElementById('modalContent').innerHTML = `
-      <h3>${driver.firstName} ${driver.lastName}</h3>
-      <p>📧 ${driver.email} | 📞 ${driver.phone || 'N/A'}</p>
-      <p>🚗 Car: ${assignedCar ? assignedCar.name + ' (' + assignedCar.plate + ')' : 'None'}</p>
-      <button class="green-pill-btn" onclick="trackDriver('${driverId}')"><i class="fas fa-location-dot"></i> Track</button>
-      <button class="green-pill-btn" onclick="showDriverReports('${driverId}')"><i class="fas fa-file-alt"></i> Reports</button>
-      <button style="background:transparent; border:none; margin-top:10px;" onclick="document.getElementById('modalOverlay').style.display='none'">Close</button>
+    document.getElementById('modalDriverName').textContent = `${driver.firstName} ${driver.lastName}`;
+    document.getElementById('modalDriverDetails').innerHTML = `
+      <p><i class="fas fa-envelope"></i> ${driver.email}<br>
+      <i class="fas fa-phone"></i> ${driver.phone || 'N/A'}<br>
+      <i class="fas fa-id-card"></i> NRC: ${driver.nrc || 'N/A'}<br>
+      <i class="fas fa-car"></i> ${assignedCar ? assignedCar.name + ' (' + assignedCar.plate + ')' : 'No car assigned'}</p>
     `;
-    modal.style.display = 'flex';
+    document.getElementById('modalTrackBtn').onclick = () => {
+      if (driver.lat && driver.lng) {
+        closeAllPages();
+        map.setView([driver.lat, driver.lng], 18);
+        document.getElementById('driverModal').style.display = 'none';
+      } else alert('Driver location not available');
+    };
+    document.getElementById('modalReportsBtn').onclick = () => showDriverReports(driverId);
+    document.getElementById('driverModal').style.display = 'flex';
   };
 
-  window.trackDriver = function(driverId) {
+  async function showDriverReports(driverId) {
     const driver = drivers.find(d => d.id === driverId);
-    if (driver.lat && driver.lng) {
-      closePageView();
-      map.setView([driver.lat, driver.lng], 18);
-      L.marker([driver.lat, driver.lng]).addTo(map).bindPopup(`${driver.firstName}`).openPopup();
-      document.getElementById('modalOverlay').style.display = 'none';
-    } else { alert('Driver location not available'); }
-  };
+    const modal = document.getElementById('driverReportsModal');
+    const content = document.getElementById('driverReportsContent');
+    content.innerHTML = '<div class="spinner"></div>';
+    modal.style.display = 'flex';
+    
+    const snap = await get(ref(db, `shiftReports/${driverId}`));
+    const reports = snap.val() ? Object.values(snap.val()) : [];
+    reports.sort((a,b) => b.timestamp - a.timestamp);
+    
+    const formatDate = (ts) => new Date(ts).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    content.innerHTML = reports.map(r => `
+      <div class="report-card">
+        <div class="report-date">${formatDate(r.startTime)}</div>
+        <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
+        <div class="summary-line"><span>Start fuel:</span><span>${r.startFuel} L</span></div>
+        <div class="summary-line"><span>End fuel:</span><span>${r.endFuel} L</span></div>
+        <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed.toFixed(1)} L</span></div>
+        <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
+        <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue.toLocaleString()}</span></div>
+        <div class="summary-line"><span>Expenses:</span><span>ZMW ${r.totalExpenses.toLocaleString()}</span></div>
+        <div class="summary-line"><span class="profit-positive">Profit:</span><span class="profit-positive">ZMW ${r.profit.toLocaleString()}</span></div>
+      </div>
+    `).join('') || '<p>No reports for this driver.</p>';
+  }
 
-  window.showDriverReports = function(driverId) {
-    // Fetch reports from Firebase and show in modal
-    get(child(ref(db), `driverReports/${driverId}`)).then(snap => {
-      const reports = snap.val() ? Object.values(snap.val()) : [];
-      let html = `<h4>Daily Reports</h4>`;
-      reports.forEach(r => {
-        html += `<p>${r.date}: Start ${r.startFuel}L, End ${r.endFuel}L, Dist ${r.distance}km, Revenue ${r.revenue}</p>`;
-      });
-      document.getElementById('modalContent').innerHTML = html + `<button onclick="document.getElementById('modalOverlay').style.display='none'">Close</button>`;
-    });
-  };
-
-  // Cars page
+  // Cars Page
   function renderCarsPage() {
     const cont = document.getElementById('carsListContainer');
     cont.innerHTML = cars.map(c => {
       const driver = drivers.find(d => d.id === c.assignedDriver);
       return `
-        <div class="card-item" onclick="showCarDetails('${c.id}')">
-          <strong>${c.name}</strong> (${c.plate})<br>
-          <span>Assigned: ${driver ? driver.firstName : 'None'}</span>
+        <div class="card-item" style="display:flex; align-items:center;">
+          <i class="fas fa-car-side car-icon"></i>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:18px;">${c.name}</div>
+            <div style="color:#2e5c3e;">${c.plate}</div>
+            <div style="font-size:14px;">Assigned: ${driver ? driver.firstName : 'None'}</div>
+            <div style="font-size:13px;">Fuel used: ${c.totalFuelConsumed || 0} L · Dist: ${c.totalDistance || 0} km</div>
+          </div>
         </div>
       `;
     }).join('');
   }
 
-  window.showCarDetails = function(carId) {
-    const car = cars.find(c => c.id === carId);
-    const driver = drivers.find(d => d.id === car.assignedDriver);
-    document.getElementById('modalContent').innerHTML = `
-      <h3>${car.name} (${car.plate})</h3>
-      <p>Assigned driver: ${driver ? driver.firstName : 'None'}</p>
-      <p>Fuel consumed: ${car.totalFuelConsumed || 0} L</p>
-      <p>Distance: ${car.totalDistance || 0} km</p>
-      <button onclick="document.getElementById('modalOverlay').style.display='none'">Close</button>
-    `;
-    document.getElementById('modalOverlay').style.display = 'flex';
-  };
+  // Assign Page
+  function renderAssignSelects() {
+    const driverSelect = document.getElementById('selectDriver');
+    const carSelect = document.getElementById('selectCar');
+    driverSelect.innerHTML = '<option value="">Select Driver</option>' + drivers.map(d => `<option value="${d.id}">${d.firstName} ${d.lastName}</option>`).join('');
+    carSelect.innerHTML = '<option value="">Select Car</option>' + cars.map(c => `<option value="${c.id}">${c.name} (${c.plate})</option>`).join('');
+  }
 
-  // Assignments page
-  function renderAssignments() {
-    const cont = document.getElementById('assignmentsContainer');
+  function renderAssignmentsList() {
+    const cont = document.getElementById('assignmentsList');
     cont.innerHTML = drivers.map(d => {
       const assignedCar = cars.find(c => c.assignedDriver === d.id);
       return `
         <div class="card-item">
-          <strong>${d.firstName} ${d.lastName}</strong>
-          <select id="carSelect_${d.id}" class="form-input">
-            <option value="">-- Select car --</option>
-            ${cars.map(c => `<option value="${c.id}" ${c.assignedDriver === d.id ? 'selected' : ''}>${c.name} (${c.plate})</option>`).join('')}
-          </select>
-          <button class="green-pill-btn" onclick="assignCarToDriver('${d.id}')">Assign</button>
-          <button class="green-pill-btn" onclick="suspendDriver('${d.id}')">Suspend</button>
+          <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
+          <div>Car: ${assignedCar ? assignedCar.name + ' (' + assignedCar.plate + ')' : 'None'}</div>
+          ${assignedCar ? `<button class="outline-btn" onclick="removeAssignment('${d.id}')">Remove Assignment</button>` : ''}
         </div>
       `;
     }).join('');
   }
 
-  window.assignCarToDriver = async function(driverId) {
-    const select = document.getElementById(`carSelect_${driverId}`);
-    const carId = select.value;
-    if (!carId) return;
-    // Update car's assignedDriver
-    await update(ref(db, `cars/${carId}`), { assignedDriver: driverId });
-    // Remove previous assignment if any
-    const prevCar = cars.find(c => c.assignedDriver === driverId);
-    if (prevCar) await update(ref(db, `cars/${prevCar.id}`), { assignedDriver: null });
-    alert('Car assigned');
+  window.removeAssignment = async function(driverId) {
+    const car = cars.find(c => c.assignedDriver === driverId);
+    if (car) {
+      await update(ref(db, `cars/${car.id}`), { assignedDriver: null });
+    }
   };
 
-  window.suspendDriver = function(driverId) {
-    update(ref(db, `drivers/${driverId}`), { suspended: true });
-    alert('Driver suspended');
-  };
-
-  // Reports loading
-  document.getElementById('loadReportBtn').addEventListener('click', () => {
-    const type = document.getElementById('reportTypeSelect').value;
+  // Reports Page
+  document.getElementById('loadReportsBtn').addEventListener('click', async () => {
     const period = document.getElementById('reportPeriodSelect').value;
-    // Fetch data accordingly and display table
-    // For demo, we'll build a simple table from Firebase
-    const container = document.getElementById('reportTableContainer');
-    container.innerHTML = `<table class="report-table"><tr><th>Date</th><th>Driver</th><th>Fuel</th><th>Distance</th></tr>`;
-    // In real implementation, fetch from Firebase based on type/period
-    container.innerHTML += `<tr><td>2026-04-20</td><td>Casey</td><td>45L</td><td>120km</td></tr></table>`;
+    const container = document.getElementById('reportsListContainer');
+    container.innerHTML = '<div class="spinner"></div>';
+    
+    // Fetch all reports from all drivers
+    const reports = [];
+    for (let driver of drivers) {
+      const snap = await get(ref(db, `shiftReports/${driver.id}`));
+      if (snap.exists()) {
+        const driverReports = Object.values(snap.val());
+        driverReports.forEach(r => reports.push({ ...r, driverName: driver.firstName + ' ' + driver.lastName }));
+      }
+    }
+    // Filter by period (simplified)
+    const now = Date.now();
+    const filtered = reports.filter(r => {
+      if (period === 'all') return true;
+      const day = 24*60*60*1000;
+      if (period === 'today') return (now - r.timestamp) < day;
+      if (period === 'week') return (now - r.timestamp) < 7*day;
+      if (period === 'month') return (now - r.timestamp) < 30*day;
+    });
+    filtered.sort((a,b) => b.timestamp - a.timestamp);
+    
+    const formatDate = (ts) => new Date(ts).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    container.innerHTML = filtered.map(r => `
+      <div class="report-card">
+        <div class="report-date">${formatDate(r.startTime)} · ${r.driverName}</div>
+        <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
+        <div class="summary-line"><span>Start fuel:</span><span>${r.startFuel} L</span></div>
+        <div class="summary-line"><span>End fuel:</span><span>${r.endFuel} L</span></div>
+        <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed.toFixed(1)} L</span></div>
+        <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
+        <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue.toLocaleString()}</span></div>
+        <div class="summary-line"><span>Expenses:</span><span>ZMW ${r.totalExpenses.toLocaleString()}</span></div>
+        <div class="summary-line"><span class="profit-positive">Profit:</span><span class="profit-positive">ZMW ${r.profit.toLocaleString()}</span></div>
+      </div>
+    `).join('') || '<p>No reports found.</p>';
   });
 
-  // CSV download
-  document.getElementById('downloadReportCsv').addEventListener('click', () => {
-    let csv = "Date,Driver,Fuel,Distance\n2026-04-20,Casey,45L,120km";
+  // CSV Download
+  document.getElementById('downloadReportsCsv').addEventListener('click', async () => {
+    // Similar fetch, generate CSV
+    let csv = "Date,Driver,Car,Plate,StartFuel,EndFuel,FuelConsumed,Distance,Revenue,Expenses,Profit\n";
+    for (let d of drivers) {
+      const snap = await get(ref(db, `shiftReports/${d.id}`));
+      if (snap.exists()) {
+        Object.values(snap.val()).forEach(r => {
+          csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},${r.startFuel},${r.endFuel},${r.fuelConsumed},${r.distance},${r.revenue},${r.totalExpenses},${r.profit}\n`;
+        });
+      }
+    }
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'report.csv';
+    a.download = 'all_reports.csv';
     a.click();
   });
 
-  // Page navigation
+  // Navigation
   document.querySelectorAll('.action-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const page = btn.dataset.page;
       document.getElementById(page + 'Page').classList.add('active');
     });
   });
-
-  window.closePageView = function() {
+  function closeAllPages() {
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
-  };
+  }
+  document.getElementById('closeDriversPage').onclick = closeAllPages;
+  document.getElementById('closeCarsPage').onclick = closeAllPages;
+  document.getElementById('closeAssignPage').onclick = closeAllPages;
+  document.getElementById('closeReportsPage').onclick = closeAllPages;
 
   // Toggle forms
-  document.getElementById('toggleCreateDriverForm').addEventListener('click', () => {
-    const form = document.getElementById('createDriverForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  });
-  document.getElementById('toggleAddCarForm').addEventListener('click', () => {
-    const form = document.getElementById('addCarForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  });
+  document.getElementById('toggleAddDriverForm').onclick = () => {
+    document.getElementById('addDriverForm').style.display = 
+      document.getElementById('addDriverForm').style.display === 'block' ? 'none' : 'block';
+  };
+  document.getElementById('toggleAddCarForm').onclick = () => {
+    document.getElementById('addCarForm').style.display = 
+      document.getElementById('addCarForm').style.display === 'block' ? 'none' : 'block';
+  };
+  document.getElementById('toggleAssignForm').onclick = () => {
+    document.getElementById('assignForm').style.display = 
+      document.getElementById('assignForm').style.display === 'block' ? 'none' : 'block';
+  };
 
-  // Create driver (Firebase Auth + DB)
-  document.getElementById('createDriverBtn').addEventListener('click', async () => {
+  // Create driver
+  document.getElementById('createDriverBtn').onclick = async () => {
     const email = document.getElementById('driverEmail').value;
     const pass = document.getElementById('driverPassword').value;
-    const confirm = document.getElementById('driverConfirmPassword').value;
-    if (pass !== confirm) return alert('Passwords do not match');
+    if (pass !== document.getElementById('driverConfirmPassword').value) return alert('Passwords mismatch');
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       const uid = cred.user.uid;
@@ -613,37 +694,46 @@
         firstName: document.getElementById('driverFirstName').value,
         lastName: document.getElementById('driverLastName').value,
         nrc: document.getElementById('driverNRC').value,
-        email: email,
-        phone: document.getElementById('driverPhone').value,
-        lat: null, lng: null, road: '', city: ''
+        email, phone: document.getElementById('driverPhone').value,
+        lat: null, lng: null
       });
-      alert('Driver created');
-      document.getElementById('createDriverForm').style.display = 'none';
-      // Sign admin back in
+      document.getElementById('addDriverForm').style.display = 'none';
       await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
     } catch(e) { alert(e.message); }
-  });
+  };
 
   // Add car
-  document.getElementById('addCarBtn').addEventListener('click', async () => {
+  document.getElementById('addCarBtn').onclick = async () => {
     const name = document.getElementById('carName').value;
     const plate = document.getElementById('carPlate').value;
     const newRef = push(ref(db, 'cars'));
     await set(newRef, { name, plate, assignedDriver: null, totalFuelConsumed: 0, totalDistance: 0 });
     document.getElementById('addCarForm').style.display = 'none';
-  });
+  };
+
+  // Assign car
+  document.getElementById('confirmAssignBtn').onclick = async () => {
+    const driverId = document.getElementById('selectDriver').value;
+    const carId = document.getElementById('selectCar').value;
+    if (!driverId || !carId) return alert('Select both');
+    // Remove previous assignment from car if any
+    const prevCar = cars.find(c => c.assignedDriver === driverId);
+    if (prevCar) await update(ref(db, `cars/${prevCar.id}`), { assignedDriver: null });
+    await update(ref(db, `cars/${carId}`), { assignedDriver: driverId });
+    document.getElementById('assignForm').style.display = 'none';
+  };
 
   // Search driver
   document.getElementById('searchDriverInput').addEventListener('input', (e) => {
     const q = e.target.value.toLowerCase();
     const filtered = drivers.filter(d => (d.firstName+' '+d.lastName).toLowerCase().includes(q));
-    const cont = document.getElementById('driversListContainer');
-    cont.innerHTML = filtered.map(d => `<div class="card-item" onclick="showDriverDetails('${d.id}')">${d.firstName} ${d.lastName}</div>`).join('');
+    document.getElementById('driversListContainer').innerHTML = filtered.map(d => `
+      <div class="card-item" onclick="showDriverModal('${d.id}')">${d.firstName} ${d.lastName}</div>
+    `).join('');
   });
 
-  // Start app
-  initMap();
-  loadData();
+  // Logout
+  document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
 </script>
 </body>
 </html>
