@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Admin · Driver Daily Monitoring</title>
+  <title>Admin · Driver & Worker Monitor</title>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Leaflet -->
@@ -16,6 +16,7 @@
       box-sizing: border-box;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
+
     body {
       background: #ffffff;
       display: flex;
@@ -23,6 +24,7 @@
       align-items: flex-start;
       min-height: 100vh;
     }
+
     #app {
       max-width: 450px;
       width: 100%;
@@ -31,18 +33,21 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 20px rgba(0,0,0,0.02);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
     }
+
     #mapWrapper {
       position: relative;
       height: 70vh;
       width: 100%;
     }
+
     #mapContainer {
       height: 100%;
       width: 100%;
       z-index: 1;
     }
+
     /* Floating city selector */
     .city-selector {
       position: absolute;
@@ -52,13 +57,14 @@
       background: white;
       border-radius: 40px;
       padding: 8px 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       border: 1px solid #c0dcc0;
       display: flex;
       align-items: center;
       gap: 8px;
       cursor: pointer;
     }
+
     .city-dropdown {
       position: absolute;
       top: 60px;
@@ -66,19 +72,22 @@
       background: white;
       border-radius: 24px;
       padding: 8px 0;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
       display: none;
       z-index: 11;
       min-width: 140px;
     }
+
     .city-option {
       padding: 12px 20px;
       cursor: pointer;
       color: #1e3a2a;
     }
+
     .city-option:hover {
       background: #f0f7f0;
     }
+
     /* Floating emergency button */
     .emergency-float-btn {
       position: absolute;
@@ -91,20 +100,23 @@
       border-radius: 40px;
       padding: 10px 18px;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .emergency-float-btn.pulse {
       animation: pulse-red 1.5s infinite;
     }
+
     @keyframes pulse-red {
       0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
       70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
       100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
     }
+
     .emergency-badge {
       background: white;
       color: #dc2626;
@@ -113,19 +125,21 @@
       font-size: 12px;
       margin-left: 4px;
     }
+
     /* Toast message */
     .city-toast {
       position: absolute;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(30,58,42,0.9);
+      background: rgba(30, 58, 42, 0.9);
       color: white;
       padding: 12px 24px;
       border-radius: 40px;
       z-index: 20;
       transition: opacity 0.5s;
     }
+
     #bottomPanel {
       flex: 1;
       background: #ffffff;
@@ -135,12 +149,14 @@
       padding: 16px 14px 20px;
       overflow-y: auto;
     }
+
     .admin-header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 12px;
     }
+
     .admin-avatar {
       width: 50px;
       height: 50px;
@@ -152,20 +168,24 @@
       color: white;
       font-size: 24px;
     }
+
     .admin-info h3 {
       color: #1e3a2a;
       font-weight: 700;
     }
+
     .admin-info p {
       color: #5a7a62;
       font-size: 14px;
     }
+
     .action-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
       gap: 8px;
       margin: 8px 0;
     }
+
     .action-btn {
       background: white;
       border: 1.5px solid #2e5c3e;
@@ -177,16 +197,19 @@
       font-size: 13px;
       cursor: pointer;
     }
+
     .action-btn i {
       display: block;
       font-size: 20px;
       margin-bottom: 4px;
     }
+
     .section-title {
       font-weight: 700;
       color: #1e3a2a;
       margin: 16px 0 8px;
     }
+
     .driver-item {
       background: #f8fbf8;
       border-radius: 18px;
@@ -195,6 +218,7 @@
       border-left: 5px solid #2e5c3e;
       cursor: pointer;
     }
+
     .pill-btn {
       background: #2e5c3e;
       color: white;
@@ -207,6 +231,7 @@
       cursor: pointer;
       margin: 8px 0;
     }
+
     .outline-btn {
       background: white;
       border: 1.5px solid #2e5c3e;
@@ -218,6 +243,7 @@
       cursor: pointer;
       margin: 8px 0;
     }
+
     .dropdown-form {
       background: #f4f9f4;
       border-radius: 24px;
@@ -225,7 +251,9 @@
       margin: 12px 0;
       display: none;
     }
-    .form-input, .form-select {
+
+    .form-input,
+    .form-select {
       width: 100%;
       padding: 14px 18px;
       border-radius: 30px;
@@ -234,17 +262,22 @@
       font-size: 15px;
       background: white;
     }
+
     /* Modals & Pages */
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.3);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
       backdrop-filter: blur(2px);
       z-index: 200;
       display: none;
       align-items: center;
       justify-content: center;
     }
+
     .modal-card {
       background: white;
       border-radius: 32px;
@@ -254,22 +287,31 @@
       max-height: 80vh;
       overflow-y: auto;
     }
+
     .page-view {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: white;
       z-index: 150;
       overflow-y: auto;
       padding: 20px 16px 90px;
       display: none;
     }
-    .page-view.active { display: block; }
+
+    .page-view.active {
+      display: block;
+    }
+
     .page-header {
       display: flex;
       align-items: center;
       gap: 16px;
       margin-bottom: 20px;
     }
+
     .back-btn {
       background: none;
       border: none;
@@ -277,6 +319,7 @@
       color: #2e5c3e;
       cursor: pointer;
     }
+
     .emergency-card {
       background: #fff5f5;
       border-radius: 20px;
@@ -284,15 +327,18 @@
       margin-bottom: 12px;
       border-left: 5px solid #dc2626;
     }
+
     .emergency-title {
       font-weight: 700;
       color: #dc2626;
     }
+
     .horizontal-buttons {
       display: flex;
       gap: 12px;
       margin-top: 12px;
     }
+
     .call-btn {
       background: #2e5c3e;
       color: white;
@@ -302,6 +348,7 @@
       flex: 1;
       font-weight: 600;
     }
+
     .track-red-btn {
       background: #dc2626;
       color: white;
@@ -311,6 +358,7 @@
       flex: 1;
       font-weight: 600;
     }
+
     .report-card {
       background: #f8fbf8;
       border-radius: 20px;
@@ -318,26 +366,31 @@
       margin-bottom: 16px;
       border: 1px solid #d0e0d0;
     }
+
     .report-date {
       font-weight: 700;
       color: #1e3a2a;
       margin-bottom: 8px;
     }
+
     .summary-line {
       display: flex;
       justify-content: space-between;
       padding: 6px 0;
       border-bottom: 1px dashed #c0dcc0;
     }
+
     .profit-positive {
       color: #2e5c3e;
       font-weight: 700;
     }
+
     .car-icon {
       font-size: 32px;
       color: #2e5c3e;
       margin-right: 12px;
     }
+
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #2e5c3e;
@@ -347,7 +400,68 @@
       animation: spin 1s linear infinite;
       margin: 20px auto;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toggle Switch (Apple‑style) */
+    .toggle-switch {
+      display: flex;
+      background: #eef3ef;
+      border-radius: 40px;
+      padding: 4px;
+      margin: 16px 0;
+    }
+
+    .toggle-option {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #5a7a62;
+      cursor: pointer;
+    }
+
+    .toggle-option.active {
+      background: #2e5c3e;
+      color: white;
+    }
+
+    .worker-status {
+      font-size: 13px;
+      color: #5a7a62;
+      margin-top: 4px;
+    }
+
+    .on-shift {
+      color: #2e5c3e;
+      font-weight: 600;
+    }
+
+    .off-shift {
+      color: #dc2626;
+    }
+
+    .task-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #d0e0d0;
+    }
+
+    .task-title {
+      font-weight: 700;
+      color: #1e3a2a;
+    }
+
+    .task-desc {
+      color: #4a6a5a;
+      margin: 6px 0;
+    }
   </style>
 </head>
 <body>
@@ -403,25 +517,46 @@
   <div id="emergencyListContainer"></div>
 </div>
 
-<!-- Drivers Page -->
+<!-- Drivers Page (with toggle) -->
 <div id="driversPage" class="page-view">
   <div class="page-header">
     <button class="back-btn" id="closeDriversPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">All Drivers</h2>
+    <h2 style="color:#1e3a2a;">Team</h2>
   </div>
-  <button class="pill-btn" id="toggleAddDriverForm"><i class="fas fa-plus-circle"></i> Add Driver</button>
-  <div id="addDriverForm" class="dropdown-form">
-    <input type="text" id="driverFirstName" class="form-input" placeholder="First Name">
-    <input type="text" id="driverLastName" class="form-input" placeholder="Last Name">
-    <input type="text" id="driverNRC" class="form-input" placeholder="NRC">
-    <input type="email" id="driverEmail" class="form-input" placeholder="Email">
-    <input type="tel" id="driverPhone" class="form-input" placeholder="Phone">
-    <input type="password" id="driverPassword" class="form-input" placeholder="Password">
-    <input type="password" id="driverConfirmPassword" class="form-input" placeholder="Confirm Password">
-    <button class="pill-btn" id="createDriverBtn">Create Driver</button>
+  <!-- Toggle -->
+  <div class="toggle-switch">
+    <div class="toggle-option active" data-type="drivers">Drivers</div>
+    <div class="toggle-option" data-type="workers">Workers</div>
   </div>
-  <input type="text" id="searchDriverInput" class="form-input" placeholder="Search driver...">
-  <div id="driversListContainer"></div>
+  <!-- Drivers Section -->
+  <div id="driversSection">
+    <button class="pill-btn" id="toggleAddDriverForm"><i class="fas fa-plus-circle"></i> Add Driver</button>
+    <div id="addDriverForm" class="dropdown-form">
+      <input type="text" id="driverFirstName" class="form-input" placeholder="First Name">
+      <input type="text" id="driverLastName" class="form-input" placeholder="Last Name">
+      <input type="text" id="driverNRC" class="form-input" placeholder="NRC">
+      <input type="email" id="driverEmail" class="form-input" placeholder="Email">
+      <input type="tel" id="driverPhone" class="form-input" placeholder="Phone">
+      <input type="password" id="driverPassword" class="form-input" placeholder="Password">
+      <input type="password" id="driverConfirmPassword" class="form-input" placeholder="Confirm Password">
+      <button class="pill-btn" id="createDriverBtn">Create Driver</button>
+    </div>
+    <input type="text" id="searchDriverInput" class="form-input" placeholder="Search driver...">
+    <div id="driversListContainer"></div>
+  </div>
+  <!-- Workers Section -->
+  <div id="workersSection" style="display:none;">
+    <button class="pill-btn" id="toggleAddWorkerForm"><i class="fas fa-plus-circle"></i> Add Worker</button>
+    <div id="addWorkerForm" class="dropdown-form">
+      <input type="text" id="workerFullName" class="form-input" placeholder="Full Name">
+      <input type="tel" id="workerPhone" class="form-input" placeholder="Airtel Phone Number">
+      <input type="email" id="workerEmail" class="form-input" placeholder="Email (worker@...)">
+      <input type="password" id="workerPassword" class="form-input" placeholder="Password">
+      <input type="password" id="workerConfirmPassword" class="form-input" placeholder="Confirm Password">
+      <button class="pill-btn" id="createWorkerBtn">Create Worker</button>
+    </div>
+    <div id="workersListContainer"></div>
+  </div>
 </div>
 
 <!-- Cars Page -->
@@ -439,42 +574,62 @@
   <div id="carsListContainer"></div>
 </div>
 
-<!-- Assign Page -->
+<!-- Assign Page (with toggle) -->
 <div id="assignPage" class="page-view">
   <div class="page-header">
     <button class="back-btn" id="closeAssignPage"><i class="fas fa-arrow-left"></i></button>
     <h2 style="color:#1e3a2a;">Assignments</h2>
   </div>
-  <button class="pill-btn" id="toggleAssignForm"><i class="fas fa-link"></i> Assign Car to Driver</button>
-  <div id="assignForm" class="dropdown-form">
-    <select id="selectDriver" class="form-select"><option value="">Select Driver</option></select>
-    <select id="selectCar" class="form-select"><option value="">Select Car</option></select>
-    <button class="pill-btn" id="confirmAssignBtn">Assign</button>
+  <div class="toggle-switch">
+    <div class="toggle-option active" data-assign="drivers">Drivers</div>
+    <div class="toggle-option" data-assign="workers">Workers</div>
   </div>
-  <div class="section-title">Current Assignments</div>
-  <div id="assignmentsList"></div>
+  <div id="assignDriversSection">
+    <button class="pill-btn" id="toggleAssignForm"><i class="fas fa-link"></i> Assign Car to Driver</button>
+    <div id="assignForm" class="dropdown-form">
+      <select id="selectDriver" class="form-select"><option value="">Select Driver</option></select>
+      <select id="selectCar" class="form-select"><option value="">Select Car</option></select>
+      <button class="pill-btn" id="confirmAssignBtn">Assign</button>
+    </div>
+    <div class="section-title">Current Driver Assignments</div>
+    <div id="assignmentsList"></div>
+  </div>
+  <div id="assignWorkersSection" style="display:none;">
+    <div class="section-title">Workers</div>
+    <div id="workersAssignList"></div>
+  </div>
 </div>
 
-<!-- Reports Page -->
+<!-- Reports Page (with toggle) -->
 <div id="reportsPage" class="page-view">
   <div class="page-header">
     <button class="back-btn" id="closeReportsPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">All Reports</h2>
+    <h2 style="color:#1e3a2a;">Reports</h2>
   </div>
-  <div style="display:flex; gap:8px; margin-bottom:16px;">
-    <select id="reportPeriodSelect" class="form-select" style="flex:1;">
-      <option value="all">All Time</option>
-      <option value="today">Today</option>
-      <option value="week">This Week</option>
-      <option value="month">This Month</option>
-    </select>
-    <button class="pill-btn" id="loadReportsBtn" style="width:auto;">Load</button>
+  <div class="toggle-switch">
+    <div class="toggle-option active" data-report="drivers">Drivers</div>
+    <div class="toggle-option" data-report="workers">Workers</div>
   </div>
-  <div id="reportsListContainer"></div>
-  <button class="pill-btn" id="downloadReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
+  <div id="reportsDriversSection">
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
+      <select id="reportPeriodSelect" class="form-select" style="flex:1;">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+      </select>
+      <button class="pill-btn" id="loadReportsBtn" style="width:auto;">Load</button>
+    </div>
+    <div id="reportsListContainer"></div>
+    <button class="pill-btn" id="downloadReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
+  </div>
+  <div id="reportsWorkersSection" style="display:none;">
+    <div id="workersReportsList"></div>
+    <button class="pill-btn" id="viewTimesheetBtn"><i class="fas fa-clock"></i> View Timesheet (2 weeks)</button>
+  </div>
 </div>
 
-<!-- Driver Detail Modal -->
+<!-- Modals -->
 <div class="modal-overlay" id="driverModal">
   <div class="modal-card">
     <h3 id="modalDriverName" style="color:#1e3a2a;"></h3>
@@ -487,7 +642,6 @@
   </div>
 </div>
 
-<!-- Car Detail Modal -->
 <div class="modal-overlay" id="carModal">
   <div class="modal-card">
     <h3 id="modalCarName" style="color:#1e3a2a;"></h3>
@@ -496,7 +650,37 @@
   </div>
 </div>
 
-<!-- Driver Reports Modal -->
+<div class="modal-overlay" id="workerModal">
+  <div class="modal-card">
+    <h3 id="modalWorkerName" style="color:#1e3a2a;"></h3>
+    <p id="modalWorkerDetails"></p>
+    <div class="horizontal-buttons">
+      <button class="pill-btn" id="assignTaskBtn"><i class="fas fa-tasks"></i> Assign Task</button>
+      <button class="outline-btn" id="markOffDayBtn"><i class="fas fa-calendar-times"></i> Mark Off Day</button>
+    </div>
+    <button class="outline-btn" onclick="document.getElementById('workerModal').style.display='none'">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="taskModal">
+  <div class="modal-card">
+    <h3>Assign Task</h3>
+    <input type="text" id="taskTitle" class="form-input" placeholder="Task Title">
+    <textarea id="taskDescription" class="form-input" rows="3" placeholder="Task Description"></textarea>
+    <button class="pill-btn" id="saveTaskBtn">Assign Task</button>
+    <button class="outline-btn" onclick="document.getElementById('taskModal').style.display='none'">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="timesheetModal">
+  <div class="modal-card" style="max-width:400px;">
+    <h3>Timesheet (Last 2 Weeks)</h3>
+    <div id="timesheetContent"></div>
+    <button class="pill-btn" id="downloadTimesheetCsv"><i class="fas fa-download"></i> Download CSV</button>
+    <button class="outline-btn" onclick="document.getElementById('timesheetModal').style.display='none'">Close</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="driverReportsModal">
   <div class="modal-card">
     <h3 style="color:#1e3a2a;">Driver Reports</h3>
@@ -528,11 +712,13 @@
   let adminLocation = { lat: -15.3875, lng: 28.3228 };
   let drivers = [];
   let cars = [];
+  let workers = [];
   let driverMarkers = {};
   let currentCity = "Lusaka";
   let emergencies = [];
   let unreadEmergencyCount = 0;
   let lastReadEmergencyTimestamp = 0;
+  let currentWorkerId = null;
 
   // Auth protection
   onAuthStateChanged(auth, (user) => {
@@ -562,15 +748,19 @@
       drivers = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({ id, ...d })) : [];
       updateMapMarkers();
       updateProximityList();
-      renderDriversPage();
+      renderDriversList();
       renderAssignSelects();
       renderAssignmentsList();
     });
     onValue(ref(db, 'cars'), (snap) => {
       cars = snap.val() ? Object.entries(snap.val()).map(([id, c]) => ({ id, ...c })) : [];
-      renderCarsPage();
+      renderCarsList();
       renderAssignSelects();
-      renderAssignmentsList();
+    });
+    onValue(ref(db, 'workers'), (snap) => {
+      workers = snap.val() ? Object.entries(snap.val()).map(([id, w]) => ({ id, ...w })) : [];
+      renderWorkersList();
+      renderWorkersAssignList();
     });
   }
 
@@ -579,12 +769,9 @@
     driverMarkers = {};
     const cityDrivers = drivers.filter(d => d.city === currentCity && d.lat && d.lng);
     cityDrivers.forEach(d => {
-      const marker = L.marker([d.lat, d.lng]).addTo(map).bindPopup(`${d.firstName} ${d.lastName}<br>${d.road || ''}`);
-      driverMarkers[d.id] = marker;
+      driverMarkers[d.id] = L.marker([d.lat, d.lng]).addTo(map).bindPopup(`${d.firstName} ${d.lastName}<br>${d.road || ''}`);
     });
-    if (cityDrivers.length === 0) {
-      showToast(`No drivers working in ${currentCity}`);
-    }
+    if (cityDrivers.length === 0) showToast(`No drivers working in ${currentCity}`);
   }
 
   function showToast(msg) {
@@ -598,105 +785,6 @@
     }, 2500);
   }
 
-  // City selector
-  document.getElementById('citySelectorBtn').addEventListener('click', () => {
-    document.getElementById('cityDropdown').style.display = 'block';
-  });
-  document.querySelectorAll('.city-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      const city = opt.dataset.city;
-      const lat = parseFloat(opt.dataset.lat);
-      const lng = parseFloat(opt.dataset.lng);
-      currentCity = city;
-      document.getElementById('selectedCityDisplay').textContent = city;
-      document.getElementById('cityDropdown').style.display = 'none';
-      map.setView([lat, lng], 13);
-      updateMapMarkers();
-    });
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.city-selector')) {
-      document.getElementById('cityDropdown').style.display = 'none';
-    }
-  });
-
-  // Emergency listening with unread tracking
-  function listenEmergencies() {
-    const reportsRef = ref(db, 'driverReports');
-    onValue(reportsRef, (snap) => {
-      const allEmergencies = snap.val() ? Object.entries(snap.val()).map(([id, e]) => ({ id, ...e })) : [];
-      emergencies = allEmergencies;
-      // Count unread (those with timestamp > lastReadEmergencyTimestamp)
-      unreadEmergencyCount = emergencies.filter(e => e.timestamp > lastReadEmergencyTimestamp).length;
-      updateEmergencyUI();
-    });
-  }
-
-  function updateEmergencyUI() {
-    const badge = document.getElementById('emergencyCount');
-    const btn = document.getElementById('emergencyFloatBtn');
-    badge.textContent = unreadEmergencyCount;
-    if (unreadEmergencyCount > 0) {
-      btn.classList.add('pulse');
-    } else {
-      btn.classList.remove('pulse');
-    }
-  }
-
-  document.getElementById('emergencyFloatBtn').addEventListener('click', () => {
-    document.getElementById('emergencyPage').classList.add('active');
-    renderEmergencyList();
-    // Mark all as read
-    lastReadEmergencyTimestamp = Date.now();
-    unreadEmergencyCount = 0;
-    updateEmergencyUI();
-  });
-  document.getElementById('closeEmergencyPage').addEventListener('click', () => {
-    document.getElementById('emergencyPage').classList.remove('active');
-  });
-
-  function renderEmergencyList() {
-    const cont = document.getElementById('emergencyListContainer');
-    if (emergencies.length === 0) {
-      cont.innerHTML = '<p>No emergencies.</p>';
-      return;
-    }
-    // Show newest first
-    const sorted = [...emergencies].sort((a,b) => b.timestamp - a.timestamp);
-    cont.innerHTML = sorted.map(e => {
-      const driver = drivers.find(d => d.id === e.driverId);
-      return `
-        <div class="emergency-card">
-          <div class="emergency-title"><i class="fas fa-exclamation-circle"></i> ${e.type?.toUpperCase() || 'EMERGENCY'}</div>
-          <p><strong>${e.driverName || 'Driver'}</strong> · ${new Date(e.timestamp).toLocaleTimeString()}</p>
-          <p>${e.message}</p>
-          <div class="horizontal-buttons">
-            <button class="call-btn" data-phone="${driver?.phone || ''}"><i class="fas fa-phone"></i> Call</button>
-            <button class="track-red-btn" data-driverid="${e.driverId}"><i class="fas fa-map-marker-alt"></i> Track</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-    document.querySelectorAll('.call-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const phone = btn.dataset.phone;
-        if (phone) window.location.href = `tel:${phone}`;
-        else alert('No phone number');
-      });
-    });
-    document.querySelectorAll('.track-red-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const driverId = btn.dataset.driverid;
-        const driver = drivers.find(d => d.id === driverId);
-        if (driver?.lat && driver?.lng) {
-          closeAllPages();
-          map.setView([driver.lat, driver.lng], 18);
-        } else alert('Location unavailable');
-      });
-    });
-  }
-
-  // Proximity list
   function updateProximityList() {
     const withCoords = drivers.filter(d => d.lat && d.lng);
     withCoords.sort((a, b) => {
@@ -704,7 +792,7 @@
       const distB = getDistance(adminLocation.lat, adminLocation.lng, b.lat, b.lng);
       return distA - distB;
     });
-    document.getElementById('driverProximityList').innerHTML = withCoords.slice(0,5).map(d => {
+    document.getElementById('driverProximityList').innerHTML = withCoords.slice(0, 5).map(d => {
       const car = cars.find(c => c.assignedDriver === d.id);
       return `<div class="driver-item" onclick="showDriverModal('${d.id}')">
         <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
@@ -715,29 +803,96 @@
   }
 
   function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Format helpers
-  function formatTime(ts) { return new Date(ts).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
-  function formatDuration(ms) { const h = Math.floor(ms/3600000); const m = Math.floor((ms%3600000)/60000); return `${h}h ${m}m`; }
+  function formatTime(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatDuration(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    return `${h}h ${m}m`;
+  }
+
+  // City selector
+  document.getElementById('citySelectorBtn').addEventListener('click', () => {
+    document.getElementById('cityDropdown').style.display = 'block';
+  });
+  document.querySelectorAll('.city-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      currentCity = opt.dataset.city;
+      document.getElementById('selectedCityDisplay').textContent = currentCity;
+      document.getElementById('cityDropdown').style.display = 'none';
+      map.setView([parseFloat(opt.dataset.lat), parseFloat(opt.dataset.lng)], 13);
+      updateMapMarkers();
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.city-selector')) document.getElementById('cityDropdown').style.display = 'none';
+  });
+
+  // Emergency
+  function listenEmergencies() {
+    onValue(ref(db, 'driverReports'), (snap) => {
+      emergencies = snap.val() ? Object.entries(snap.val()).map(([id, e]) => ({ id, ...e })) : [];
+      unreadEmergencyCount = emergencies.filter(e => e.timestamp > lastReadEmergencyTimestamp).length;
+      const btn = document.getElementById('emergencyFloatBtn');
+      document.getElementById('emergencyCount').textContent = unreadEmergencyCount;
+      if (unreadEmergencyCount > 0) btn.classList.add('pulse'); else btn.classList.remove('pulse');
+    });
+  }
+
+  document.getElementById('emergencyFloatBtn').addEventListener('click', () => {
+    document.getElementById('emergencyPage').classList.add('active');
+    renderEmergencyList();
+    lastReadEmergencyTimestamp = Date.now();
+    unreadEmergencyCount = 0;
+    updateEmergencyUI();
+  });
+
+  function updateEmergencyUI() {
+    const btn = document.getElementById('emergencyFloatBtn');
+    document.getElementById('emergencyCount').textContent = unreadEmergencyCount;
+    if (unreadEmergencyCount > 0) btn.classList.add('pulse'); else btn.classList.remove('pulse');
+  }
+
+  function renderEmergencyList() {
+    const cont = document.getElementById('emergencyListContainer');
+    if (emergencies.length === 0) { cont.innerHTML = '<p>No emergencies.</p>'; return; }
+    const sorted = [...emergencies].sort((a, b) => b.timestamp - a.timestamp);
+    cont.innerHTML = sorted.map(e => {
+      const driver = drivers.find(d => d.id === e.driverId);
+      return `<div class="emergency-card">
+        <div class="emergency-title"><i class="fas fa-exclamation-circle"></i> ${e.type?.toUpperCase() || 'EMERGENCY'}</div>
+        <p><strong>${e.driverName || 'Driver'}</strong> · ${new Date(e.timestamp).toLocaleTimeString()}</p>
+        <p>${e.message}</p>
+        <div class="horizontal-buttons">
+          <button class="call-btn" data-phone="${driver?.phone || ''}"><i class="fas fa-phone"></i> Call</button>
+          <button class="track-red-btn" data-driverid="${e.driverId}"><i class="fas fa-map-marker-alt"></i> Track</button>
+        </div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.call-btn').forEach(btn => btn.addEventListener('click', () => { const phone = btn.dataset.phone; if (phone) window.location.href = `tel:${phone}`; else alert('No phone number'); }));
+    document.querySelectorAll('.track-red-btn').forEach(btn => btn.addEventListener('click', () => { const driverId = btn.dataset.driverid; const driver = drivers.find(d => d.id === driverId); if (driver?.lat) { closeAllPages(); map.setView([driver.lat, driver.lng], 18); } else alert('Location unavailable'); }));
+  }
+
+  document.getElementById('closeEmergencyPage').addEventListener('click', () => document.getElementById('emergencyPage').classList.remove('active'));
 
   // Driver modal
   window.showDriverModal = function(driverId) {
     const driver = drivers.find(d => d.id === driverId);
     const car = cars.find(c => c.assignedDriver === driverId);
     document.getElementById('modalDriverName').textContent = `${driver.firstName} ${driver.lastName}`;
-    document.getElementById('modalDriverDetails').innerHTML = `
-      <p><i class="fas fa-envelope"></i> ${driver.email}<br><i class="fas fa-phone"></i> ${driver.phone||'N/A'}<br>
-      <i class="fas fa-car"></i> ${car ? car.name+' ('+car.plate+')' : 'None'}</p>`;
-    document.getElementById('modalTrackBtn').onclick = () => {
-      if (driver.lat) { closeAllPages(); map.setView([driver.lat, driver.lng], 18); document.getElementById('driverModal').style.display='none'; }
-      else alert('No location');
-    };
+    document.getElementById('modalDriverDetails').innerHTML = `<p><i class="fas fa-envelope"></i> ${driver.email}<br><i class="fas fa-phone"></i> ${driver.phone || 'N/A'}<br><i class="fas fa-car"></i> ${car ? car.name + ' (' + car.plate + ')' : 'None'}</p>`;
+    document.getElementById('modalTrackBtn').onclick = () => { if (driver.lat) { closeAllPages(); map.setView([driver.lat, driver.lng], 18); document.getElementById('driverModal').style.display = 'none'; } else alert('No location'); };
     document.getElementById('modalReportsBtn').onclick = () => showDriverReports(driverId);
-    document.getElementById('driverModal').style.display='flex';
+    document.getElementById('driverModal').style.display = 'flex';
   };
 
   async function showDriverReports(driverId) {
@@ -747,13 +902,13 @@
     modal.style.display = 'flex';
     const snap = await get(ref(db, `shiftReports/${driverId}`));
     const reports = snap.val() ? Object.values(snap.val()) : [];
-    reports.sort((a,b) => b.timestamp - a.timestamp);
-    const formatDate = ts => new Date(ts).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+    reports.sort((a, b) => b.timestamp - a.timestamp);
+    const formatDate = ts => new Date(ts).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     content.innerHTML = reports.map(r => `
       <div class="report-card">
         <div class="report-date">${formatDate(r.startTime)}</div>
         <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime-r.startTime))})</span></div>
+        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime - r.startTime))})</span></div>
         <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
         <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
         <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue?.toLocaleString()}</span></div>
@@ -762,61 +917,61 @@
     `).join('') || '<p>No reports</p>';
   }
 
-  // Car modal (with totals)
-  window.showCarModal = async function(carId) {
-    const car = cars.find(c => c.id === carId);
-    const driver = drivers.find(d => d.id === car?.assignedDriver);
-    // Calculate total income for this car from all reports
-    let totalIncome = 0;
-    for (let d of drivers) {
-      const snap = await get(ref(db, `shiftReports/${d.id}`));
-      if (snap.exists()) {
-        Object.values(snap.val()).forEach(r => {
-          if (r.carId === carId) totalIncome += r.revenue || 0;
-        });
-      }
-    }
-    document.getElementById('modalCarName').textContent = `${car.name} (${car.plate})`;
-    document.getElementById('modalCarDetails').innerHTML = `
-      <p><i class="fas fa-user"></i> Assigned driver: ${driver ? driver.firstName + ' ' + driver.lastName : 'None'}</p>
-      <p><i class="fas fa-gas-pump"></i> Total fuel consumed: ${car.totalFuelConsumed || 0} L</p>
-      <p><i class="fas fa-road"></i> Total distance: ${car.totalDistance || 0} km</p>
-      <p><i class="fas fa-money-bill"></i> Total income: ZMW ${totalIncome.toLocaleString()}</p>
-    `;
-    document.getElementById('carModal').style.display = 'flex';
+  // Worker modal
+  window.showWorkerModal = function(workerId) {
+    const w = workers.find(x => x.id === workerId);
+    currentWorkerId = workerId;
+    document.getElementById('modalWorkerName').textContent = w.fullName;
+    document.getElementById('modalWorkerDetails').innerHTML = `📞 ${w.phone} · ✉️ ${w.email}`;
+    document.getElementById('assignTaskBtn').onclick = () => { document.getElementById('taskModal').style.display = 'flex'; };
+    document.getElementById('markOffDayBtn').onclick = async () => { await update(ref(db, `workers/${workerId}`), { offDay: true }); alert('Marked as off day'); document.getElementById('workerModal').style.display = 'none'; };
+    document.getElementById('workerModal').style.display = 'flex';
   };
 
-  // Render drivers page
-  function renderDriversPage() {
-    const cont = document.getElementById('driversListContainer');
-    cont.innerHTML = drivers.map(d => `
-      <div class="card-item" onclick="showDriverModal('${d.id}')">
-        <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
-        <div>${d.email} · ${d.phone || ''}</div>
-        <div style="color:#2e5c3e;">NRC: ${d.nrc || ''}</div>
-      </div>
-    `).join('');
+  document.getElementById('saveTaskBtn').addEventListener('click', async () => {
+    const title = document.getElementById('taskTitle').value;
+    const desc = document.getElementById('taskDescription').value;
+    if (!title) return alert('Enter task title');
+    await push(ref(db, `tasks/${currentWorkerId}`), { title, description: desc, status: 'pending', createdAt: Date.now() });
+    document.getElementById('taskModal').style.display = 'none';
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskDescription').value = '';
+  });
+
+  // Render functions
+  function renderDriversList() {
+    document.getElementById('driversListContainer').innerHTML = drivers.map(d => `<div class="driver-item" onclick="showDriverModal('${d.id}')"><strong>${d.firstName} ${d.lastName}</strong><br>${d.email}</div>`).join('');
   }
 
-  // Render cars page (clickable)
-  function renderCarsPage() {
-    const cont = document.getElementById('carsListContainer');
-    cont.innerHTML = cars.map(c => {
-      const driver = drivers.find(d => d.id === c.assignedDriver);
-      return `
-        <div class="card-item" style="display:flex; align-items:center;" onclick="showCarModal('${c.id}')">
-          <i class="fas fa-car-side car-icon"></i>
-          <div style="flex:1;">
-            <div style="font-weight:700; font-size:18px;">${c.name}</div>
-            <div style="color:#2e5c3e;">${c.plate}</div>
-            <div style="font-size:14px;">Assigned: ${driver ? driver.firstName : 'None'}</div>
-          </div>
-        </div>
-      `;
+  function renderWorkersList() {
+    const cont = document.getElementById('workersListContainer');
+    cont.innerHTML = workers.map(w => {
+      const activeShift = w.activeShift || null;
+      const status = activeShift ? `<span class="on-shift">On shift since ${formatTime(activeShift.startTime)}</span>` : `<span class="off-shift">Off shift</span>`;
+      return `<div class="driver-item" onclick="showWorkerModal('${w.id}')"><strong>${w.fullName}</strong><div class="worker-status">${status}</div></div>`;
     }).join('');
   }
 
-  // Assign selects and list
+  function renderCarsList() {
+    document.getElementById('carsListContainer').innerHTML = cars.map(c => {
+      const driver = drivers.find(d => d.id === c.assignedDriver);
+      return `<div class="driver-item" onclick="showCarModal('${c.id}')"><i class="fas fa-car-side car-icon"></i> ${c.name} (${c.plate})<br>Assigned: ${driver ? driver.firstName : 'None'}</div>`;
+    }).join('');
+  }
+
+  window.showCarModal = async function(carId) {
+    const car = cars.find(c => c.id === carId);
+    const driver = drivers.find(d => d.id === car?.assignedDriver);
+    let totalIncome = 0;
+    for (let d of drivers) {
+      const snap = await get(ref(db, `shiftReports/${d.id}`));
+      if (snap.exists()) Object.values(snap.val()).forEach(r => { if (r.carId === carId) totalIncome += r.revenue || 0; });
+    }
+    document.getElementById('modalCarName').textContent = `${car.name} (${car.plate})`;
+    document.getElementById('modalCarDetails').innerHTML = `<p><i class="fas fa-user"></i> Assigned: ${driver ? driver.firstName : 'None'}</p><p><i class="fas fa-gas-pump"></i> Fuel: ${car.totalFuelConsumed || 0} L</p><p><i class="fas fa-road"></i> Distance: ${car.totalDistance || 0} km</p><p><i class="fas fa-money-bill"></i> Income: ZMW ${totalIncome.toLocaleString()}</p>`;
+    document.getElementById('carModal').style.display = 'flex';
+  };
+
   function renderAssignSelects() {
     const dSel = document.getElementById('selectDriver');
     const cSel = document.getElementById('selectCar');
@@ -825,25 +980,22 @@
   }
 
   function renderAssignmentsList() {
-    const cont = document.getElementById('assignmentsList');
-    cont.innerHTML = drivers.map(d => {
+    document.getElementById('assignmentsList').innerHTML = drivers.map(d => {
       const car = cars.find(c => c.assignedDriver === d.id);
-      return `
-        <div class="card-item">
-          <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
-          <div>Car: ${car ? car.name + ' (' + car.plate + ')' : 'None'}</div>
-          ${car ? `<button class="outline-btn" onclick="removeAssignment('${d.id}')">Remove Assignment</button>` : ''}
-        </div>
-      `;
+      return `<div class="driver-item">${d.firstName} ${d.lastName} — ${car ? car.name : 'None'} ${car ? `<button class="outline-btn" onclick="removeAssignment('${d.id}')">Remove</button>` : ''}</div>`;
     }).join('');
   }
 
-  window.removeAssignment = async function(driverId) {
+  window.removeAssignment = async (driverId) => {
     const car = cars.find(c => c.assignedDriver === driverId);
     if (car) await update(ref(db, `cars/${car.id}`), { assignedDriver: null });
   };
 
-  // Reports page
+  function renderWorkersAssignList() {
+    document.getElementById('workersAssignList').innerHTML = workers.map(w => `<div class="driver-item" onclick="showWorkerModal('${w.id}')">${w.fullName}</div>`).join('');
+  }
+
+  // Reports
   document.getElementById('loadReportsBtn').addEventListener('click', async () => {
     const period = document.getElementById('reportPeriodSelect').value;
     const cont = document.getElementById('reportsListContainer');
@@ -851,25 +1003,23 @@
     let allReports = [];
     for (let d of drivers) {
       const snap = await get(ref(db, `shiftReports/${d.id}`));
-      if (snap.exists()) {
-        Object.values(snap.val()).forEach(r => allReports.push({ ...r, driverName: d.firstName+' '+d.lastName }));
-      }
+      if (snap.exists()) Object.values(snap.val()).forEach(r => allReports.push({ ...r, driverName: d.firstName + ' ' + d.lastName }));
     }
     const now = Date.now(); const day = 86400000;
     const filtered = allReports.filter(r => {
       if (period === 'today') return (now - r.timestamp) < day;
-      if (period === 'week') return (now - r.timestamp) < 7*day;
-      if (period === 'month') return (now - r.timestamp) < 30*day;
+      if (period === 'week') return (now - r.timestamp) < 7 * day;
+      if (period === 'month') return (now - r.timestamp) < 30 * day;
       return true;
     });
-    filtered.sort((a,b) => b.timestamp - a.timestamp);
+    filtered.sort((a, b) => b.timestamp - a.timestamp);
     cont.innerHTML = filtered.map(r => `
       <div class="report-card">
         <div class="report-date">${new Date(r.startTime).toLocaleDateString()} · ${r.driverName}</div>
         <div>${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime-r.startTime))})</span></div>
-        <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
-        <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
+        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime - r.startTime))})</span></div>
+        <div class="summary-line"><span>Fuel:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
+        <div class="summary-line"><span>Dist:</span><span>${r.distance} km</span></div>
         <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue?.toLocaleString()}</span></div>
         <div class="summary-line"><span>Profit:</span><span>ZMW ${r.profit?.toLocaleString()}</span></div>
       </div>
@@ -880,11 +1030,9 @@
     let csv = "Date,Driver,Car,Plate,Start,End,Duration,Fuel(L),Distance(km),Revenue(ZMW),Profit(ZMW)\n";
     for (let d of drivers) {
       const snap = await get(ref(db, `shiftReports/${d.id}`));
-      if (snap.exists()) {
-        Object.values(snap.val()).forEach(r => {
-          csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime-r.startTime))}",${r.fuelConsumed},${r.distance},${r.revenue},${r.profit}\n`;
-        });
-      }
+      if (snap.exists()) Object.values(snap.val()).forEach(r => {
+        csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime - r.startTime))}",${r.fuelConsumed},${r.distance},${r.revenue},${r.profit}\n`;
+      });
     }
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -893,40 +1041,116 @@
     a.click();
   });
 
-  // Navigation
-  document.querySelectorAll('.action-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const page = btn.dataset.page;
-      document.getElementById(page + 'Page').classList.add('active');
-    });
+  // Timesheet
+  document.getElementById('viewTimesheetBtn').addEventListener('click', async () => {
+    const modal = document.getElementById('timesheetModal');
+    modal.style.display = 'flex';
+    const content = document.getElementById('timesheetContent');
+    const now = new Date();
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000);
+    let html = '<table style="width:100%; border-collapse:collapse;"><tr><th>Worker</th><th>Phone</th><th>Date</th><th>In</th><th>Out</th></tr>';
+    for (let w of workers) {
+      const snap = await get(ref(db, `shiftReports/${w.id}`));
+      if (snap.exists()) {
+        Object.values(snap.val()).forEach(r => {
+          if (r.startTime > twoWeeksAgo.getTime()) {
+            html += `<tr><td>${w.fullName}</td><td>${w.phone}</td><td>${new Date(r.startTime).toLocaleDateString()}</td><td>${formatTime(r.startTime)}</td><td>${formatTime(r.endTime)}</td></tr>`;
+          }
+        });
+      }
+    }
+    html += '</table>';
+    content.innerHTML = html || '<p>No shifts in last 2 weeks.</p>';
+    document.getElementById('downloadTimesheetCsv').onclick = () => {
+      let csv = "Worker,Phone,Date,Time In,Time Out\n";
+      for (let w of workers) {
+        get(ref(db, `shiftReports/${w.id}`)).then(snap => {
+          if (snap.exists()) {
+            Object.values(snap.val()).forEach(r => {
+              if (r.startTime > twoWeeksAgo.getTime()) csv += `"${w.fullName}","${w.phone}","${new Date(r.startTime).toLocaleDateString()}","${formatTime(r.startTime)}","${formatTime(r.endTime)}"\n`;
+            });
+          }
+        });
+      }
+      setTimeout(() => {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `timesheet_${now.toLocaleDateString()}.csv`;
+        a.click();
+      }, 500);
+    };
   });
+
+  // Toggles
+  document.querySelectorAll('[data-type]').forEach(el => el.addEventListener('click', function() {
+    document.querySelectorAll('[data-type]').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('driversSection').style.display = this.dataset.type === 'drivers' ? 'block' : 'none';
+    document.getElementById('workersSection').style.display = this.dataset.type === 'workers' ? 'block' : 'none';
+  }));
+
+  document.querySelectorAll('[data-assign]').forEach(el => el.addEventListener('click', function() {
+    document.querySelectorAll('[data-assign]').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('assignDriversSection').style.display = this.dataset.assign === 'drivers' ? 'block' : 'none';
+    document.getElementById('assignWorkersSection').style.display = this.dataset.assign === 'workers' ? 'block' : 'none';
+  }));
+
+  document.querySelectorAll('[data-report]').forEach(el => el.addEventListener('click', function() {
+    document.querySelectorAll('[data-report]').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('reportsDriversSection').style.display = this.dataset.report === 'drivers' ? 'block' : 'none';
+    document.getElementById('reportsWorkersSection').style.display = this.dataset.report === 'workers' ? 'block' : 'none';
+  }));
+
+  // Add worker
+  document.getElementById('toggleAddWorkerForm').onclick = () => {
+    const form = document.getElementById('addWorkerForm');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  };
+
+  document.getElementById('createWorkerBtn').onclick = async () => {
+    const fullName = document.getElementById('workerFullName').value;
+    const phone = document.getElementById('workerPhone').value;
+    const email = document.getElementById('workerEmail').value;
+    const pass = document.getElementById('workerPassword').value;
+    const confirm = document.getElementById('workerConfirmPassword').value;
+    if (pass !== confirm) return alert('Passwords mismatch');
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await set(ref(db, `workers/${cred.user.uid}`), { fullName, phone, email, offDay: false });
+      await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
+      document.getElementById('addWorkerForm').style.display = 'none';
+    } catch (e) { alert(e.message); }
+  };
+
+  // Navigation
+  document.querySelectorAll('.action-btn').forEach(btn => btn.addEventListener('click', () => {
+    const page = btn.dataset.page;
+    document.getElementById(page + 'Page').classList.add('active');
+  }));
+
   function closeAllPages() {
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
   }
+
   document.getElementById('closeDriversPage').onclick = closeAllPages;
   document.getElementById('closeCarsPage').onclick = closeAllPages;
   document.getElementById('closeAssignPage').onclick = closeAllPages;
   document.getElementById('closeReportsPage').onclick = closeAllPages;
 
-  // Toggle forms
+  // Driver form toggle
   document.getElementById('toggleAddDriverForm').onclick = () => {
-    document.getElementById('addDriverForm').style.display = 
-      document.getElementById('addDriverForm').style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('toggleAddCarForm').onclick = () => {
-    document.getElementById('addCarForm').style.display = 
-      document.getElementById('addCarForm').style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('toggleAssignForm').onclick = () => {
-    document.getElementById('assignForm').style.display = 
-      document.getElementById('assignForm').style.display === 'block' ? 'none' : 'block';
+    const form = document.getElementById('addDriverForm');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Create driver
   document.getElementById('createDriverBtn').onclick = async () => {
     const email = document.getElementById('driverEmail').value;
     const pass = document.getElementById('driverPassword').value;
-    if (pass !== document.getElementById('driverConfirmPassword').value) return alert('Passwords mismatch');
+    const confirm = document.getElementById('driverConfirmPassword').value;
+    if (pass !== confirm) return alert('Passwords mismatch');
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       const uid = cred.user.uid;
@@ -939,10 +1163,14 @@
       });
       document.getElementById('addDriverForm').style.display = 'none';
       await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
-    } catch(e) { alert(e.message); }
+    } catch (e) { alert(e.message); }
   };
 
-  // Add car
+  // Car
+  document.getElementById('toggleAddCarForm').onclick = () => {
+    const form = document.getElementById('addCarForm');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  };
   document.getElementById('addCarBtn').onclick = async () => {
     const name = document.getElementById('carName').value;
     const plate = document.getElementById('carPlate').value;
@@ -952,6 +1180,10 @@
   };
 
   // Assign car
+  document.getElementById('toggleAssignForm').onclick = () => {
+    const form = document.getElementById('assignForm');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  };
   document.getElementById('confirmAssignBtn').onclick = async () => {
     const driverId = document.getElementById('selectDriver').value;
     const carId = document.getElementById('selectCar').value;
@@ -965,10 +1197,8 @@
   // Search driver
   document.getElementById('searchDriverInput').addEventListener('input', (e) => {
     const q = e.target.value.toLowerCase();
-    const filtered = drivers.filter(d => (d.firstName+' '+d.lastName).toLowerCase().includes(q));
-    document.getElementById('driversListContainer').innerHTML = filtered.map(d => `
-      <div class="card-item" onclick="showDriverModal('${d.id}')">${d.firstName} ${d.lastName}</div>
-    `).join('');
+    const filtered = drivers.filter(d => (d.firstName + ' ' + d.lastName).toLowerCase().includes(q));
+    document.getElementById('driversListContainer').innerHTML = filtered.map(d => `<div class="driver-item" onclick="showDriverModal('${d.id}')">${d.firstName} ${d.lastName}</div>`).join('');
   });
 
   // Logout
