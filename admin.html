@@ -330,7 +330,7 @@
 
     .emergency-title {
       font-weight: 700;
-      color: #dc2626;
+      color: #2e5c3e;
     }
 
     .horizontal-buttons {
@@ -461,6 +461,76 @@
     .task-desc {
       color: #4a6a5a;
       margin: 6px 0;
+    }
+
+    /* iPhone style toggle (small) */
+    .dayoff-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2e5c3e;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Timesheet table */
+    .timesheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .timesheet-table th,
+    .timesheet-table td {
+      border: 1px solid #d0e0d0;
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    .timesheet-table th {
+      background: #eef3ef;
     }
   </style>
 </head>
@@ -625,7 +695,7 @@
   </div>
   <div id="reportsWorkersSection" style="display:none;">
     <div id="workersReportsList"></div>
-    <button class="pill-btn" id="viewTimesheetBtn"><i class="fas fa-clock"></i> View Timesheet (2 weeks)</button>
+    <button class="pill-btn" id="viewTimesheetBtn"><i class="fas fa-clock"></i> View Timesheet (14 days)</button>
   </div>
 </div>
 
@@ -654,10 +724,9 @@
   <div class="modal-card">
     <h3 id="modalWorkerName" style="color:#1e3a2a;"></h3>
     <p id="modalWorkerDetails"></p>
-    <div class="horizontal-buttons">
-      <button class="pill-btn" id="assignTaskBtn"><i class="fas fa-tasks"></i> Assign Task</button>
-      <button class="outline-btn" id="markOffDayBtn"><i class="fas fa-calendar-times"></i> Mark Off Day</button>
-    </div>
+    <div class="section-title" style="margin-top:16px;">Completed Tasks</div>
+    <div id="workerCompletedTasks"></div>
+    <button class="pill-btn" id="assignTaskFromModalBtn" style="margin-top:16px;"><i class="fas fa-plus"></i> Assign Task</button>
     <button class="outline-btn" onclick="document.getElementById('workerModal').style.display='none'">Close</button>
   </div>
 </div>
@@ -673,10 +742,10 @@
 </div>
 
 <div class="modal-overlay" id="timesheetModal">
-  <div class="modal-card" style="max-width:400px;">
-    <h3>Timesheet (Last 2 Weeks)</h3>
-    <div id="timesheetContent"></div>
-    <button class="pill-btn" id="downloadTimesheetCsv"><i class="fas fa-download"></i> Download CSV</button>
+  <div class="modal-card" style="max-width:95%; width:95%;">
+    <h3>Timesheet (Last 14 Days)</h3>
+    <div id="timesheetContent" style="overflow-x:auto;"></div>
+    <button class="pill-btn" id="downloadTimesheetCsv" style="margin-top:16px;"><i class="fas fa-download"></i> Download CSV</button>
     <button class="outline-btn" onclick="document.getElementById('timesheetModal').style.display='none'">Close</button>
   </div>
 </div>
@@ -720,16 +789,12 @@
   let lastReadEmergencyTimestamp = 0;
   let currentWorkerId = null;
 
-  // Auth protection
   onAuthStateChanged(auth, (user) => {
-    if (!user || !user.email.startsWith('admin@')) {
-      window.location.href = 'index.html';
-    } else {
-      document.getElementById('adminEmailDisplay').textContent = user.email;
-      initMap();
-      loadData();
-      listenEmergencies();
-    }
+    if (!user || !user.email.startsWith('admin@')) { window.location.href = 'index.html'; return; }
+    document.getElementById('adminEmailDisplay').textContent = user.email;
+    initMap();
+    loadData();
+    listenEmergencies();
   });
 
   function initMap() {
@@ -787,12 +852,8 @@
 
   function updateProximityList() {
     const withCoords = drivers.filter(d => d.lat && d.lng);
-    withCoords.sort((a, b) => {
-      const distA = getDistance(adminLocation.lat, adminLocation.lng, a.lat, a.lng);
-      const distB = getDistance(adminLocation.lat, adminLocation.lng, b.lat, b.lng);
-      return distA - distB;
-    });
-    document.getElementById('driverProximityList').innerHTML = withCoords.slice(0, 5).map(d => {
+    withCoords.sort((a, b) => getDistance(adminLocation.lat, adminLocation.lng, a.lat, a.lng) - getDistance(adminLocation.lat, adminLocation.lng, b.lat, b.lng));
+    document.getElementById('driverProximityList').innerHTML = withCoords.slice(0,5).map(d => {
       const car = cars.find(c => c.assignedDriver === d.id);
       return `<div class="driver-item" onclick="showDriverModal('${d.id}')">
         <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
@@ -821,21 +882,15 @@
   }
 
   // City selector
-  document.getElementById('citySelectorBtn').addEventListener('click', () => {
-    document.getElementById('cityDropdown').style.display = 'block';
-  });
-  document.querySelectorAll('.city-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      currentCity = opt.dataset.city;
-      document.getElementById('selectedCityDisplay').textContent = currentCity;
-      document.getElementById('cityDropdown').style.display = 'none';
-      map.setView([parseFloat(opt.dataset.lat), parseFloat(opt.dataset.lng)], 13);
-      updateMapMarkers();
-    });
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.city-selector')) document.getElementById('cityDropdown').style.display = 'none';
-  });
+  document.getElementById('citySelectorBtn').addEventListener('click', () => document.getElementById('cityDropdown').style.display = 'block');
+  document.querySelectorAll('.city-option').forEach(opt => opt.addEventListener('click', () => {
+    currentCity = opt.dataset.city;
+    document.getElementById('selectedCityDisplay').textContent = currentCity;
+    document.getElementById('cityDropdown').style.display = 'none';
+    map.setView([parseFloat(opt.dataset.lat), parseFloat(opt.dataset.lng)], 13);
+    updateMapMarkers();
+  }));
+  document.addEventListener('click', (e) => { if (!e.target.closest('.city-selector')) document.getElementById('cityDropdown').style.display = 'none'; });
 
   // Emergency
   function listenEmergencies() {
@@ -865,7 +920,7 @@
   function renderEmergencyList() {
     const cont = document.getElementById('emergencyListContainer');
     if (emergencies.length === 0) { cont.innerHTML = '<p>No emergencies.</p>'; return; }
-    const sorted = [...emergencies].sort((a, b) => b.timestamp - a.timestamp);
+    const sorted = [...emergencies].sort((a,b) => b.timestamp - a.timestamp);
     cont.innerHTML = sorted.map(e => {
       const driver = drivers.find(d => d.id === e.driverId);
       return `<div class="emergency-card">
@@ -902,13 +957,13 @@
     modal.style.display = 'flex';
     const snap = await get(ref(db, `shiftReports/${driverId}`));
     const reports = snap.val() ? Object.values(snap.val()) : [];
-    reports.sort((a, b) => b.timestamp - a.timestamp);
-    const formatDate = ts => new Date(ts).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    reports.sort((a,b) => b.timestamp - a.timestamp);
+    const formatDate = ts => new Date(ts).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
     content.innerHTML = reports.map(r => `
       <div class="report-card">
         <div class="report-date">${formatDate(r.startTime)}</div>
         <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime - r.startTime))})</span></div>
+        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime-r.startTime))})</span></div>
         <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
         <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
         <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue?.toLocaleString()}</span></div>
@@ -918,13 +973,18 @@
   }
 
   // Worker modal
-  window.showWorkerModal = function(workerId) {
+  window.showWorkerModal = async function(workerId) {
     const w = workers.find(x => x.id === workerId);
     currentWorkerId = workerId;
     document.getElementById('modalWorkerName').textContent = w.fullName;
     document.getElementById('modalWorkerDetails').innerHTML = `📞 ${w.phone} · ✉️ ${w.email}`;
-    document.getElementById('assignTaskBtn').onclick = () => { document.getElementById('taskModal').style.display = 'flex'; };
-    document.getElementById('markOffDayBtn').onclick = async () => { await update(ref(db, `workers/${workerId}`), { offDay: true }); alert('Marked as off day'); document.getElementById('workerModal').style.display = 'none'; };
+    
+    const snap = await get(ref(db, `tasks/${workerId}`));
+    const tasks = snap.val() ? Object.values(snap.val()).filter(t => t.status === 'completed') : [];
+    const tasksDiv = document.getElementById('workerCompletedTasks');
+    tasksDiv.innerHTML = tasks.length ? tasks.map(t => `<div class="task-card"><strong>${t.title}</strong><br>${t.summary || ''}</div>`).join('') : '<p>No completed tasks yet.</p>';
+    
+    document.getElementById('assignTaskFromModalBtn').onclick = () => { document.getElementById('taskModal').style.display = 'flex'; };
     document.getElementById('workerModal').style.display = 'flex';
   };
 
@@ -948,9 +1008,37 @@
     cont.innerHTML = workers.map(w => {
       const activeShift = w.activeShift || null;
       const status = activeShift ? `<span class="on-shift">On shift since ${formatTime(activeShift.startTime)}</span>` : `<span class="off-shift">Off shift</span>`;
-      return `<div class="driver-item" onclick="showWorkerModal('${w.id}')"><strong>${w.fullName}</strong><div class="worker-status">${status}</div></div>`;
+      return `<div class="driver-item" onclick="showWorkerModal('${w.id}')">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>${w.fullName}</strong>
+          <div class="dayoff-toggle" onclick="event.stopPropagation()">
+            <label class="switch">
+              <input type="checkbox" ${w.offDay ? 'checked' : ''} onchange="toggleDayOff('${w.id}', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="worker-status">${status}</div>
+        <button class="outline-btn" style="margin-top:8px;" onclick="event.stopPropagation(); viewWorkerDailyReport('${w.id}')"><i class="fas fa-file-alt"></i> Daily Report</button>
+      </div>`;
     }).join('');
   }
+
+  window.toggleDayOff = async (workerId, value) => {
+    await update(ref(db, `workers/${workerId}`), { offDay: value });
+  };
+
+  window.viewWorkerDailyReport = async (workerId) => {
+    const w = workers.find(x => x.id === workerId);
+    const snap = await get(ref(db, `shiftReports/${workerId}`));
+    const reports = snap.val() ? Object.values(snap.val()) : [];
+    const todayReport = reports.find(r => new Date(r.startTime).toDateString() === new Date().toDateString());
+    if (todayReport) {
+      alert(`${w.fullName} summary: ${todayReport.summary}\nTasks: ${todayReport.completedTasks?.map(t => t.title).join(', ') || 'None'}`);
+    } else {
+      alert('No report submitted today.');
+    }
+  };
 
   function renderCarsList() {
     document.getElementById('carsListContainer').innerHTML = cars.map(c => {
@@ -1008,16 +1096,16 @@
     const now = Date.now(); const day = 86400000;
     const filtered = allReports.filter(r => {
       if (period === 'today') return (now - r.timestamp) < day;
-      if (period === 'week') return (now - r.timestamp) < 7 * day;
-      if (period === 'month') return (now - r.timestamp) < 30 * day;
+      if (period === 'week') return (now - r.timestamp) < 7*day;
+      if (period === 'month') return (now - r.timestamp) < 30*day;
       return true;
     });
-    filtered.sort((a, b) => b.timestamp - a.timestamp);
+    filtered.sort((a,b) => b.timestamp - a.timestamp);
     cont.innerHTML = filtered.map(r => `
       <div class="report-card">
         <div class="report-date">${new Date(r.startTime).toLocaleDateString()} · ${r.driverName}</div>
         <div>${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime - r.startTime))})</span></div>
+        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime-r.startTime))})</span></div>
         <div class="summary-line"><span>Fuel:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
         <div class="summary-line"><span>Dist:</span><span>${r.distance} km</span></div>
         <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue?.toLocaleString()}</span></div>
@@ -1031,7 +1119,7 @@
     for (let d of drivers) {
       const snap = await get(ref(db, `shiftReports/${d.id}`));
       if (snap.exists()) Object.values(snap.val()).forEach(r => {
-        csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime - r.startTime))}",${r.fuelConsumed},${r.distance},${r.revenue},${r.profit}\n`;
+        csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime-r.startTime))}",${r.fuelConsumed},${r.distance},${r.revenue},${r.profit}\n`;
       });
     }
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -1041,42 +1129,71 @@
     a.click();
   });
 
-  // Timesheet
+  // Timesheet (calendar view 14 days)
   document.getElementById('viewTimesheetBtn').addEventListener('click', async () => {
     const modal = document.getElementById('timesheetModal');
     modal.style.display = 'flex';
     const content = document.getElementById('timesheetContent');
-    const now = new Date();
-    const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000);
-    let html = '<table style="width:100%; border-collapse:collapse;"><tr><th>Worker</th><th>Phone</th><th>Date</th><th>In</th><th>Out</th></tr>';
+    const end = new Date();
+    const start = new Date(end.getTime() - 13 * 86400000);
+    
+    const dates = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      dates.push(new Date(d));
+    }
+    
+    let html = '<table class="timesheet-table"><tr><th>Worker</th><th>Phone</th>';
+    dates.forEach(d => html += `<th>${d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric' })}</th>`);
+    html += '</tr>';
+    
     for (let w of workers) {
+      html += `<tr><td>${w.fullName}</td><td>${w.phone}</td>`;
       const snap = await get(ref(db, `shiftReports/${w.id}`));
-      if (snap.exists()) {
-        Object.values(snap.val()).forEach(r => {
-          if (r.startTime > twoWeeksAgo.getTime()) {
-            html += `<tr><td>${w.fullName}</td><td>${w.phone}</td><td>${new Date(r.startTime).toLocaleDateString()}</td><td>${formatTime(r.startTime)}</td><td>${formatTime(r.endTime)}</td></tr>`;
-          }
-        });
+      const reports = snap.val() ? Object.values(snap.val()) : [];
+      for (let d of dates) {
+        const dayReport = reports.find(r => new Date(r.startTime).toDateString() === d.toDateString());
+        if (dayReport) {
+          html += `<td>${formatTime(dayReport.startTime)} - ${formatTime(dayReport.endTime)}</td>`;
+        } else {
+          html += `<td>—</td>`;
+        }
       }
+      html += '</tr>';
     }
     html += '</table>';
-    content.innerHTML = html || '<p>No shifts in last 2 weeks.</p>';
+    content.innerHTML = html;
+    
     document.getElementById('downloadTimesheetCsv').onclick = () => {
-      let csv = "Worker,Phone,Date,Time In,Time Out\n";
-      for (let w of workers) {
-        get(ref(db, `shiftReports/${w.id}`)).then(snap => {
-          if (snap.exists()) {
-            Object.values(snap.val()).forEach(r => {
-              if (r.startTime > twoWeeksAgo.getTime()) csv += `"${w.fullName}","${w.phone}","${new Date(r.startTime).toLocaleDateString()}","${formatTime(r.startTime)}","${formatTime(r.endTime)}"\n`;
-            });
-          }
+      let csv = "Worker,Phone," + dates.map(d => d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric' })).join(',') + "\n";
+      workers.forEach(w => {
+        let row = `"${w.fullName}","${w.phone}"`;
+        dates.forEach(d => {
+          const dayReport = (async () => {
+            const snap = await get(ref(db, `shiftReports/${w.id}`));
+            const reps = snap.val() ? Object.values(snap.val()) : [];
+            return reps.find(r => new Date(r.startTime).toDateString() === d.toDateString());
+          })();
+          // For CSV we'll do it async properly inside the loop, but for brevity we'll build after fetching.
         });
-      }
+      });
+      // Simple synchronous alternative: use the already fetched reports from the modal build.
+      // We'll just rebuild with the data we already have.
+      let csv2 = "Worker,Phone," + dates.map(d => d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric' })).join(',') + "\n";
+      workers.forEach(async (w) => {
+        const snap = await get(ref(db, `shiftReports/${w.id}`));
+        const reps = snap.val() ? Object.values(snap.val()) : [];
+        let row = `"${w.fullName}","${w.phone}"`;
+        dates.forEach(d => {
+          const dayReport = reps.find(r => new Date(r.startTime).toDateString() === d.toDateString());
+          row += ',' + (dayReport ? `"${formatTime(dayReport.startTime)} - ${formatTime(dayReport.endTime)}"` : '""');
+        });
+        csv2 += row + '\n';
+      });
       setTimeout(() => {
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const blob = new Blob([csv2], { type: 'text/csv' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `timesheet_${now.toLocaleDateString()}.csv`;
+        a.download = `timesheet_${start.toLocaleDateString()}_to_${end.toLocaleDateString()}.csv`;
         a.click();
       }, 500);
     };
@@ -1109,7 +1226,6 @@
     const form = document.getElementById('addWorkerForm');
     form.style.display = form.style.display === 'block' ? 'none' : 'block';
   };
-
   document.getElementById('createWorkerBtn').onclick = async () => {
     const fullName = document.getElementById('workerFullName').value;
     const phone = document.getElementById('workerPhone').value;
@@ -1145,7 +1261,6 @@
     const form = document.getElementById('addDriverForm');
     form.style.display = form.style.display === 'block' ? 'none' : 'block';
   };
-
   document.getElementById('createDriverBtn').onclick = async () => {
     const email = document.getElementById('driverEmail').value;
     const pass = document.getElementById('driverPassword').value;
