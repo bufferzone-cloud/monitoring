@@ -34,13 +34,32 @@
       padding-bottom: 80px;
     }
 
-    /* Off-day banner */
-    .offday-banner {
-      background: #fef3c7;
-      color: #92400e;
-      padding: 16px;
+    /* Off-day fullscreen message */
+    .offday-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      border-bottom: 1px solid #fde68a;
+      padding: 20px;
+    }
+
+    .offday-message {
+      font-size: 24px;
+      font-weight: 600;
+      color: #dc2626;
+      max-width: 350px;
+    }
+
+    .offday-message .worker-name {
+      color: #2e5c3e;
+      font-weight: 700;
     }
 
     /* Header */
@@ -210,10 +229,6 @@
       border-radius: 20px;
       background: #e0f0e0;
       color: #2e5c3e;
-    }
-
-    .task-status.completed {
-      background: #d1e7d1;
     }
 
     .expand-btn {
@@ -388,7 +403,14 @@
 </head>
 <body>
 <div id="app">
-  <div id="offdayMessage" class="offday-banner" style="display:none;"></div>
+  <!-- Off-day fullscreen overlay -->
+  <div id="offdayFullscreen" class="offday-fullscreen" style="display: none;">
+    <div class="offday-message">
+      <span id="offdayWorkerName"></span><br>
+      Today is your day off.<br>
+      Please report early tomorrow.
+    </div>
+  </div>
 
   <!-- Home Page -->
   <div id="homePage" class="page-view active">
@@ -397,18 +419,20 @@
       <div class="date-display" id="currentDate"></div>
     </div>
 
-    <div class="shift-circle-container">
-      <button class="shift-circle pulse" id="startShiftBtn">
-        <i class="fas fa-play"></i>
-        <span>Start Shift</span>
-      </button>
-      <button class="shift-circle red pulse" id="endShiftBtn" style="display:none;">
-        <i class="fas fa-stop"></i>
-        <span>End Shift</span>
-      </button>
+    <div id="shiftSection">
+      <div class="shift-circle-container">
+        <button class="shift-circle pulse" id="startShiftBtn">
+          <i class="fas fa-play"></i>
+          <span>Start Shift</span>
+        </button>
+        <button class="shift-circle red pulse" id="endShiftBtn" style="display:none;">
+          <i class="fas fa-stop"></i>
+          <span>End Shift</span>
+        </button>
+      </div>
+      <div class="shift-timer" id="shiftTimer" style="display:none;">00:00:00</div>
+      <div class="shift-hint" id="shiftHint">Only start when at your workplace</div>
     </div>
-    <div class="shift-timer" id="shiftTimer" style="display:none;">00:00:00</div>
-    <div class="shift-hint" id="shiftHint">Only start when at your workplace</div>
   </div>
 
   <!-- Tasks Page -->
@@ -497,21 +521,26 @@
     if (snap.exists()) {
       workerData = snap.val();
       document.getElementById('workerName').textContent = `Hi, ${workerData.fullName || 'Worker'}`;
-      checkOffDay();
+      handleOffDay();
     } else {
       workerData = { fullName: 'Worker', offDay: false };
       await set(workerRef, workerData);
+      handleOffDay();
     }
     setCurrentDate();
     loadTasks();
     checkActiveShift();
   }
 
-  function checkOffDay() {
+  function handleOffDay() {
     if (workerData.offDay) {
-      document.getElementById('offdayMessage').style.display = 'block';
-      document.getElementById('offdayMessage').textContent = `Hi ${workerData.fullName}, today is your day off. Please report early tomorrow.`;
-      document.getElementById('startShiftBtn').style.display = 'none';
+      document.getElementById('offdayFullscreen').style.display = 'flex';
+      document.getElementById('offdayWorkerName').innerHTML = `<span class="worker-name">${workerData.fullName}</span>`;
+      document.getElementById('shiftSection').style.display = 'none';
+      // Disable shift start
+    } else {
+      document.getElementById('offdayFullscreen').style.display = 'none';
+      document.getElementById('shiftSection').style.display = 'block';
     }
   }
 
@@ -524,6 +553,7 @@
 
   // Shift handling
   async function checkActiveShift() {
+    if (workerData.offDay) return;
     const shiftRef = ref(db, `activeShifts/${currentUser.uid}`);
     const snap = await get(shiftRef);
     if (snap.exists()) {
