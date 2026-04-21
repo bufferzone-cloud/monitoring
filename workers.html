@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Worker · Daily Monitoring</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    #app {
+      max-width: 450px;
+      width: 100%;
+      background: #ffffff;
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0,0,0,0.02);
+      padding-bottom: 80px;
+    }
+    /* Off-day banner */
+    .offday-banner {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 16px;
+      text-align: center;
+      border-bottom: 1px solid #fde68a;
+    }
+    /* Header */
+    .worker-header {
+      padding: 20px 16px 8px;
+    }
+    .worker-header h2 {
+      color: #1e3a2a;
+      font-weight: 700;
+    }
+    .date-display {
+      color: #5a7a62;
+      font-size: 16px;
+      margin-top: 4px;
+    }
+    /* Shift button */
+    .shift-section {
+      padding: 16px;
+    }
+    .shift-btn {
+      width: 100%;
+      background: #2e5c3e;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 22px 20px;
+      font-weight: 700;
+      font-size: 22px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .shift-btn.red {
+      background: #dc2626;
+    }
+    .shift-hint {
+      text-align: center;
+      color: #6b8a7a;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .timer {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a2a;
+      margin-top: 8px;
+    }
+    /* Bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 450px;
+      margin: 0 auto;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 16px 20px;
+      border-top: 1px solid #e0e8e0;
+    }
+    .nav-item {
+      text-align: center;
+      color: #7e8b9c;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .nav-item.active {
+      color: #2e5c3e;
+      font-weight: 700;
+    }
+    .nav-item i {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    /* Page views */
+    .page-view {
+      padding: 8px 16px;
+      display: none;
+    }
+    .page-view.active {
+      display: block;
+    }
+    /* Tasks */
+    .task-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #d0e0d0;
+    }
+    .task-title {
+      font-weight: 700;
+      color: #1e3a2a;
+    }
+    .task-desc {
+      color: #4a6a5a;
+      margin: 6px 0;
+    }
+    .task-summary-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 20px;
+      border: 1px solid #cbdcd0;
+      margin: 10px 0;
+    }
+    /* Toggle */
+    .toggle-container {
+      display: flex;
+      background: #f0f5f0;
+      border-radius: 40px;
+      padding: 4px;
+      margin: 16px 0;
+    }
+    .toggle-option {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #5a7a62;
+    }
+    .toggle-option.active {
+      background: #2e5c3e;
+      color: white;
+    }
+    /* Period dropdown */
+    .period-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .period-pill {
+      background: #f0f5f0;
+      border: none;
+      border-radius: 40px;
+      padding: 10px 16px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 32px;
+      padding: 24px;
+      width: 90%;
+      max-width: 380px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2e5c3e;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 30px;
+      border: 1.5px solid #cbdcd0;
+      margin-bottom: 12px;
+    }
+    .pill-btn {
+      background: #2e5c3e;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 14px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="offdayMessage" class="offday-banner" style="display:none;"></div>
+  
+  <!-- Home Page -->
+  <div id="homePage" class="page-view active">
+    <div class="worker-header">
+      <h2 id="workerName">Loading...</h2>
+      <div class="date-display" id="currentDate"></div>
+    </div>
+    <div class="shift-section">
+      <div id="shiftButtonContainer">
+        <button class="shift-btn" id="startShiftBtn">▶ Start Shift</button>
+        <div class="shift-hint">Only start when at your workplace</div>
+      </div>
+      <div id="activeShiftContainer" style="display:none;">
+        <button class="shift-btn red" id="endShiftBtn">⏹ End Shift</button>
+        <div class="timer" id="shiftTimer">00:00:00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tasks Page -->
+  <div id="tasksPage" class="page-view">
+    <h3 style="color:#1e3a2a; margin-bottom:16px;" id="tasksDateTitle"></h3>
+    <div id="tasksListContainer"></div>
+  </div>
+
+  <!-- Reports Page -->
+  <div id="reportsPage" class="page-view">
+    <div class="toggle-container">
+      <div class="toggle-option active" data-tab="tasks">Tasks</div>
+      <div class="toggle-option" data-tab="reports">Reports</div>
+    </div>
+    <div class="period-selector">
+      <select id="periodSelect" class="period-pill" style="flex:1;">
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div id="reportsContent"></div>
+  </div>
+
+  <!-- Settings Page -->
+  <div id="settingsPage" class="page-view">
+    <button class="pill-btn" id="logoutBtn" style="margin-top:20px;">Logout</button>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-page="home"><i class="fas fa-home"></i><span>Home</span></div>
+    <div class="nav-item" data-page="tasks"><i class="fas fa-tasks"></i><span>Tasks</span></div>
+    <div class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
+    <div class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
+  </div>
+</div>
+
+<!-- End Shift Report Modal -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-card">
+    <h3 style="color:#1e3a2a;">Daily Report</h3>
+    <textarea id="reportSummary" class="form-input" rows="4" placeholder="Work summary..."></textarea>
+    <input type="number" id="reportFuel" class="form-input" placeholder="Fuel used (L)">
+    <input type="number" id="reportDistance" class="form-input" placeholder="Distance (km)">
+    <button class="pill-btn" id="submitReportBtn">Submit & End Shift</button>
+    <button class="outline-btn" onclick="document.getElementById('reportModal').style.display='none'">Cancel</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
+    authDomain: "monitoring-1a105.firebaseapp.com",
+    databaseURL: "https://monitoring-1a105-default-rtdb.firebaseio.com",
+    projectId: "monitoring-1a105",
+    storageBucket: "monitoring-1a105.firebasestorage.app",
+    messagingSenderId: "1095363656731",
+    appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  let currentUser = null;
+  let workerData = null;
+  let activeShift = null;
+  let shiftInterval = null;
+  let tasks = [];
+
+  // Auth
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'index.html'; return; }
+    if (!user.email.startsWith('worker@')) { window.location.href = 'index.html'; return; }
+    currentUser = user;
+    await loadWorkerData();
+  });
+
+  async function loadWorkerData() {
+    const workerRef = ref(db, 'workers/' + currentUser.uid);
+    const snap = await get(workerRef);
+    if (snap.exists()) {
+      workerData = snap.val();
+      document.getElementById('workerName').textContent = `Hi, ${workerData.firstName || 'Worker'}`;
+      checkOffDay();
+    } else {
+      // Create basic worker record
+      workerData = { firstName: 'Worker', offDay: false };
+      await set(workerRef, workerData);
+    }
+    setCurrentDate();
+    loadTasks();
+    checkActiveShift();
+  }
+
+  function checkOffDay() {
+    if (workerData.offDay) {
+      document.getElementById('offdayMessage').style.display = 'block';
+      document.getElementById('offdayMessage').textContent = `Hi ${workerData.firstName}, today is your day off. Please report early tomorrow.`;
+    }
+  }
+
+  function setCurrentDate() {
+    const d = new Date();
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    document.getElementById('currentDate').textContent = d.toLocaleDateString('en-GB', options);
+    document.getElementById('tasksDateTitle').textContent = `Today's Tasks · ${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+  }
+
+  // Shift handling
+  async function checkActiveShift() {
+    const shiftRef = ref(db, `activeShifts/${currentUser.uid}`);
+    const snap = await get(shiftRef);
+    if (snap.exists()) {
+      activeShift = snap.val();
+      showActiveShiftUI();
+    } else {
+      showStartShiftUI();
+    }
+  }
+
+  function showStartShiftUI() {
+    document.getElementById('shiftButtonContainer').style.display = 'block';
+    document.getElementById('activeShiftContainer').style.display = 'none';
+    if (shiftInterval) clearInterval(shiftInterval);
+  }
+
+  function showActiveShiftUI() {
+    document.getElementById('shiftButtonContainer').style.display = 'none';
+    document.getElementById('activeShiftContainer').style.display = 'block';
+    startTimer();
+  }
+
+  function startTimer() {
+    if (shiftInterval) clearInterval(shiftInterval);
+    shiftInterval = setInterval(() => {
+      if (!activeShift) return;
+      const elapsed = Date.now() - activeShift.startTime;
+      const h = Math.floor(elapsed / 3600000);
+      const m = Math.floor((elapsed % 3600000) / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('shiftTimer').textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+  }
+
+  document.getElementById('startShiftBtn').addEventListener('click', async () => {
+    const shiftData = { startTime: Date.now() };
+    await set(ref(db, `activeShifts/${currentUser.uid}`), shiftData);
+    activeShift = shiftData;
+    showActiveShiftUI();
+  });
+
+  document.getElementById('endShiftBtn').addEventListener('click', () => {
+    document.getElementById('reportModal').style.display = 'flex';
+  });
+
+  document.getElementById('submitReportBtn').addEventListener('click', async () => {
+    const summary = document.getElementById('reportSummary').value;
+    const fuel = parseFloat(document.getElementById('reportFuel').value) || 0;
+    const distance = parseFloat(document.getElementById('reportDistance').value) || 0;
+    const endTime = Date.now();
+    const report = {
+      workerId: currentUser.uid,
+      workerName: workerData.firstName,
+      startTime: activeShift.startTime,
+      endTime,
+      summary,
+      fuel,
+      distance,
+      timestamp: endTime
+    };
+    await push(ref(db, `shiftReports/${currentUser.uid}`), report);
+    await set(ref(db, `activeShifts/${currentUser.uid}`), null);
+    activeShift = null;
+    document.getElementById('reportModal').style.display = 'none';
+    showStartShiftUI();
+    document.getElementById('reportSummary').value = '';
+    document.getElementById('reportFuel').value = '';
+    document.getElementById('reportDistance').value = '';
+  });
+
+  // Tasks
+  function loadTasks() {
+    const tasksRef = ref(db, `tasks/${currentUser.uid}`);
+    onValue(tasksRef, (snap) => {
+      tasks = snap.val() ? Object.entries(snap.val()).map(([id, t]) => ({ id, ...t })) : [];
+      renderTasks();
+    });
+  }
+
+  function renderTasks() {
+    const container = document.getElementById('tasksListContainer');
+    const pending = tasks.filter(t => t.status !== 'completed');
+    if (pending.length === 0) {
+      container.innerHTML = '<p style="color:#5a7a62;">Please stand by for tasks.</p>';
+      return;
+    }
+    container.innerHTML = pending.map(t => `
+      <div class="task-card" data-id="${t.id}">
+        <div class="task-title">${t.title}</div>
+        <div class="task-desc">${t.description}</div>
+        <button class="outline-btn expand-task">Expand</button>
+        <div class="task-detail" style="display:none;">
+          <textarea class="task-summary-input" placeholder="Write summary..."></textarea>
+          <button class="pill-btn mark-done">Mark Done</button>
+        </div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.expand-task').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const detail = e.target.closest('.task-card').querySelector('.task-detail');
+        detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+    document.querySelectorAll('.mark-done').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const card = e.target.closest('.task-card');
+        const taskId = card.dataset.id;
+        const summary = card.querySelector('.task-summary-input').value;
+        await update(ref(db, `tasks/${currentUser.uid}/${taskId}`), { status: 'completed', summary, completedAt: Date.now() });
+      });
+    });
+  }
+
+  // Reports page toggle
+  document.querySelectorAll('.toggle-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      loadReportsContent(opt.dataset.tab);
+    });
+  });
+
+  async function loadReportsContent(tab) {
+    const container = document.getElementById('reportsContent');
+    const period = document.getElementById('periodSelect').value;
+    container.innerHTML = '<div class="spinner"></div>';
+    if (tab === 'tasks') {
+      const snap = await get(ref(db, `tasks/${currentUser.uid}`));
+      const allTasks = snap.val() ? Object.values(snap.val()) : [];
+      const completed = allTasks.filter(t => t.status === 'completed');
+      container.innerHTML = completed.map(t => `
+        <div class="task-card">
+          <div class="task-title">${t.title}</div>
+          <div>${t.summary || ''}</div>
+          <div style="font-size:12px;">${new Date(t.completedAt).toLocaleString()}</div>
+        </div>
+      `).join('') || '<p>No completed tasks.</p>';
+    } else {
+      const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
+      const reports = snap.val() ? Object.values(snap.val()) : [];
+      container.innerHTML = reports.map(r => `
+        <div class="task-card">
+          <div><strong>${new Date(r.startTime).toLocaleDateString()}</strong></div>
+          <div>${r.summary}</div>
+          <div>Fuel: ${r.fuel}L · Dist: ${r.distance}km</div>
+        </div>
+      `).join('') || '<p>No reports.</p>';
+    }
+  }
+
+  // Navigation
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      const page = item.dataset.page;
+      document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+      document.getElementById(page + 'Page').classList.add('active');
+      if (page === 'reports') loadReportsContent('tasks');
+    });
+  });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth).then(() => window.location.href = 'index.html'));
+</script>
+</body>
+</html>
