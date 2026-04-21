@@ -300,8 +300,11 @@
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       const user = userCred.user;
 
+      // Redirect based on email prefix
       if (user.email.startsWith('admin@')) {
         window.location.href = 'admin.html';
+      } else if (user.email.startsWith('worker@')) {
+        window.location.href = 'workers.html';
       } else {
         window.location.href = 'driver.html';
       }
