@@ -13,6 +13,7 @@
       box-sizing: border-box;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
+
     body {
       background: #ffffff;
       display: flex;
@@ -20,6 +21,7 @@
       align-items: flex-start;
       min-height: 100vh;
     }
+
     #app {
       max-width: 450px;
       width: 100%;
@@ -28,9 +30,10 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 20px rgba(0,0,0,0.02);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
       padding-bottom: 80px;
     }
+
     /* Off-day banner */
     .offday-banner {
       background: #fef3c7;
@@ -39,51 +42,96 @@
       text-align: center;
       border-bottom: 1px solid #fde68a;
     }
+
     /* Header */
     .worker-header {
-      padding: 20px 16px 8px;
+      padding: 24px 20px 8px;
+      text-align: center;
     }
+
     .worker-header h2 {
       color: #1e3a2a;
       font-weight: 700;
+      font-size: 28px;
     }
+
     .date-display {
       color: #5a7a62;
       font-size: 16px;
-      margin-top: 4px;
+      margin-top: 6px;
     }
-    /* Shift button */
-    .shift-section {
-      padding: 16px;
+
+    /* Circular Shift Button */
+    .shift-circle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 30px 0 20px;
     }
-    .shift-btn {
-      width: 100%;
+
+    .shift-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
       background: #2e5c3e;
       color: white;
       border: none;
-      border-radius: 24px;
-      padding: 22px 20px;
       font-weight: 700;
-      font-size: 22px;
+      font-size: 24px;
       cursor: pointer;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(46, 92, 62, 0.3);
+      transition: transform 0.2s;
     }
-    .shift-btn.red {
+
+    .shift-circle i {
+      font-size: 48px;
+    }
+
+    .shift-circle.pulse {
+      animation: pulse-green 2s infinite;
+    }
+
+    .shift-circle.red {
       background: #dc2626;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
     }
+
+    .shift-circle.red.pulse {
+      animation: pulse-red 1.5s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(46, 92, 62, 0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(46, 92, 62, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 92, 62, 0); }
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+
+    .shift-timer {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a2a;
+      margin-top: 8px;
+    }
+
     .shift-hint {
       text-align: center;
       color: #6b8a7a;
       font-size: 14px;
       margin-top: 8px;
     }
-    .timer {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 600;
-      color: #1e3a2a;
-      margin-top: 8px;
-    }
+
     /* Bottom navigation */
     .bottom-nav {
       position: fixed;
@@ -98,6 +146,7 @@
       padding: 12px 16px 20px;
       border-top: 1px solid #e0e8e0;
     }
+
     .nav-item {
       text-align: center;
       color: #7e8b9c;
@@ -105,54 +154,101 @@
       font-weight: 500;
       cursor: pointer;
     }
+
     .nav-item.active {
       color: #2e5c3e;
       font-weight: 700;
     }
+
     .nav-item i {
       font-size: 22px;
       display: block;
       margin-bottom: 4px;
     }
+
     /* Page views */
     .page-view {
       padding: 8px 16px;
       display: none;
     }
+
     .page-view.active {
       display: block;
     }
+
     /* Tasks */
     .task-card {
       background: #f8fbf8;
       border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
       border: 1px solid #d0e0d0;
     }
+
     .task-title {
       font-weight: 700;
       color: #1e3a2a;
+      font-size: 16px;
     }
+
     .task-desc {
       color: #4a6a5a;
-      margin: 6px 0;
+      margin: 8px 0;
+      font-size: 14px;
     }
+
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .task-status {
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #e0f0e0;
+      color: #2e5c3e;
+    }
+
+    .task-status.completed {
+      background: #d1e7d1;
+    }
+
+    .expand-btn {
+      background: none;
+      border: 1px solid #2e5c3e;
+      color: #2e5c3e;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .task-detail {
+      margin-top: 16px;
+      display: none;
+    }
+
     .task-summary-input {
       width: 100%;
       padding: 12px;
       border-radius: 20px;
       border: 1px solid #cbdcd0;
       margin: 10px 0;
+      font-size: 14px;
     }
-    /* Toggle */
+
+    /* Toggle for Reports */
     .toggle-container {
       display: flex;
-      background: #f0f5f0;
+      background: #eef3ef;
       border-radius: 40px;
       padding: 4px;
       margin: 16px 0;
     }
+
     .toggle-option {
       flex: 1;
       text-align: center;
@@ -162,16 +258,19 @@
       cursor: pointer;
       color: #5a7a62;
     }
+
     .toggle-option.active {
       background: #2e5c3e;
       color: white;
     }
-    /* Period dropdown */
+
+    /* Period selector */
     .period-selector {
       display: flex;
       gap: 8px;
       margin-bottom: 16px;
     }
+
     .period-pill {
       background: #f0f5f0;
       border: none;
@@ -179,18 +278,52 @@
       padding: 10px 16px;
       font-weight: 500;
       cursor: pointer;
+      flex: 1;
     }
+
+    /* Report cards */
+    .report-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid #d0e0d0;
+    }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #1e3a2a;
+      font-weight: 600;
+    }
+
+    .report-summary {
+      color: #3a5a4a;
+      margin: 8px 0;
+    }
+
+    .report-tasks {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #c0dcc0;
+    }
+
     /* Modal */
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.3);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
       backdrop-filter: blur(2px);
       z-index: 200;
       display: none;
       align-items: center;
       justify-content: center;
     }
+
     .modal-card {
       background: white;
       border-radius: 32px;
@@ -198,6 +331,7 @@
       width: 90%;
       max-width: 380px;
     }
+
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #2e5c3e;
@@ -207,14 +341,21 @@
       animation: spin 1s linear infinite;
       margin: 20px auto;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     .form-input {
       width: 100%;
       padding: 14px 18px;
       border-radius: 30px;
       border: 1.5px solid #cbdcd0;
       margin-bottom: 12px;
+      font-size: 15px;
     }
+
     .pill-btn {
       background: #2e5c3e;
       color: white;
@@ -225,28 +366,49 @@
       width: 100%;
       cursor: pointer;
     }
+
+    .outline-btn {
+      background: white;
+      border: 1.5px solid #2e5c3e;
+      color: #2e5c3e;
+      border-radius: 40px;
+      padding: 12px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #6b8a7a;
+      padding: 40px 20px;
+    }
   </style>
 </head>
 <body>
 <div id="app">
   <div id="offdayMessage" class="offday-banner" style="display:none;"></div>
-  
+
   <!-- Home Page -->
   <div id="homePage" class="page-view active">
     <div class="worker-header">
       <h2 id="workerName">Loading...</h2>
       <div class="date-display" id="currentDate"></div>
     </div>
-    <div class="shift-section">
-      <div id="shiftButtonContainer">
-        <button class="shift-btn" id="startShiftBtn">▶ Start Shift</button>
-        <div class="shift-hint">Only start when at your workplace</div>
-      </div>
-      <div id="activeShiftContainer" style="display:none;">
-        <button class="shift-btn red" id="endShiftBtn">⏹ End Shift</button>
-        <div class="timer" id="shiftTimer">00:00:00</div>
-      </div>
+
+    <div class="shift-circle-container">
+      <button class="shift-circle pulse" id="startShiftBtn">
+        <i class="fas fa-play"></i>
+        <span>Start Shift</span>
+      </button>
+      <button class="shift-circle red pulse" id="endShiftBtn" style="display:none;">
+        <i class="fas fa-stop"></i>
+        <span>End Shift</span>
+      </button>
     </div>
+    <div class="shift-timer" id="shiftTimer" style="display:none;">00:00:00</div>
+    <div class="shift-hint" id="shiftHint">Only start when at your workplace</div>
   </div>
 
   <!-- Tasks Page -->
@@ -258,15 +420,15 @@
   <!-- Reports Page -->
   <div id="reportsPage" class="page-view">
     <div class="toggle-container">
-      <div class="toggle-option active" data-tab="tasks">Tasks</div>
-      <div class="toggle-option" data-tab="reports">Reports</div>
+      <div class="toggle-option active" data-tab="tasks">Completed Tasks</div>
+      <div class="toggle-option" data-tab="reports">Shift Reports</div>
     </div>
     <div class="period-selector">
-      <select id="periodSelect" class="period-pill" style="flex:1;">
+      <select id="periodSelect" class="period-pill">
         <option value="today">Today</option>
         <option value="week">This Week</option>
         <option value="month">This Month</option>
-        <option value="custom">Custom</option>
+        <option value="all">All Time</option>
       </select>
     </div>
     <div id="reportsContent"></div>
@@ -274,7 +436,7 @@
 
   <!-- Settings Page -->
   <div id="settingsPage" class="page-view">
-    <button class="pill-btn" id="logoutBtn" style="margin-top:20px;">Logout</button>
+    <button class="pill-btn" id="logoutBtn" style="margin-top:20px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 
   <!-- Bottom Navigation -->
@@ -289,10 +451,8 @@
 <!-- End Shift Report Modal -->
 <div class="modal-overlay" id="reportModal">
   <div class="modal-card">
-    <h3 style="color:#1e3a2a;">Daily Report</h3>
-    <textarea id="reportSummary" class="form-input" rows="4" placeholder="Work summary..."></textarea>
-    <input type="number" id="reportFuel" class="form-input" placeholder="Fuel used (L)">
-    <input type="number" id="reportDistance" class="form-input" placeholder="Distance (km)">
+    <h3 style="color:#1e3a2a; margin-bottom:16px;">Daily Work Summary</h3>
+    <textarea id="workSummary" class="form-input" rows="4" placeholder="Describe what you accomplished today..."></textarea>
     <button class="pill-btn" id="submitReportBtn">Submit & End Shift</button>
     <button class="outline-btn" onclick="document.getElementById('reportModal').style.display='none'">Cancel</button>
   </div>
@@ -336,11 +496,10 @@
     const snap = await get(workerRef);
     if (snap.exists()) {
       workerData = snap.val();
-      document.getElementById('workerName').textContent = `Hi, ${workerData.firstName || 'Worker'}`;
+      document.getElementById('workerName').textContent = `Hi, ${workerData.fullName || 'Worker'}`;
       checkOffDay();
     } else {
-      // Create basic worker record
-      workerData = { firstName: 'Worker', offDay: false };
+      workerData = { fullName: 'Worker', offDay: false };
       await set(workerRef, workerData);
     }
     setCurrentDate();
@@ -351,7 +510,8 @@
   function checkOffDay() {
     if (workerData.offDay) {
       document.getElementById('offdayMessage').style.display = 'block';
-      document.getElementById('offdayMessage').textContent = `Hi ${workerData.firstName}, today is your day off. Please report early tomorrow.`;
+      document.getElementById('offdayMessage').textContent = `Hi ${workerData.fullName}, today is your day off. Please report early tomorrow.`;
+      document.getElementById('startShiftBtn').style.display = 'none';
     }
   }
 
@@ -375,14 +535,18 @@
   }
 
   function showStartShiftUI() {
-    document.getElementById('shiftButtonContainer').style.display = 'block';
-    document.getElementById('activeShiftContainer').style.display = 'none';
+    document.getElementById('startShiftBtn').style.display = 'flex';
+    document.getElementById('endShiftBtn').style.display = 'none';
+    document.getElementById('shiftTimer').style.display = 'none';
+    document.getElementById('shiftHint').textContent = 'Only start when at your workplace';
     if (shiftInterval) clearInterval(shiftInterval);
   }
 
   function showActiveShiftUI() {
-    document.getElementById('shiftButtonContainer').style.display = 'none';
-    document.getElementById('activeShiftContainer').style.display = 'block';
+    document.getElementById('startShiftBtn').style.display = 'none';
+    document.getElementById('endShiftBtn').style.display = 'flex';
+    document.getElementById('shiftTimer').style.display = 'block';
+    document.getElementById('shiftHint').textContent = 'Shift in progress...';
     startTimer();
   }
 
@@ -394,11 +558,12 @@
       const h = Math.floor(elapsed / 3600000);
       const m = Math.floor((elapsed % 3600000) / 60000);
       const s = Math.floor((elapsed % 60000) / 1000);
-      document.getElementById('shiftTimer').textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      document.getElementById('shiftTimer').textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }, 1000);
   }
 
   document.getElementById('startShiftBtn').addEventListener('click', async () => {
+    if (workerData.offDay) { alert('You are off duty today.'); return; }
     const shiftData = { startTime: Date.now() };
     await set(ref(db, `activeShifts/${currentUser.uid}`), shiftData);
     activeShift = shiftData;
@@ -410,28 +575,29 @@
   });
 
   document.getElementById('submitReportBtn').addEventListener('click', async () => {
-    const summary = document.getElementById('reportSummary').value;
-    const fuel = parseFloat(document.getElementById('reportFuel').value) || 0;
-    const distance = parseFloat(document.getElementById('reportDistance').value) || 0;
+    const summary = document.getElementById('workSummary').value.trim();
+    if (!summary) { alert('Please provide a work summary'); return; }
+
     const endTime = Date.now();
+    const completedTasks = tasks.filter(t => t.status === 'completed' && t.completedAt > activeShift.startTime);
+
     const report = {
       workerId: currentUser.uid,
-      workerName: workerData.firstName,
+      workerName: workerData.fullName,
       startTime: activeShift.startTime,
       endTime,
       summary,
-      fuel,
-      distance,
+      completedTasks: completedTasks.map(t => ({ title: t.title, summary: t.summary || '' })),
+      durationMs: endTime - activeShift.startTime,
       timestamp: endTime
     };
+
     await push(ref(db, `shiftReports/${currentUser.uid}`), report);
     await set(ref(db, `activeShifts/${currentUser.uid}`), null);
     activeShift = null;
     document.getElementById('reportModal').style.display = 'none';
+    document.getElementById('workSummary').value = '';
     showStartShiftUI();
-    document.getElementById('reportSummary').value = '';
-    document.getElementById('reportFuel').value = '';
-    document.getElementById('reportDistance').value = '';
   });
 
   // Tasks
@@ -447,32 +613,45 @@
     const container = document.getElementById('tasksListContainer');
     const pending = tasks.filter(t => t.status !== 'completed');
     if (pending.length === 0) {
-      container.innerHTML = '<p style="color:#5a7a62;">Please stand by for tasks.</p>';
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list" style="font-size:48px; color:#c0dcc0; margin-bottom:16px;"></i><p>Please stand by for tasks</p></div>';
       return;
     }
     container.innerHTML = pending.map(t => `
       <div class="task-card" data-id="${t.id}">
         <div class="task-title">${t.title}</div>
-        <div class="task-desc">${t.description}</div>
-        <button class="outline-btn expand-task">Expand</button>
-        <div class="task-detail" style="display:none;">
-          <textarea class="task-summary-input" placeholder="Write summary..."></textarea>
-          <button class="pill-btn mark-done">Mark Done</button>
+        <div class="task-desc">${t.description || ''}</div>
+        <div class="task-meta">
+          <span class="task-status">Pending</span>
+          <button class="expand-btn"><i class="fas fa-chevron-down"></i> Expand</button>
+        </div>
+        <div class="task-detail">
+          <textarea class="task-summary-input" placeholder="Write summary of completed work..."></textarea>
+          <button class="pill-btn mark-done" style="margin-top:8px;">Mark as Done</button>
         </div>
       </div>
     `).join('');
-    document.querySelectorAll('.expand-task').forEach(btn => {
+
+    document.querySelectorAll('.expand-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const detail = e.target.closest('.task-card').querySelector('.task-detail');
-        detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+        const card = e.target.closest('.task-card');
+        const detail = card.querySelector('.task-detail');
+        const icon = btn.querySelector('i');
+        detail.style.display = detail.style.display === 'block' ? 'none' : 'block';
+        icon.className = detail.style.display === 'block' ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
       });
     });
+
     document.querySelectorAll('.mark-done').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const card = e.target.closest('.task-card');
         const taskId = card.dataset.id;
-        const summary = card.querySelector('.task-summary-input').value;
-        await update(ref(db, `tasks/${currentUser.uid}/${taskId}`), { status: 'completed', summary, completedAt: Date.now() });
+        const summary = card.querySelector('.task-summary-input').value.trim();
+        if (!summary) { alert('Please write a summary'); return; }
+        await update(ref(db, `tasks/${currentUser.uid}/${taskId}`), {
+          status: 'completed',
+          summary,
+          completedAt: Date.now()
+        });
       });
     });
   }
@@ -486,32 +665,74 @@
     });
   });
 
+  document.getElementById('periodSelect').addEventListener('change', () => {
+    const activeTab = document.querySelector('.toggle-option.active').dataset.tab;
+    loadReportsContent(activeTab);
+  });
+
   async function loadReportsContent(tab) {
     const container = document.getElementById('reportsContent');
     const period = document.getElementById('periodSelect').value;
     container.innerHTML = '<div class="spinner"></div>';
+
+    const now = Date.now();
+    const day = 86400000;
+
     if (tab === 'tasks') {
-      const snap = await get(ref(db, `tasks/${currentUser.uid}`));
-      const allTasks = snap.val() ? Object.values(snap.val()) : [];
-      const completed = allTasks.filter(t => t.status === 'completed');
-      container.innerHTML = completed.map(t => `
-        <div class="task-card">
-          <div class="task-title">${t.title}</div>
-          <div>${t.summary || ''}</div>
-          <div style="font-size:12px;">${new Date(t.completedAt).toLocaleString()}</div>
+      const completed = tasks.filter(t => t.status === 'completed');
+      const filtered = completed.filter(t => {
+        if (period === 'today') return (now - t.completedAt) < day;
+        if (period === 'week') return (now - t.completedAt) < 7 * day;
+        if (period === 'month') return (now - t.completedAt) < 30 * day;
+        return true;
+      });
+      filtered.sort((a, b) => b.completedAt - a.completedAt);
+      container.innerHTML = filtered.length === 0 ? '<div class="empty-state">No completed tasks in this period</div>' : filtered.map(t => `
+        <div class="report-card">
+          <div class="report-header">
+            <span>${t.title}</span>
+            <span>${new Date(t.completedAt).toLocaleDateString()}</span>
+          </div>
+          <div class="report-summary">${t.summary || 'No summary'}</div>
         </div>
-      `).join('') || '<p>No completed tasks.</p>';
+      `).join('');
     } else {
       const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
       const reports = snap.val() ? Object.values(snap.val()) : [];
-      container.innerHTML = reports.map(r => `
-        <div class="task-card">
-          <div><strong>${new Date(r.startTime).toLocaleDateString()}</strong></div>
-          <div>${r.summary}</div>
-          <div>Fuel: ${r.fuel}L · Dist: ${r.distance}km</div>
+      const filtered = reports.filter(r => {
+        if (period === 'today') return (now - r.timestamp) < day;
+        if (period === 'week') return (now - r.timestamp) < 7 * day;
+        if (period === 'month') return (now - r.timestamp) < 30 * day;
+        return true;
+      });
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
+      container.innerHTML = filtered.length === 0 ? '<div class="empty-state">No shift reports in this period</div>' : filtered.map(r => `
+        <div class="report-card">
+          <div class="report-header">
+            <span>${new Date(r.startTime).toLocaleDateString()}</span>
+            <span>${formatTime(r.startTime)} - ${formatTime(r.endTime)}</span>
+          </div>
+          <div class="report-summary">${r.summary}</div>
+          ${r.completedTasks && r.completedTasks.length ? `
+            <div class="report-tasks">
+              <strong>Completed Tasks:</strong>
+              ${r.completedTasks.map(t => `<div style="margin-top:6px;">• ${t.title}: ${t.summary}</div>`).join('')}
+            </div>
+          ` : ''}
+          <div style="margin-top:8px; font-size:13px; color:#5a7a62;">Duration: ${formatDuration(r.durationMs)}</div>
         </div>
-      `).join('') || '<p>No reports.</p>';
+      `).join('');
     }
+  }
+
+  function formatTime(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatDuration(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    return `${h}h ${m}m`;
   }
 
   // Navigation
