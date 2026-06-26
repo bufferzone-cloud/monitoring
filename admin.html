@@ -1641,7 +1641,7 @@
         .assign-flow-card .selected-preview img {
             width: 40px;
             height: 40px;
-            border-radius: var(--radius);
+            border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--gray-200);
         }
@@ -2722,7 +2722,7 @@
                         <div id="vehicleDropdownContainer"></div>
                     </div>
                     <div id="vehiclePreview" class="selected-preview" style="display:none;">
-                        <img id="vehiclePreviewImg" src="" alt="Vehicle">
+                        <img id="vehiclePreviewImg" src="" alt="Vehicle" style="border-radius:50%;">
                         <div class="info">
                             <div class="name" id="vehiclePreviewName"></div>
                             <div class="detail" id="vehiclePreviewDetail"></div>
@@ -2736,7 +2736,7 @@
                         <div id="driverDropdownContainer"></div>
                     </div>
                     <div id="driverPreview" class="selected-preview" style="display:none;">
-                        <img id="driverPreviewImg" src="" alt="Driver">
+                        <img id="driverPreviewImg" src="" alt="Driver" style="border-radius:50%;">
                         <div class="info">
                             <div class="name" id="driverPreviewName"></div>
                             <div class="detail" id="driverPreviewDetail"></div>
@@ -2842,8 +2842,12 @@
                     const preview = document.getElementById('vehiclePreview');
                     if (preview) {
                         preview.style.display = 'flex';
-                        document.getElementById('vehiclePreviewImg').src = vehicle.image ||
-                            'https://via.placeholder.com/40?text=Car';
+                        const img = document.getElementById('vehiclePreviewImg');
+                        img.src = vehicle.image || 'https://via.placeholder.com/40?text=Car';
+                        img.style.borderRadius = '50%';
+                        img.style.width = '40px';
+                        img.style.height = '40px';
+                        img.style.objectFit = 'cover';
                         document.getElementById('vehiclePreviewName').textContent = vehicle.name;
                         document.getElementById('vehiclePreviewDetail').textContent =
                             `${vehicle.plate} · ${vehicle.color}`;
@@ -2851,7 +2855,7 @@
                 },
                 '<span style="color:var(--gray-400);">Select a vehicle...</span>',
                 (v) => `
-                    <img src="${v.image || 'https://via.placeholder.com/28?text=Car'}" alt="${escapeHtml(v.name)}">
+                    <img src="${v.image || 'https://via.placeholder.com/28?text=Car'}" alt="${escapeHtml(v.name)}" style="border-radius:50%;width:28px;height:28px;object-fit:cover;">
                     <div class="item-info">
                         <div class="name">${escapeHtml(v.name)}</div>
                         <div class="detail">${escapeHtml(v.plate)} · ${escapeHtml(v.color)}</div>
@@ -2872,8 +2876,12 @@
                     const preview = document.getElementById('driverPreview');
                     if (preview) {
                         preview.style.display = 'flex';
-                        document.getElementById('driverPreviewImg').src = driver.image ||
-                            'https://via.placeholder.com/40?text=Driver';
+                        const img = document.getElementById('driverPreviewImg');
+                        img.src = driver.image || 'https://via.placeholder.com/40?text=Driver';
+                        img.style.borderRadius = '50%';
+                        img.style.width = '40px';
+                        img.style.height = '40px';
+                        img.style.objectFit = 'cover';
                         document.getElementById('driverPreviewName').textContent = driver.name;
                         document.getElementById('driverPreviewDetail').textContent = driver.phone;
 
@@ -2890,7 +2898,7 @@
                 },
                 '<span style="color:var(--gray-400);">Select a driver...</span>',
                 (d) => `
-                    <img src="${d.image || 'https://via.placeholder.com/28?text=Driver'}" alt="${escapeHtml(d.name)}">
+                    <img src="${d.image || 'https://via.placeholder.com/28?text=Driver'}" alt="${escapeHtml(d.name)}" style="border-radius:50%;width:28px;height:28px;object-fit:cover;">
                     <div class="item-info">
                         <div class="name">${escapeHtml(d.name)}</div>
                         <div class="detail">${escapeHtml(d.phone)}</div>
@@ -3151,7 +3159,7 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
-                // Update to pending first, then will be signed by driver
+                // Update to pending first
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'pending',
                     timeParked: timeParked,
@@ -3172,6 +3180,65 @@
                 renderStats();
             } catch (err) {
                 showToast('Error submitting end of day: ' + err.message, 'error');
+            }
+        };
+
+        window.signEndOfDay = async function(statId) {
+            if (!confirm('Sign this End of Day report?')) return;
+            try {
+                const stat = allStats.find(s => s.id === statId);
+                if (!stat) return;
+
+                // Check if all End of Day fields are filled
+                if (!stat.timeParked || !stat.mileageParked) {
+                    showToast('End of Day data incomplete. Please complete the End of Day form first.', 'error');
+                    return;
+                }
+
+                // Mark as completed
+                await db.ref(`driverStats/${statId}`).update({
+                    status: 'completed',
+                    signature: 'signed',
+                    signedAt: Date.now(),
+                    reportGenerated: true
+                });
+
+                // Generate report
+                const reportRef = db.ref('driverReports').push();
+                await reportRef.set({
+                    statId: statId,
+                    vehicleId: stat.vehicleId,
+                    vehicleName: stat.vehicleName,
+                    vehiclePlate: stat.vehiclePlate,
+                    vehicleColor: stat.vehicleColor,
+                    vehicleImage: stat.vehicleImage,
+                    driverId: stat.driverId,
+                    driverName: stat.driverName,
+                    driverPhone: stat.driverPhone,
+                    driverImage: stat.driverImage,
+                    timeOut: stat.timeOut,
+                    mileageOut: stat.mileageOut,
+                    fuelOut: stat.fuelOut,
+                    timeParked: stat.timeParked,
+                    mileageParked: stat.mileageParked,
+                    fuelParked: stat.fuelParked,
+                    revenue: stat.revenue,
+                    adminComment: stat.adminComment,
+                    adminName: stat.adminName,
+                    adminEmail: stat.adminEmail,
+                    distanceTraveled: stat.distanceTraveled,
+                    fuelUsed: stat.fuelUsed,
+                    hoursOut: stat.hoursOut,
+                    date: Date.now(),
+                    startTime: stat.startTime,
+                    endTime: Date.now()
+                });
+
+                showToast('End of Day signed and completed! Report generated.', 'success');
+                await refreshAll();
+                renderStats();
+            } catch (err) {
+                showToast('Error signing End of Day: ' + err.message, 'error');
             }
         };
 
