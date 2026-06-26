@@ -26,6 +26,7 @@
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript">
     </script>
     <style>
+        /* ===== RESET & BASE ===== */
         *,
         *::before,
         *::after {
@@ -162,6 +163,8 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        /* ===== ANIMATIONS ===== */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -209,7 +212,640 @@
                 transform: rotate(360deg);
             }
         }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
 
+        /* ===== TOAST CONTAINER ===== */
+        #toastContainer {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 92%;
+            width: 400px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            background: var(--gray-900);
+            color: var(--white);
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            animation: fadeInUp 0.35s ease;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .toast.success {
+            background: linear-gradient(135deg, #059669, #10B981);
+        }
+        .toast.error {
+            background: linear-gradient(135deg, #DC2626, #EF4444);
+        }
+        .toast.warning {
+            background: linear-gradient(135deg, #D97706, #F59E0B);
+        }
+        .toast i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .toast span {
+            flex: 1;
+        }
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 4px;
+            transition: 0.2s;
+        }
+        .toast .toast-close:hover {
+            color: #fff;
+        }
+
+        /* ===== BUTTON STYLES (ALL BUTTONS) ===== */
+        button,
+        .btn,
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger,
+        .btn-success,
+        .btn-warning,
+        .btn-info,
+        .btn-icon,
+        .btn-submit,
+        .login-btn,
+        .action-btn-sm,
+        .nav-item,
+        .sidebar-item,
+        .close-btn,
+        .toast-close,
+        .btn-upload {
+            font-family: var(--font);
+            transition: all var(--transition);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover,
+        .btn:hover,
+        .btn-primary:hover,
+        .btn-secondary:hover,
+        .btn-danger:hover,
+        .btn-success:hover,
+        .btn-warning:hover,
+        .btn-info:hover,
+        .btn-icon:hover,
+        .btn-submit:hover,
+        .login-btn:hover,
+        .action-btn-sm:hover,
+        .nav-item:hover,
+        .sidebar-item:hover,
+        .close-btn:hover,
+        .btn-upload:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active,
+        .btn:active,
+        .btn-primary:active,
+        .btn-secondary:active,
+        .btn-danger:active,
+        .btn-success:active,
+        .btn-warning:active,
+        .btn-info:active,
+        .btn-icon:active,
+        .btn-submit:active,
+        .login-btn:active,
+        .action-btn-sm:active,
+        .nav-item:active,
+        .sidebar-item:active,
+        .btn-upload:active {
+            transform: scale(0.97);
+        }
+
+        /* Primary buttons */
+        .btn-primary,
+        .btn-submit,
+        .login-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+        .btn-primary:hover,
+        .btn-submit:hover,
+        .login-btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #0B6B61);
+            box-shadow: 0 8px 32px rgba(13, 148, 136, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Secondary buttons */
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-600);
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid var(--gray-200);
+        }
+        .btn-secondary:hover {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        /* Danger buttons */
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+        .btn-danger:hover {
+            background: #DC2626;
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Success buttons */
+        .btn-success {
+            background: var(--green);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+        .btn-success:hover {
+            background: #059669;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Warning buttons */
+        .btn-warning {
+            background: var(--accent);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+        .btn-warning:hover {
+            background: #D97706;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Info buttons */
+        .btn-info {
+            background: var(--blue);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        .btn-info:hover {
+            background: #2563EB;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Icon buttons */
+        .btn-icon {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        .btn-icon:hover {
+            background: var(--gray-200);
+        }
+        .btn-icon.green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .btn-icon.green:hover {
+            background: var(--green);
+            color: #fff;
+        }
+        .btn-icon.teal {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .btn-icon.teal:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-icon.red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+        .btn-icon.red:hover {
+            background: var(--red);
+            color: #fff;
+        }
+        .btn-icon.amber {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .btn-icon.amber:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-icon.blue {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+        .btn-icon.blue:hover {
+            background: var(--blue);
+            color: #fff;
+        }
+        .btn-icon.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-icon.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Small action buttons */
+        .action-btn-sm {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-btn-sm:hover {
+            background: var(--gray-200);
+        }
+        .action-btn-sm.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .action-btn-sm.primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* Nav item buttons */
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            background: none;
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            padding: 4px 0;
+            position: relative;
+        }
+        .nav-item i {
+            font-size: 1.25rem;
+            transition: var(--transition);
+        }
+        .nav-item:hover {
+            color: var(--gray-600);
+        }
+        .nav-item.active {
+            color: var(--primary);
+        }
+        .nav-item.active i {
+            transform: scale(1.05);
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 30%;
+            right: 30%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Sidebar item buttons */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .sidebar-item:hover {
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .sidebar-item i {
+            width: 20px;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        .sidebar-item.danger {
+            color: var(--red);
+        }
+        .sidebar-item.danger i {
+            color: var(--red);
+        }
+        .sidebar-item.danger:hover {
+            background: var(--red-light);
+        }
+
+        /* Close button */
+        .close-btn {
+            background: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--gray-400);
+        }
+        .close-btn:hover {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        /* Upload button */
+        .btn-upload {
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            background: var(--blue);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        .btn-upload:hover {
+            background: #2563EB;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        /* ===== EXPANDABLE FORMS ===== */
+        .form-expandable {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 12px;
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+        .form-expandable:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .form-expandable .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .form-expandable .form-header h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-expandable .form-header .toggle-icon {
+            transition: transform var(--transition);
+            color: var(--gray-400);
+            font-size: 0.9rem;
+        }
+        .form-expandable.expanded .form-header .toggle-icon {
+            transform: rotate(180deg);
+        }
+        .form-expandable .form-body {
+            display: none;
+            padding: 12px 0 4px 0;
+            animation: fadeInUp 0.3s ease;
+        }
+        .form-expandable.expanded .form-body {
+            display: block;
+        }
+        .form-expandable .form-body .form-group {
+            margin-bottom: 12px;
+        }
+        .form-expandable .form-body .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        .form-expandable .form-body .form-group input,
+        .form-expandable .form-body .form-group select,
+        .form-expandable .form-body .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-family: var(--font);
+            transition: var(--transition);
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .form-expandable .form-body .form-group input:focus,
+        .form-expandable .form-body .form-group select:focus,
+        .form-expandable .form-body .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .form-expandable .form-body .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-expandable .form-body .form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        /* ===== UPLOAD PREVIEW BOXES ===== */
+        .upload-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .upload-preview-box {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-50);
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .upload-preview-box:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .upload-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius);
+        }
+        .upload-preview-box .placeholder-icon {
+            font-size: 2rem;
+            color: var(--gray-400);
+        }
+        .upload-preview-box .placeholder-text {
+            font-size: 0.6rem;
+            color: var(--gray-400);
+            margin-top: 4px;
+            text-align: center;
+        }
+        .upload-preview-box .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--red);
+            color: #fff;
+            border: none;
+            font-size: 0.7rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .upload-preview-box .remove-btn:hover {
+            transform: scale(1.1);
+        }
+        .upload-preview-box.has-image .remove-btn {
+            display: flex;
+        }
+        .upload-preview-box.has-image .placeholder-icon,
+        .upload-preview-box.has-image .placeholder-text {
+            display: none;
+        }
+
+        /* ===== DATE PICKER ===== */
+        .date-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--white);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+        }
+        .date-picker-container input[type="date"] {
+            padding: 8px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-family: var(--font);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            transition: var(--transition);
+            flex: 1;
+            min-width: 140px;
+        }
+        .date-picker-container input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .date-picker-container .date-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            white-space: nowrap;
+        }
+        .date-picker-container .btn-date {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .date-picker-container .btn-date:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ===== TOAST CONTAINER ===== */
         #toastContainer {
             position: fixed;
             top: 16px;
@@ -782,172 +1418,6 @@
         .sidebar .sidebar-item.danger:hover {
             background: var(--red-light);
         }
-        .sidebar .sidebar-divider {
-            height: 1px;
-            background: var(--gray-200);
-            margin: 12px 0;
-        }
-
-        /* ===== MAP DASHBOARD ===== */
-        .map-dashboard {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-        }
-        .map-top-section {
-            height: 70%;
-            position: relative;
-            background: #1a1a2e;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            overflow: hidden;
-        }
-        .map-top-section #fleetMap {
-            width: 100%;
-            height: 100%;
-        }
-        .map-top-section .map-back-btn {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border: none;
-            border-radius: var(--radius-full);
-            padding: 8px 16px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: var(--shadow-md);
-            transition: var(--transition);
-            font-family: var(--font);
-            color: var(--gray-700);
-        }
-        .map-top-section .map-back-btn:hover {
-            background: var(--white);
-            transform: scale(1.05);
-        }
-        .map-top-section .map-back-btn i {
-            font-size: 0.9rem;
-        }
-        .map-top-section .map-stats {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border-radius: var(--radius-full);
-            padding: 6px 16px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            box-shadow: var(--shadow-md);
-            color: var(--gray-700);
-        }
-        .map-top-section .map-stats span {
-            color: var(--primary);
-            font-weight: 800;
-        }
-        .map-top-section .fuel-price-badge {
-            position: absolute;
-            bottom: 16px;
-            left: 16px;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-            border-radius: var(--radius-full);
-            padding: 6px 16px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #fff;
-            box-shadow: var(--shadow-md);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .map-top-section .fuel-price-badge i {
-            color: var(--accent);
-        }
-        .map-top-section .fuel-price-badge .price {
-            color: #6EE7B7;
-        }
-
-        .map-bottom-section {
-            height: 30%;
-            background: var(--white);
-            border-top: 1px solid var(--gray-200);
-            padding: 12px 16px;
-            overflow-y: auto;
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-        }
-        .map-bottom-section .section-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gray-400);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .map-bottom-section .section-label i {
-            color: var(--primary);
-        }
-        .map-bottom-section .driver-route-cards {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-        .map-bottom-section .driver-route-cards .mini-card {
-            flex: 0 0 160px;
-            background: var(--gray-50);
-            border-radius: var(--radius);
-            padding: 12px;
-            border: 1px solid var(--gray-200);
-            transition: var(--transition);
-            cursor: pointer;
-        }
-        .map-bottom-section .driver-route-cards .mini-card:hover {
-            background: var(--white);
-            box-shadow: var(--shadow);
-            transform: translateY(-2px);
-        }
-        .map-bottom-section .driver-route-cards .mini-card .driver-name {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: var(--gray-800);
-        }
-        .map-bottom-section .driver-route-cards .mini-card .driver-route {
-            font-size: 0.7rem;
-            color: var(--gray-500);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 2px;
-        }
-        .map-bottom-section .driver-route-cards .mini-card .driver-status {
-            margin-top: 6px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: var(--green);
-        }
-        .map-bottom-section .driver-route-cards .mini-card .driver-status .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--green);
-            display: inline-block;
-        }
 
         /* ===== CARDS GRID ===== */
         .grid-cards {
@@ -1132,20 +1602,12 @@
             color: var(--accent);
         }
         .status-badge.signed {
-            background: var(--green-light);
-            color: var(--green);
+            background: var(--blue-light);
+            color: var(--blue);
         }
         .status-badge.completed {
             background: var(--green-light);
             color: var(--green);
-        }
-        .status-badge.active {
-            background: var(--green-light);
-            color: var(--green);
-        }
-        .status-badge.inactive {
-            background: var(--gray-100);
-            color: var(--gray-500);
         }
         .status-badge .dot {
             width: 6px;
@@ -1155,7 +1617,7 @@
         }
 
         /* ===== STATS SECTION ===== */
-        .stats-header {
+        #statsSection .stats-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1163,7 +1625,7 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-        .stats-header h2 {
+        #statsSection .stats-header h2 {
             font-size: 1.3rem;
             font-weight: 800;
             color: var(--gray-800);
@@ -1171,7 +1633,7 @@
             align-items: center;
             gap: 8px;
         }
-        .stats-header h2 i {
+        #statsSection .stats-header h2 i {
             color: var(--primary);
         }
 
@@ -1246,68 +1708,7 @@
             color: var(--gray-500);
         }
 
-        .stats-form {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 16px;
-        }
-        .stats-form .form-group {
-            margin-bottom: 12px;
-        }
-        .stats-form .form-group label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--gray-600);
-            margin-bottom: 4px;
-        }
-        .stats-form .form-group input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid var(--gray-200);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            font-family: var(--font);
-            transition: var(--transition);
-            background: var(--gray-50);
-            color: var(--gray-800);
-        }
-        .stats-form .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: var(--white);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-        .stats-form .form-group .readonly-value {
-            padding: 10px 14px;
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            background: var(--gray-100);
-            color: var(--gray-600);
-            border: 1px solid var(--gray-200);
-        }
-        .stats-form .btn-submit {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: var(--radius);
-            background: var(--primary);
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: var(--font);
-        }
-        .stats-form .btn-submit:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
+        /* ===== STATS CARDS ===== */
         .stats-cards-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -1390,28 +1791,6 @@
         }
         .stats-card-item .stats-card-actions .btn-icon.primary:hover {
             background: var(--primary-dark);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: var(--gray-500);
-        }
-        .empty-state i {
-            font-size: 3rem;
-            color: var(--gray-300);
-            margin-bottom: 12px;
-            display: block;
-        }
-        .empty-state h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 4px;
-        }
-        .empty-state p {
-            font-size: 0.85rem;
-            color: var(--gray-400);
         }
 
         /* ===== MODAL ===== */
@@ -1546,15 +1925,6 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px var(--primary-glow);
         }
-        .modal-footer .btn-danger {
-            background: var(--red);
-            color: #fff;
-        }
-        .modal-footer .btn-danger:hover {
-            background: #DC2626;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
@@ -1586,25 +1956,9 @@
             .bottom-nav .nav-item {
                 font-size: 0.5rem;
             }
-            .map-top-section {
-                height: 60%;
-            }
-            .map-bottom-section {
-                height: 40%;
-            }
-            .map-bottom-section .driver-route-cards .mini-card {
-                flex: 0 0 140px;
-            }
-            .map-top-section .map-back-btn {
-                font-size: 0.7rem;
-                padding: 6px 12px;
-            }
         }
         @media (min-width: 600px) {
             .grid-cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .stats-cards-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -1613,7 +1967,7 @@
                 grid-template-columns: repeat(3, 1fr);
             }
             .stats-cards-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -1680,8 +2034,6 @@
                 <option value="pending">Pending</option>
                 <option value="signed">Signed</option>
                 <option value="completed">Completed</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
             </select>
             <button class="action-btn-sm primary" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
         </div>
@@ -1698,7 +2050,6 @@
             <button class="nav-item" data-tab="vehicles"><i class="fas fa-truck"></i><span>Vehicles</span></button>
             <button class="nav-item" data-tab="drivers"><i class="fas fa-user-md"></i><span>Drivers</span></button>
             <button class="nav-item" data-tab="reports"><i class="fas fa-file-alt"></i><span>Reports</span></button>
-            <button class="nav-item" data-tab="map"><i class="fas fa-map-marked-alt"></i><span>Map</span></button>
         </nav>
     </div>
 
@@ -1717,28 +2068,12 @@
             <button class="sidebar-item" onclick="switchTab('vehicles');toggleSidebar();"><i class="fas fa-truck"></i> Vehicles</button>
             <button class="sidebar-item" onclick="switchTab('drivers');toggleSidebar();"><i class="fas fa-user-md"></i> Drivers</button>
             <button class="sidebar-item" onclick="switchTab('reports');toggleSidebar();"><i class="fas fa-file-alt"></i> Reports</button>
-            <button class="sidebar-item" onclick="switchTab('map');toggleSidebar();"><i class="fas fa-map-marked-alt"></i> Live Map</button>
         </div>
 
         <div class="sidebar-section">
             <div class="section-title">Operations</div>
             <button class="sidebar-item" onclick="openFuelManagement();toggleSidebar();"><i class="fas fa-gas-pump"></i> Fuel Management</button>
             <button class="sidebar-item" onclick="openMaintenance();toggleSidebar();"><i class="fas fa-wrench"></i> Maintenance</button>
-            <button class="sidebar-item" onclick="openFleetAnalytics();toggleSidebar();"><i class="fas fa-chart-bar"></i> Analytics</button>
-            <button class="sidebar-item" onclick="openExpenseReports();toggleSidebar();"><i class="fas fa-file-invoice-dollar"></i> Expenses</button>
-            <button class="sidebar-item" onclick="openDriverPerformance();toggleSidebar();"><i class="fas fa-star"></i> Driver Scorecards</button>
-        </div>
-
-        <div class="sidebar-section">
-            <div class="section-title">Logs &amp; Reports</div>
-            <button class="sidebar-item" onclick="openTripHistory();toggleSidebar();"><i class="fas fa-history"></i> Trip History</button>
-            <button class="sidebar-item" onclick="openFuelConsumption();toggleSidebar();"><i class="fas fa-tachometer-alt"></i> Fuel Reports</button>
-            <button class="sidebar-item" onclick="openCompanyDocuments();toggleSidebar();"><i class="fas fa-file-alt"></i> Documents</button>
-        </div>
-
-        <div class="sidebar-section">
-            <div class="section-title">Support</div>
-            <button class="sidebar-item" onclick="openHelpCenter();toggleSidebar();"><i class="fas fa-question-circle"></i> Help Center</button>
         </div>
 
         <div class="sidebar-divider"></div>
@@ -1802,11 +2137,9 @@
         let statusFilter = 'all';
         let selectedVehicle = null;
         let selectedDriver = null;
-        let currentStatId = null;
+        let selectedDate = new Date().toISOString().split('T')[0];
         let isShutdown = false;
         let shutdownListeners = [];
-        let fleetMap = null;
-        let mapMarkers = [];
 
         // ==============================================================
         // UTILITIES
@@ -1844,14 +2177,6 @@
             return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -1868,18 +2193,112 @@
         }
 
         // ==============================================================
+        // EXPANDABLE FORMS
+        // ==============================================================
+        function toggleFormExpand(element) {
+            element.classList.toggle('expanded');
+        }
+
+        function createExpandableForm(headerText, iconClass, formContent) {
+            const container = document.createElement('div');
+            container.className = 'form-expandable';
+            container.onclick = function(e) {
+                // Don't toggle if clicking on input or button
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
+                    e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                toggleFormExpand(this);
+            };
+
+            container.innerHTML = `
+                <div class="form-header">
+                    <h4><i class="fas ${iconClass}" style="color:var(--primary);"></i> ${headerText}</h4>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="form-body">
+                    ${formContent}
+                </div>
+            `;
+            return container;
+        }
+
+        // ==============================================================
+        // UPLOAD PREVIEW BOXES
+        // ==============================================================
+        function createUploadPreviewContainer() {
+            const container = document.createElement('div');
+            container.className = 'upload-preview-container';
+            return container;
+        }
+
+        function addUploadPreviewBox(container, imageUrl, onRemove) {
+            const box = document.createElement('div');
+            box.className = 'upload-preview-box has-image';
+
+            box.innerHTML = `
+                <img src="${imageUrl}" alt="Uploaded image">
+                <button class="remove-btn" onclick="removeUploadPreview(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            if (onRemove) {
+                box.querySelector('.remove-btn').onclick = function(e) {
+                    e.stopPropagation();
+                    onRemove();
+                    box.remove();
+                };
+            }
+
+            container.appendChild(box);
+            return box;
+        }
+
+        function removeUploadPreview(btn) {
+            const box = btn.closest('.upload-preview-box');
+            if (box) {
+                box.remove();
+            }
+        }
+
+        function addEmptyUploadPreviewBox(container, onClick) {
+            const box = document.createElement('div');
+            box.className = 'upload-preview-box';
+            box.onclick = onClick;
+
+            box.innerHTML = `
+                <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                <div class="placeholder-text">Tap to upload</div>
+            `;
+
+            container.appendChild(box);
+            return box;
+        }
+
+        // ==============================================================
         // CLOUDINARY UPLOAD WITH PREVIEW
         // ==============================================================
-        function openCloudinaryUpload(callback, resourceType = 'image', previewElementId = null) {
+        function openCloudinaryUploadWithPreview(containerId, callback, resourceType = 'image') {
+            const container = document.getElementById(containerId) || document.querySelector('.upload-preview-container');
+
+            if (!container) {
+                showToast('Upload container not found', 'error');
+                return;
+            }
+
             const options = {
                 cloudName: CLOUD_NAME,
                 uploadPreset: UPLOAD_PRESET,
                 sources: ['local', 'url'],
                 maxFileSize: 155000000,
                 resourceType: resourceType,
-                clientAllowedFormats: resourceType === 'image' ? ['jpg', 'jpeg', 'png', 'gif', 'webp'] : ['mp4', 'mov', 'avi', 'webm'],
+                clientAllowedFormats: resourceType === 'image' ? ['jpg', 'jpeg', 'png', 'gif', 'webp'] : ['mp4',
+                    'mov', 'avi', 'webm'
+                ],
                 maxFiles: 1
             };
+
             cloudinary.openUploadWidget(options, (err, res) => {
                 if (err) {
                     showToast('Upload error: ' + err.message, 'error');
@@ -1888,13 +2307,23 @@
                 if (res.event === 'success') {
                     const info = res.info;
                     const url = info.secure_url;
-                    callback(url);
-                    // Update preview if element ID provided
-                    if (previewElementId) {
-                        const preview = document.getElementById(previewElementId);
-                        if (preview) {
-                            preview.innerHTML = `<img src="${url}" style="width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);">`;
-                        }
+
+                    // Remove empty placeholder if exists
+                    const emptyBox = container.querySelector('.upload-preview-box:not(.has-image)');
+                    if (emptyBox) {
+                        emptyBox.remove();
+                    }
+
+                    // Add preview box
+                    addUploadPreviewBox(container, url, () => {
+                        // On remove, add back empty box
+                        addEmptyUploadPreviewBox(container, () => {
+                            openCloudinaryUploadWithPreview(containerId, callback, resourceType);
+                        });
+                    });
+
+                    if (callback) {
+                        callback(url);
                     }
                     showToast('Upload successful!', 'success');
                 }
@@ -1923,6 +2352,7 @@
                     return;
                 }
 
+                // Check if admin exists in DB
                 const adminSnap = await db.ref(`admins/${user.uid}`).once('value');
                 if (!adminSnap.exists()) {
                     await db.ref(`admins/${user.uid}`).set({
@@ -2021,9 +2451,7 @@
                         image: data.image || '',
                         status: data.assignedDriver ? 'active' : 'inactive',
                         driverId: data.assignedDriver || '',
-                        driverName: '',
-                        lat: data.lat || null,
-                        lng: data.lng || null
+                        driverName: ''
                     });
                 });
             }
@@ -2047,8 +2475,7 @@
                         image: data.image || '',
                         status: data.lat ? 'active' : 'inactive',
                         lat: data.lat || null,
-                        lng: data.lng || null,
-                        city: data.city || ''
+                        lng: data.lng || null
                     });
                 });
             }
@@ -2072,14 +2499,14 @@
                         driverPhone: data.driverPhone || '',
                         driverImage: data.driverImage || '',
                         timeOut: data.timeOut || '',
-                        mileageOut: data.mileageOut || 0,
-                        fuelOut: data.fuelOut || 0,
+                        mileageOut: data.mileageOut || '',
+                        fuelOut: data.fuelOut || '',
                         startTime: data.startTime || Date.now(),
                         status: data.status || 'pending',
                         signature: data.signature || '',
                         timeParked: data.timeParked || '',
-                        mileageParked: data.mileageParked || 0,
-                        fuelParked: data.fuelParked || 0,
+                        mileageParked: data.mileageParked || '',
+                        fuelParked: data.fuelParked || '',
                         revenue: data.revenue || 0,
                         adminComment: data.adminComment || '',
                         adminName: data.adminName || '',
@@ -2127,13 +2554,11 @@
             const stats = {
                 vehicles: allVehicles.length,
                 drivers: allDrivers.length,
-                activeDrivers: allDrivers.filter(d => d.status === 'active').length,
                 pendingStats: allStats.filter(s => s.status === 'pending').length,
-                signedStats: allStats.filter(s => s.status === 'signed').length,
                 completedStats: allStats.filter(s => s.status === 'completed').length
             };
             document.getElementById('statsText').textContent =
-                `${stats.vehicles} veh · ${stats.activeDrivers} active · ${stats.pendingStats} pending · ${stats.completedStats} complete`;
+                `${stats.vehicles} veh · ${stats.drivers} drv · ${stats.pendingStats} pending · ${stats.completedStats} complete`;
         }
 
         // ==============================================================
@@ -2143,7 +2568,6 @@
             const pendingStats = allStats.filter(s => s.status === 'pending');
             const signedStats = allStats.filter(s => s.status === 'signed');
             const completedStats = allStats.filter(s => s.status === 'completed');
-            const activeDrivers = allDrivers.filter(d => d.status === 'active');
 
             let html = `
                 <div class="page-header">
@@ -2156,7 +2580,7 @@
                     </div>
                     <div class="card">
                         <div class="card-header"><div class="icon-wrap purple"><i class="fas fa-user-md"></i></div><div><div class="card-title">Drivers</div><div class="card-subtitle">On the road</div></div></div>
-                        <div class="card-body"><div class="detail-row"><span class="label">Active</span><span class="value">${activeDrivers.length}</span></div><div class="detail-row"><span class="label">Total</span><span class="value">${allDrivers.length}</span></div></div>
+                        <div class="card-body"><div class="detail-row"><span class="label">Active</span><span class="value">${allDrivers.filter(d => d.status === 'active').length}</span></div><div class="detail-row"><span class="label">Total</span><span class="value">${allDrivers.length}</span></div></div>
                     </div>
                     <div class="card">
                         <div class="card-header"><div class="icon-wrap amber"><i class="fas fa-chart-bar"></i></div><div><div class="card-title">Stats</div><div class="card-subtitle">Today's activity</div></div></div>
@@ -2168,18 +2592,50 @@
         }
 
         function renderStats() {
+            // Filter stats by selected date
+            const selectedDateStart = new Date(selectedDate);
+            selectedDateStart.setHours(0, 0, 0, 0);
+            const selectedDateEnd = new Date(selectedDate);
+            selectedDateEnd.setHours(23, 59, 59, 999);
+
+            const filteredStats = allStats.filter(s => {
+                const statDate = new Date(s.startTime);
+                return statDate >= selectedDateStart && statDate <= selectedDateEnd;
+            });
+
             let html = `
                 <div class="stats-header">
                     <h2><i class="fas fa-chart-bar"></i> Fleet Stats</h2>
                 </div>
 
-                <!-- Assign Vehicle Dropdown -->
-                <div class="assign-flow-card">
-                    <div class="step-label"><i class="fas fa-truck"></i> Step 1: Select Vehicle</div>
-                    <select id="vehicleSelect" onchange="onVehicleSelect(this.value)">
-                        <option value="">-- Select a vehicle --</option>
-                        ${allVehicles.map(v => `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`).join('')}
-                    </select>
+                <!-- Date Picker -->
+                <div class="date-picker-container">
+                    <span class="date-label"><i class="fas fa-calendar-alt"></i> Date:</span>
+                    <input type="date" id="datePicker" value="${selectedDate}" onchange="onDateChange(this.value)">
+                    <button class="btn-date" onclick="onDateChange(document.getElementById('datePicker').value)">
+                        <i class="fas fa-search"></i> View
+                    </button>
+                    <button class="btn-date" style="background:var(--gray-400);" onclick="onDateChange(new Date().toISOString().split('T')[0])">
+                        <i class="fas fa-clock"></i> Today
+                    </button>
+                </div>
+
+                <!-- Stats Count -->
+                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                    <span class="status-badge pending"><span class="dot"></span> Pending: ${filteredStats.filter(s => s.status === 'pending').length}</span>
+                    <span class="status-badge signed"><span class="dot"></span> Signed: ${filteredStats.filter(s => s.status === 'signed').length}</span>
+                    <span class="status-badge completed"><span class="dot"></span> Completed: ${filteredStats.filter(s => s.status === 'completed').length}</span>
+                </div>
+
+                <!-- Assign Vehicle - Expandable Form -->
+                ${createExpandableFormHTML('Assign Vehicle', 'fa-truck', `
+                    <div class="form-group">
+                        <label>Select Vehicle</label>
+                        <select id="vehicleSelect" onchange="onVehicleSelect(this.value)">
+                            <option value="">-- Select a vehicle --</option>
+                            ${allVehicles.map(v => `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`).join('')}
+                        </select>
+                    </div>
                     <div id="vehiclePreview" class="selected-preview" style="display:none;">
                         <img id="vehiclePreviewImg" src="" alt="Vehicle">
                         <div class="info">
@@ -2187,15 +2643,17 @@
                             <div class="detail" id="vehiclePreviewDetail"></div>
                         </div>
                     </div>
-                </div>
+                `)}
 
-                <!-- Assign Driver Dropdown -->
-                <div class="assign-flow-card" id="driverAssignCard" style="display:none;">
-                    <div class="step-label"><i class="fas fa-user-md"></i> Step 2: Select Driver</div>
-                    <select id="driverSelect" onchange="onDriverSelect(this.value)">
-                        <option value="">-- Select a driver --</option>
-                        ${allDrivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.phone)})</option>`).join('')}
-                    </select>
+                <!-- Assign Driver - Expandable Form -->
+                ${createExpandableFormHTML('Assign Driver', 'fa-user-md', `
+                    <div class="form-group">
+                        <label>Select Driver</label>
+                        <select id="driverSelect" onchange="onDriverSelect(this.value)">
+                            <option value="">-- Select a driver --</option>
+                            ${allDrivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.phone)})</option>`).join('')}
+                        </select>
+                    </div>
                     <div id="driverPreview" class="selected-preview" style="display:none;">
                         <img id="driverPreviewImg" src="" alt="Driver">
                         <div class="info">
@@ -2203,18 +2661,16 @@
                             <div class="detail" id="driverPreviewDetail"></div>
                         </div>
                     </div>
-                </div>
+                `)}
 
-                <!-- Stats Form -->
-                <div class="stats-form" id="statsForm" style="display:none;">
-                    <div class="step-label"><i class="fas fa-clipboard-list"></i> Step 3: Starting Statistics</div>
+                <!-- Starting Statistics - Expandable Form -->
+                ${createExpandableFormHTML('Starting Statistics', 'fa-clipboard-list', `
                     <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
                         <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
                             <div><span class="label">Name:</span> <span id="formVehicleName" style="font-weight:500;color:var(--gray-800);"></span></div>
                             <div><span class="label">Plate:</span> <span id="formVehiclePlate" style="font-weight:500;color:var(--gray-800);"></span></div>
                             <div><span class="label">Color:</span> <span id="formVehicleColor" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            <div><span class="label">Image:</span> <span id="formVehicleImage" style="font-weight:500;color:var(--gray-800);"></span></div>
                         </div>
                     </div>
                     <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
@@ -2222,7 +2678,6 @@
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
                             <div><span class="label">Name:</span> <span id="formDriverName" style="font-weight:500;color:var(--gray-800);"></span></div>
                             <div><span class="label">Phone:</span> <span id="formDriverPhone" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            <div><span class="label">Image:</span> <span id="formDriverImage" style="font-weight:500;color:var(--gray-800);"></span></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -2241,13 +2696,15 @@
                         <label><i class="fas fa-calendar"></i> Date & Time</label>
                         <div class="readonly-value" id="statsDateTime">${new Date().toLocaleString()}</div>
                     </div>
-                    <button class="btn-submit" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
-                </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
+                    </div>
+                `)}
 
-                <!-- Stats Cards Grid -->
+                <!-- Stats Cards -->
                 <div class="stats-cards-grid" id="statsCardsGrid">
-                    ${allStats.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-chart-bar"></i><h3>No stats recorded yet</h3><p>Use the form above to create your first stat entry.</p></div>' :
-                    allStats.sort((a,b) => b.startTime - a.startTime).map(s => `
+                    ${filteredStats.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-chart-bar"></i><h3>No stats for this date</h3><p>Select a different date or create a new stat entry.</p></div>' :
+                    filteredStats.sort((a,b) => b.startTime - a.startTime).map(s => `
                         <div class="stats-card-item" onclick="openStatDetail('${s.id}')">
                             <div class="stats-card-header">
                                 <div><strong>${escapeHtml(s.vehicleName)}</strong> <span style="font-size:0.75rem;color:var(--gray-500);">${escapeHtml(s.vehiclePlate)}</span></div>
@@ -2262,23 +2719,29 @@
                             </div>
                             <div class="stats-card-actions">
                                 ${s.status === 'pending' ? `<button class="btn-icon primary" onclick="event.stopPropagation();signStat('${s.id}')"><i class="fas fa-check"></i> Sign</button>` : ''}
-                                ${s.status === 'signed' ? `<button class="btn-icon green" onclick="event.stopPropagation();openEndOfDay('${s.id}')"><i class="fas fa-flag-checkered"></i> End of Day</button>` : ''}
+                                ${s.status === 'signed' ? `<button class="btn-icon success" onclick="event.stopPropagation();openEndOfDay('${s.id}')"><i class="fas fa-flag-checkered"></i> End of Day</button>` : ''}
                                 ${s.status === 'completed' ? `<button class="btn-icon teal" onclick="event.stopPropagation();viewReport('${s.id}')"><i class="fas fa-file-alt"></i> Report</button>` : ''}
-                                <button class="btn-icon red" onclick="event.stopPropagation();deleteStat('${s.id}')"><i class="fas fa-trash"></i></button>
+                                ${s.status === 'pending' || s.status === 'signed' ? `<button class="btn-icon red" onclick="event.stopPropagation();deleteStat('${s.id}')"><i class="fas fa-trash"></i></button>` : ''}
                             </div>
                         </div>
                     `).join('')}
                 </div>
             `;
             document.getElementById('contentArea').innerHTML = html;
-            
-            // Add event listeners for vehicle and driver selects
-            document.getElementById('vehicleSelect').addEventListener('change', function() {
-                onVehicleSelect(this.value);
-            });
-            document.getElementById('driverSelect').addEventListener('change', function() {
-                onDriverSelect(this.value);
-            });
+        }
+
+        function createExpandableFormHTML(headerText, iconClass, content) {
+            return `
+                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
+                    <div class="form-header">
+                        <h4><i class="fas ${iconClass}" style="color:var(--primary);"></i> ${headerText}</h4>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="form-body">
+                        ${content}
+                    </div>
+                </div>
+            `;
         }
 
         function renderVehicles() {
@@ -2360,7 +2823,6 @@
                             </div>
                             <div class="card-body">
                                 <div class="detail-row"><span class="label">Email</span><span class="value">${escapeHtml(d.email || 'N/A')}</span></div>
-                                <div class="detail-row"><span class="label">Location</span><span class="value">${d.lat && d.lng ? '📍 Active' : '📍 Unknown'}</span></div>
                             </div>
                             <div class="card-actions">
                                 <button class="btn-icon teal" onclick="editDriver('${d.id}')"><i class="fas fa-edit"></i> Edit</button>
@@ -2412,80 +2874,14 @@
             document.getElementById('contentArea').innerHTML = html;
         }
 
-        function renderMap() {
-            let html = `
-                <div class="map-dashboard">
-                    <div class="map-top-section">
-                        <div id="fleetMap" style="width:100%;height:100%;"></div>
-                        <button class="map-back-btn" onclick="switchTab('dashboard')"><i class="fas fa-arrow-left"></i> Back</button>
-                        <div class="map-stats"><i class="fas fa-truck"></i> <span>${allVehicles.filter(v => v.status === 'active').length}</span> active · <i class="fas fa-user-md"></i> <span>${allDrivers.filter(d => d.status === 'active').length}</span> drivers</div>
-                        <div class="fuel-price-badge"><i class="fas fa-gas-pump"></i> Diesel: <span class="price">ZMW 28.50</span></div>
-                    </div>
-                    <div class="map-bottom-section">
-                        <div class="section-label"><i class="fas fa-route"></i> Drivers on route</div>
-                        <div class="driver-route-cards">
-                            ${allDrivers.filter(d => d.status === 'active').length === 0 ? 
-                            '<div style="color:var(--gray-400);font-size:0.8rem;padding:8px;">No active drivers</div>' :
-                            allDrivers.filter(d => d.status === 'active').map(d => {
-                                const assignedVehicle = allVehicles.find(v => v.driverId === d.id);
-                                const routeName = assignedVehicle ? (assignedVehicle.name || 'Unknown') : 'Unassigned';
-                                return `
-                                    <div class="mini-card">
-                                        ${d.image ? `<img src="${d.image}" style="width:100%;height:60px;object-fit:cover;border-radius:var(--radius-sm);margin-bottom:4px;" alt="Driver" />` : 
-                                        `<div style="width:100%;height:60px;background:var(--gray-200);border-radius:var(--radius-sm);margin-bottom:4px;display:flex;align-items:center;justify-content:center;color:var(--gray-400);"><i class="fas fa-user" style="font-size:24px;"></i></div>`}
-                                        <div class="driver-name">${escapeHtml(d.name || 'Driver')}</div>
-                                        <div class="driver-route"><i class="fas fa-truck"></i> ${escapeHtml(routeName)}</div>
-                                        <div class="driver-status"><span class="dot"></span> Active</div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('contentArea').innerHTML = html;
-            document.getElementById('statsText').textContent = `🗺️ ${allVehicles.filter(v => v.status === 'active').length} vehicles · ${allDrivers.filter(d => d.status === 'active').length} drivers`;
-
-            // Initialize map after rendering
-            setTimeout(() => {
-                const mapEl = document.getElementById('fleetMap');
-                if (!mapEl) return;
-                if (fleetMap) {
-                    fleetMap.invalidateSize();
-                } else {
-                    fleetMap = L.map(mapEl, { center: [-15.3875, 28.3228], zoom: 12 });
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                        attribution: '© OpenStreetMap'
-                    }).addTo(fleetMap);
-
-                    // Add admin marker
-                    L.marker([-15.3875, 28.3228], {
-                        icon: L.divIcon({
-                            html: `<div style="background:var(--blue);color:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 8px rgba(59,130,246,0.4);border:2px solid #fff;"><i class="fas fa-user-cog"></i></div>`,
-                            className: '',
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        })
-                    }).addTo(fleetMap).bindPopup('Admin Location');
-
-                    // Add driver markers for active drivers with location
-                    allDrivers.filter(d => d.status === 'active' && d.lat && d.lng).forEach(d => {
-                        const marker = L.marker([d.lat, d.lng], {
-                            icon: L.divIcon({
-                                html: `<div style="background:var(--primary);color:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 8px rgba(13,148,136,0.4);border:2px solid #fff;"><i class="fas fa-user-md"></i></div>`,
-                                className: '',
-                                iconSize: [36, 36],
-                                iconAnchor: [18, 18]
-                            })
-                        }).addTo(fleetMap);
-                        marker.bindPopup(
-                            `<strong>${escapeHtml(d.name)}</strong><br>${escapeHtml(d.phone)}<br>${escapeHtml(d.city || 'Unknown location')}`
-                        );
-                        mapMarkers.push(marker);
-                    });
-                }
-            }, 100);
-        }
+        // ==============================================================
+        // DATE CHANGE FUNCTION
+        // ==============================================================
+        window.onDateChange = function(date) {
+            selectedDate = date;
+            document.getElementById('datePicker').value = date;
+            renderStats();
+        };
 
         // ==============================================================
         // STATS FLOW FUNCTIONS
@@ -2493,8 +2889,6 @@
         window.onVehicleSelect = function(vehicleId) {
             selectedVehicle = allVehicles.find(v => v.id === vehicleId);
             const preview = document.getElementById('vehiclePreview');
-            const assignCard = document.getElementById('driverAssignCard');
-            const statsForm = document.getElementById('statsForm');
 
             if (selectedVehicle) {
                 preview.style.display = 'flex';
@@ -2503,25 +2897,14 @@
                 document.getElementById('vehiclePreviewName').textContent = selectedVehicle.name;
                 document.getElementById('vehiclePreviewDetail').textContent =
                     `${selectedVehicle.plate} · ${selectedVehicle.color}`;
-                assignCard.style.display = 'block';
-                statsForm.style.display = 'none';
-                
-                // Pre-fill vehicle details in form
-                document.getElementById('formVehicleName').textContent = selectedVehicle.name;
-                document.getElementById('formVehiclePlate').textContent = selectedVehicle.plate;
-                document.getElementById('formVehicleColor').textContent = selectedVehicle.color || 'N/A';
-                document.getElementById('formVehicleImage').textContent = selectedVehicle.image ? '✅ Image uploaded' : 'No image';
             } else {
                 preview.style.display = 'none';
-                assignCard.style.display = 'none';
-                statsForm.style.display = 'none';
             }
         };
 
         window.onDriverSelect = function(driverId) {
             selectedDriver = allDrivers.find(d => d.id === driverId);
             const preview = document.getElementById('driverPreview');
-            const statsForm = document.getElementById('statsForm');
 
             if (selectedDriver) {
                 preview.style.display = 'flex';
@@ -2529,16 +2912,18 @@
                     'https://via.placeholder.com/48?text=Driver';
                 document.getElementById('driverPreviewName').textContent = selectedDriver.name;
                 document.getElementById('driverPreviewDetail').textContent = selectedDriver.phone;
-                statsForm.style.display = 'block';
 
-                // Pre-fill driver details in form
-                document.getElementById('formDriverName').textContent = selectedDriver.name;
-                document.getElementById('formDriverPhone').textContent = selectedDriver.phone;
-                document.getElementById('formDriverImage').textContent = selectedDriver.image ? '✅ Image uploaded' : 'No image';
+                // Auto-fill vehicle and driver details in the form
+                document.getElementById('formVehicleName').textContent = selectedVehicle ? selectedVehicle.name : 'N/A';
+                document.getElementById('formVehiclePlate').textContent = selectedVehicle ? selectedVehicle.plate :
+                'N/A';
+                document.getElementById('formVehicleColor').textContent = selectedVehicle ? selectedVehicle.color :
+                'N/A';
+                document.getElementById('formDriverName').textContent = selectedDriver ? selectedDriver.name : 'N/A';
+                document.getElementById('formDriverPhone').textContent = selectedDriver ? selectedDriver.phone : 'N/A';
                 document.getElementById('statsDateTime').textContent = new Date().toLocaleString();
             } else {
                 preview.style.display = 'none';
-                statsForm.style.display = 'none';
             }
         };
 
@@ -2594,8 +2979,6 @@
                 document.getElementById('driverSelect').value = '';
                 document.getElementById('vehiclePreview').style.display = 'none';
                 document.getElementById('driverPreview').style.display = 'none';
-                document.getElementById('driverAssignCard').style.display = 'none';
-                document.getElementById('statsForm').style.display = 'none';
                 selectedVehicle = null;
                 selectedDriver = null;
 
@@ -2626,6 +3009,12 @@
         window.openEndOfDay = function(statId) {
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
+
+            // Check if stat is already completed
+            if (stat.status === 'completed') {
+                showToast('This stat is already completed. View the report instead.', 'warning');
+                return;
+            }
 
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '🚩 End of Day Stats';
@@ -2663,11 +3052,12 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-comment"></i> Admin Comment</label>
-                    <input type="text" id="eodAdminComment" placeholder="Any notes about this shift">
+                    <textarea id="eodAdminComment" placeholder="Any notes about this shift" rows="3"></textarea>
                 </div>
             `;
             document.getElementById('modalSaveBtn').onclick = () => submitEndOfDay(statId);
             document.getElementById('modalSaveBtn').textContent = 'Submit End of Day';
+            document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
         };
 
@@ -2804,6 +3194,7 @@
         window.viewReport = function(statId) {
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
+            // Find the report
             const report = allReports.find(r => r.statId === statId);
             if (report) {
                 viewReportDetail(report.id);
@@ -2908,7 +3299,13 @@ Report generated automatically by ZAMLIFT Fleet Management
         window.deleteStat = async function(statId) {
             if (!confirm('Delete this stat entry?')) return;
             try {
+                const stat = allStats.find(s => s.id === statId);
+                if (stat && stat.status === 'completed') {
+                    showToast('Cannot delete completed stats.', 'warning');
+                    return;
+                }
                 await db.ref(`driverStats/${statId}`).remove();
+                // Also remove associated report if exists
                 const report = allReports.find(r => r.statId === statId);
                 if (report) {
                     await db.ref(`driverReports/${report.id}`).remove();
@@ -2933,9 +3330,13 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Color</label><input id="vColor" placeholder="e.g. White"></div>
                 <div class="form-group">
                     <label>Vehicle Picture</label>
-                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('vImage').value = url; document.getElementById('vImagePreview').innerHTML = '<img src=\"'+url+'\" style=\"width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);\">'; showToast('Image uploaded!', 'success'); }, 'image', 'vImagePreview')"><i class="fas fa-cloud-upload-alt"></i> Upload Image</button>
+                    <div id="vehicleUploadContainer" class="upload-preview-container">
+                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('vehicleUploadContainer', (url) => { document.getElementById('vImage').value = url; showToast('Image uploaded!', 'success'); })">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Tap to upload</div>
+                        </div>
+                    </div>
                     <input type="hidden" id="vImage">
-                    <div id="vImagePreview" style="margin-top:8px;min-height:80px;border:1px dashed var(--gray-300);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--gray-400);font-size:0.8rem;">No image uploaded</div>
                 </div>
             `;
             document.getElementById('modalSaveBtn').onclick = saveVehicle;
@@ -2964,9 +3365,7 @@ Report generated automatically by ZAMLIFT Fleet Management
                     image: image || '',
                     assignedDriver: null,
                     totalFuelConsumed: 0,
-                    totalDistance: 0,
-                    lat: null,
-                    lng: null
+                    totalDistance: 0
                 });
                 closeModal('detailModal');
                 showToast('Vehicle added successfully!', 'success');
@@ -2988,11 +3387,19 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Color</label><input id="vColor" value="${escapeHtml(v.color)}"></div>
                 <div class="form-group">
                     <label>Vehicle Picture</label>
-                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('vImage').value = url; document.getElementById('vImagePreview').innerHTML = '<img src=\"'+url+'\" style=\"width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);\">'; showToast('Image updated!', 'success'); }, 'image', 'vImagePreview')"><i class="fas fa-cloud-upload-alt"></i> Change Image</button>
-                    <input type="hidden" id="vImage" value="${escapeHtml(v.image)}">
-                    <div id="vImagePreview" style="margin-top:8px;min-height:80px;border:1px dashed var(--gray-300);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--gray-400);font-size:0.8rem;">
-                        ${v.image ? `<img src="${v.image}" style="width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);">` : 'No image uploaded'}
+                    <div id="vehicleUploadContainer" class="upload-preview-container">
+                        ${v.image ? `<div class="upload-preview-box has-image">
+                            <img src="${v.image}" alt="Vehicle">
+                            <button class="remove-btn" onclick="this.closest('.upload-preview-box').remove(); document.getElementById('vImage').value = '';">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>` : ''}
+                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('vehicleUploadContainer', (url) => { document.getElementById('vImage').value = url; showToast('Image updated!', 'success'); })">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Tap to upload</div>
+                        </div>
                     </div>
+                    <input type="hidden" id="vImage" value="${escapeHtml(v.image)}">
                 </div>
             `;
             document.getElementById('modalSaveBtn').onclick = () => saveVehicleEdit(id);
@@ -3054,9 +3461,13 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Password</label><input id="dPassword" type="password" placeholder="Min 6 characters"></div>
                 <div class="form-group">
                     <label>Driver Picture</label>
-                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('dImage').value = url; document.getElementById('dImagePreview').innerHTML = '<img src=\"'+url+'\" style=\"width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);\">'; showToast('Image uploaded!', 'success'); }, 'image', 'dImagePreview')"><i class="fas fa-cloud-upload-alt"></i> Upload Image</button>
+                    <div id="driverUploadContainer" class="upload-preview-container">
+                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('driverUploadContainer', (url) => { document.getElementById('dImage').value = url; showToast('Image uploaded!', 'success'); })">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Tap to upload</div>
+                        </div>
+                    </div>
                     <input type="hidden" id="dImage">
-                    <div id="dImagePreview" style="margin-top:8px;min-height:80px;border:1px dashed var(--gray-300);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--gray-400);font-size:0.8rem;">No image uploaded</div>
                 </div>
             `;
             document.getElementById('modalSaveBtn').onclick = saveDriver;
@@ -3122,11 +3533,19 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Email</label><input id="dEmail" value="${escapeHtml(d.email)}"></div>
                 <div class="form-group">
                     <label>Driver Picture</label>
-                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('dImage').value = url; document.getElementById('dImagePreview').innerHTML = '<img src=\"'+url+'\" style=\"width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);\">'; showToast('Image updated!', 'success'); }, 'image', 'dImagePreview')"><i class="fas fa-cloud-upload-alt"></i> Change Image</button>
-                    <input type="hidden" id="dImage" value="${escapeHtml(d.image)}">
-                    <div id="dImagePreview" style="margin-top:8px;min-height:80px;border:1px dashed var(--gray-300);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--gray-400);font-size:0.8rem;">
-                        ${d.image ? `<img src="${d.image}" style="width:80px;height:80px;border-radius:var(--radius);object-fit:cover;border:2px solid var(--primary);">` : 'No image uploaded'}
+                    <div id="driverUploadContainer" class="upload-preview-container">
+                        ${d.image ? `<div class="upload-preview-box has-image">
+                            <img src="${d.image}" alt="Driver">
+                            <button class="remove-btn" onclick="this.closest('.upload-preview-box').remove(); document.getElementById('dImage').value = '';">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>` : ''}
+                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('driverUploadContainer', (url) => { document.getElementById('dImage').value = url; showToast('Image updated!', 'success'); })">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Tap to upload</div>
+                        </div>
                     </div>
+                    <input type="hidden" id="dImage" value="${escapeHtml(d.image)}">
                 </div>
             `;
             document.getElementById('modalSaveBtn').onclick = () => saveDriverEdit(id);
@@ -3217,115 +3636,6 @@ Report generated automatically by ZAMLIFT Fleet Management
             toggleSidebar();
         };
 
-        window.openFleetAnalytics = function() {
-            const container = document.getElementById('contentArea');
-            const activeV = allVehicles.filter(v => v.status === 'active').length;
-            const activeD = allDrivers.filter(d => d.status === 'active').length;
-            const completedStats = allStats.filter(s => s.status === 'completed').length;
-            const totalFuel = allStats.reduce((sum, s) => sum + (s.fuelUsed || 0), 0);
-            const totalRevenue = allStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
-
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-chart-bar" style="color:var(--secondary);"></i> Fleet Analytics</h2>
-                </div>
-                <div class="grid-cards">
-                    <div class="card"><div class="card-header"><div class="icon-wrap purple"><i class="fas fa-tachometer-alt"></i></div><div><div class="card-title">Utilization</div><div class="card-subtitle">Current status</div></div></div><div class="card-body"><div class="detail-row"><span class="label">Active Vehicles</span><span class="value">${activeV} / ${allVehicles.length}</span></div><div class="detail-row"><span class="label">Active Drivers</span><span class="value">${activeD} / ${allDrivers.length}</span></div></div></div>
-                    <div class="card"><div class="card-header"><div class="icon-wrap teal"><i class="fas fa-route"></i></div><div><div class="card-title">Stats</div><div class="card-subtitle">Performance</div></div></div><div class="card-body"><div class="detail-row"><span class="label">Completed</span><span class="value">${completedStats}</span></div><div class="detail-row"><span class="label">In Progress</span><span class="value">${allStats.filter(s => s.status === 'signed').length}</span></div></div></div>
-                    <div class="card"><div class="card-header"><div class="icon-wrap amber"><i class="fas fa-gas-pump"></i></div><div><div class="card-title">Fuel</div><div class="card-subtitle">Consumption</div></div></div><div class="card-body"><div class="detail-row"><span class="label">Total Fuel</span><span class="value">${totalFuel.toFixed(1)} L</span></div><div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${totalRevenue.toFixed(2)}</span></div></div></div>
-                </div>
-            `;
-            container.innerHTML = html;
-            document.getElementById('statsText').textContent = '📊 Analytics';
-            toggleSidebar();
-        };
-
-        window.openExpenseReports = function() {
-            const container = document.getElementById('contentArea');
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-file-invoice-dollar" style="color:var(--green);"></i> Expense Reports</h2>
-                </div>
-                <div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><h3>No expenses recorded</h3></div>
-            `;
-            container.innerHTML = html;
-            document.getElementById('statsText').textContent = '💰 Expenses';
-            toggleSidebar();
-        };
-
-        window.openDriverPerformance = function() {
-            const container = document.getElementById('contentArea');
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-star" style="color:var(--accent);"></i> Driver Scorecards</h2>
-                </div>
-                <div class="grid-cards">
-                    ${allDrivers.map(d => `
-                        <div class="card">
-                            <div class="card-header"><div class="icon-wrap purple"><i class="fas fa-user-md"></i></div><div><div class="card-title">${escapeHtml(d.name || 'Driver')}</div><div class="card-subtitle">${escapeHtml(d.phone || 'N/A')}</div></div><div style="margin-left:auto;"><span class="status-badge ${d.status === 'active' ? 'active' : 'inactive'}"><span class="dot"></span> ${d.status || 'Inactive'}</span></div></div>
-                            <div class="card-body"><div class="detail-row"><span class="label">Trips completed</span><span class="value">${allStats.filter(s => s.driverId === d.id && s.status === 'completed').length}</span></div></div>
-                        </div>
-                    `).join('') || '<div class="empty-state"><i class="fas fa-star"></i><h3>No drivers</h3></div>'}
-                </div>
-            `;
-            container.innerHTML = html;
-            document.getElementById('statsText').textContent = '⭐ Driver Scorecards';
-            toggleSidebar();
-        };
-
-        window.openTripHistory = function() {
-            const container = document.getElementById('contentArea');
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-history" style="color:var(--primary);"></i> Trip History</h2>
-                </div>
-                <div class="grid-cards">
-                    ${allStats.filter(s => s.status === 'completed').sort((a,b) => b.startTime - a.startTime).map(s => `
-                        <div class="card">
-                            <div class="card-header"><div class="icon-wrap blue"><i class="fas fa-route"></i></div><div><div class="card-title">${escapeHtml(s.vehicleName)}</div><div class="card-subtitle">${escapeHtml(s.driverName)}</div></div></div>
-                            <div class="card-body"><div class="detail-row"><span class="label">Distance</span><span class="value">${s.distanceTraveled || 0} km</span></div><div class="detail-row"><span class="label">Fuel Used</span><span class="value">${s.fuelUsed || 0} L</span></div><div class="detail-row"><span class="label">Revenue</span><span class="value">ZMW ${s.revenue || 0}</span></div><div class="detail-row"><span class="label">Date</span><span class="value">${formatDate(s.startTime)}</span></div></div>
-                        </div>
-                    `).join('') || '<div class="empty-state"><i class="fas fa-history"></i><h3>No completed trips</h3></div>'}
-                </div>
-            `;
-            container.innerHTML = html;
-            document.getElementById('statsText').textContent = '📜 Trip History';
-            toggleSidebar();
-        };
-
-        window.openFuelConsumption = function() {
-            openFuelManagement();
-        };
-
-        window.openCompanyDocuments = function() {
-            const container = document.getElementById('contentArea');
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-file-alt" style="color:var(--primary);"></i> Company Documents</h2>
-                </div>
-                <div class="empty-state"><i class="fas fa-file-alt"></i><h3>No documents uploaded</h3></div>
-            `;
-            container.innerHTML = html;
-            document.getElementById('statsText').textContent = '📄 Company Documents';
-            toggleSidebar();
-        };
-
-        window.openHelpCenter = function() {
-            const container = document.getElementById('contentArea');
-            container.innerHTML = `
-                <div class="page-header">
-                    <h2><i class="fas fa-question-circle" style="color:var(--blue);"></i> Help Center</h2>
-                </div>
-                <div class="grid-cards">
-                    <div class="card"><div class="card-header"><div class="icon-wrap teal"><i class="fas fa-book"></i></div><div><div class="card-title">User Guide</div><div class="card-subtitle">Getting started with ZAMLIFT</div></div></div><div class="card-body"><p style="font-size:0.85rem;color:var(--gray-600);">Learn how to manage your fleet, track drivers, and monitor fuel consumption.</p></div></div>
-                    <div class="card"><div class="card-header"><div class="icon-wrap blue"><i class="fas fa-video"></i></div><div><div class="card-title">Video Tutorials</div><div class="card-subtitle">Watch & learn</div></div></div><div class="card-body"><p style="font-size:0.85rem;color:var(--gray-600);">Step-by-step video guides for all features.</p></div></div>
-                    <div class="card"><div class="card-header"><div class="icon-wrap amber"><i class="fas fa-headset"></i></div><div><div class="card-title">Contact Support</div><div class="card-subtitle">We're here to help</div></div></div><div class="card-body"><p style="font-size:0.85rem;color:var(--gray-600);">Reach out to our support team via chat or email.</p></div></div>
-                </div>
-            `;
-            document.getElementById('statsText').textContent = '❓ Help Center';
-            toggleSidebar();
-        };
-
         // ==============================================================
         // TAB SWITCHING
         // ==============================================================
@@ -3345,9 +3655,6 @@ Report generated automatically by ZAMLIFT Fleet Management
                     break;
                 case 'reports':
                     renderReports();
-                    break;
-                case 'map':
-                    renderMap();
                     break;
                 default:
                     renderDashboard();
