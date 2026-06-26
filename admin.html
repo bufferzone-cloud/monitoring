@@ -73,12 +73,12 @@
             --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --sidebar-width: 280px;
-            --header-h: 64px;
-            --nav-h: 68px;
+            --header-h: 56px;
+            --nav-h: 60px;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         html {
-            font-size: 16px;
+            font-size: 14px;
             height: 100%;
         }
         body {
@@ -120,25 +120,25 @@
             align-items: center;
         }
         .gap-2 {
-            gap: 8px;
+            gap: 6px;
         }
         .gap-3 {
-            gap: 12px;
+            gap: 10px;
         }
         .gap-4 {
-            gap: 16px;
+            gap: 14px;
         }
         .mt-2 {
-            margin-top: 8px;
+            margin-top: 6px;
         }
         .mt-3 {
-            margin-top: 12px;
+            margin-top: 10px;
         }
         .mb-2 {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .mb-3 {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .w-full {
             width: 100%;
@@ -147,10 +147,10 @@
             text-align: center;
         }
         .text-sm {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         .text-xs {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
         }
         .font-bold {
             font-weight: 700;
@@ -168,7 +168,7 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
@@ -180,16 +180,6 @@
                 opacity: 0;
             }
             to {
-                opacity: 1;
-            }
-        }
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
                 opacity: 1;
             }
         }
@@ -212,43 +202,34 @@
                 transform: rotate(360deg);
             }
         }
-        @keyframes float {
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-6px);
-            }
-        }
 
         /* ===== TOAST CONTAINER ===== */
         #toastContainer {
             position: fixed;
-            top: 16px;
+            top: 14px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-width: 92%;
-            width: 400px;
+            gap: 6px;
+            max-width: 90%;
+            width: 380px;
             pointer-events: none;
         }
         .toast {
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-radius: var(--radius);
             background: var(--gray-900);
             color: var(--white);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             box-shadow: var(--shadow-lg);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             pointer-events: auto;
-            animation: fadeInUp 0.35s ease;
+            animation: fadeInUp 0.3s ease;
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
@@ -262,7 +243,7 @@
             background: linear-gradient(135deg, #D97706, #F59E0B);
         }
         .toast i {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
         }
         .toast span {
@@ -273,7 +254,7 @@
             border: none;
             color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             padding: 0 4px;
             transition: 0.2s;
         }
@@ -281,7 +262,7 @@
             color: #fff;
         }
 
-        /* ===== BUTTON STYLES (ALL BUTTONS) ===== */
+        /* ===== BUTTON STYLES ===== */
         button,
         .btn,
         .btn-primary,
@@ -297,7 +278,6 @@
         .nav-item,
         .sidebar-item,
         .close-btn,
-        .toast-close,
         .btn-upload {
             font-family: var(--font);
             transition: all var(--transition);
@@ -306,6 +286,7 @@
             outline: none;
             position: relative;
             overflow: hidden;
+            font-size: 0.8rem;
         }
 
         button:hover,
@@ -329,33 +310,18 @@
         }
 
         button:active,
-        .btn:active,
-        .btn-primary:active,
-        .btn-secondary:active,
-        .btn-danger:active,
-        .btn-success:active,
-        .btn-warning:active,
-        .btn-info:active,
-        .btn-icon:active,
-        .btn-submit:active,
-        .login-btn:active,
-        .action-btn-sm:active,
-        .nav-item:active,
-        .sidebar-item:active,
-        .btn-upload:active {
+        .btn:active {
             transform: scale(0.97);
         }
 
-        /* Primary buttons */
         .btn-primary,
         .btn-submit,
         .login-btn {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: var(--radius-full);
             font-weight: 700;
-            font-size: 0.9rem;
             box-shadow: 0 4px 16px var(--primary-glow);
         }
         .btn-primary:hover,
@@ -366,14 +332,12 @@
             transform: translateY(-2px);
         }
 
-        /* Secondary buttons */
         .btn-secondary {
             background: var(--gray-100);
             color: var(--gray-600);
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 0.85rem;
             border: 1px solid var(--gray-200);
         }
         .btn-secondary:hover {
@@ -381,14 +345,12 @@
             color: var(--gray-700);
         }
 
-        /* Danger buttons */
         .btn-danger {
             background: var(--red);
             color: #fff;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 0.85rem;
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
         }
         .btn-danger:hover {
@@ -396,14 +358,12 @@
             box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
         }
 
-        /* Success buttons */
         .btn-success {
             background: var(--green);
             color: #fff;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 0.85rem;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
         .btn-success:hover {
@@ -411,14 +371,12 @@
             box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         }
 
-        /* Warning buttons */
         .btn-warning {
             background: var(--accent);
             color: #fff;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 0.85rem;
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
         }
         .btn-warning:hover {
@@ -426,14 +384,12 @@
             box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
         }
 
-        /* Info buttons */
         .btn-info {
             background: var(--blue);
             color: #fff;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 0.85rem;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
         .btn-info:hover {
@@ -441,15 +397,14 @@
             box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
         }
 
-        /* Icon buttons */
         .btn-icon {
-            padding: 6px 14px;
+            padding: 4px 12px;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             background: var(--gray-100);
             color: var(--gray-600);
         }
@@ -504,17 +459,16 @@
             background: var(--primary-dark);
         }
 
-        /* Small action buttons */
         .action-btn-sm {
-            padding: 6px 14px;
+            padding: 4px 12px;
             border-radius: var(--radius-full);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             background: var(--gray-100);
             color: var(--gray-600);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         .action-btn-sm:hover {
             background: var(--gray-200);
@@ -529,7 +483,6 @@
             box-shadow: 0 4px 12px var(--primary-glow);
         }
 
-        /* Nav item buttons */
         .nav-item {
             flex: 1;
             display: flex;
@@ -538,14 +491,14 @@
             justify-content: center;
             gap: 2px;
             background: none;
-            font-size: 0.58rem;
+            font-size: 0.55rem;
             font-weight: 600;
             color: var(--gray-400);
             padding: 4px 0;
             position: relative;
         }
         .nav-item i {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             transition: var(--transition);
         }
         .nav-item:hover {
@@ -568,17 +521,16 @@
             border-radius: 0 0 4px 4px;
         }
 
-        /* Sidebar item buttons */
         .sidebar-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
+            gap: 10px;
+            padding: 8px 10px;
             border-radius: var(--radius);
             cursor: pointer;
             transition: var(--transition);
             color: var(--gray-600);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             background: none;
             width: 100%;
@@ -589,9 +541,9 @@
             color: var(--gray-800);
         }
         .sidebar-item i {
-            width: 20px;
+            width: 18px;
             color: var(--primary);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         .sidebar-item.danger {
             color: var(--red);
@@ -603,16 +555,15 @@
             background: var(--red-light);
         }
 
-        /* Close button */
         .close-btn {
             background: none;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--gray-400);
         }
         .close-btn:hover {
@@ -620,10 +571,10 @@
             color: var(--gray-600);
         }
 
-        /* Upload button - styled as box */
+        /* Upload box */
         .upload-box {
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             border: 2px dashed var(--gray-300);
             border-radius: var(--radius);
             display: flex;
@@ -646,11 +597,11 @@
             transform: scale(0.97);
         }
         .upload-box .placeholder-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: var(--gray-400);
         }
         .upload-box .placeholder-text {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: var(--gray-400);
             margin-top: 4px;
             text-align: center;
@@ -668,13 +619,13 @@
             position: absolute;
             top: 4px;
             right: 4px;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: var(--red);
             color: #fff;
             border: none;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             display: none;
             align-items: center;
             justify-content: center;
@@ -693,10 +644,10 @@
         .form-expandable {
             background: var(--white);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 14px;
             border: 1px solid var(--gray-200);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             transition: all var(--transition);
             cursor: pointer;
         }
@@ -707,38 +658,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 6px 0;
         }
         .form-expandable .form-header h4 {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--gray-800);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .form-expandable .form-header .toggle-icon {
             transition: transform var(--transition);
             color: var(--gray-400);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         .form-expandable.expanded .form-header .toggle-icon {
             transform: rotate(180deg);
         }
         .form-expandable .form-body {
             display: none;
-            padding: 12px 0 4px 0;
+            padding: 10px 0 4px 0;
             animation: fadeInUp 0.3s ease;
         }
         .form-expandable.expanded .form-body {
             display: block;
         }
         .form-expandable .form-body .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .form-expandable .form-body .form-group label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--gray-600);
             margin-bottom: 4px;
@@ -747,10 +698,10 @@
         .form-expandable .form-body .form-group select,
         .form-expandable .form-body .form-group textarea {
             width: 100%;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border: 1.5px solid var(--gray-200);
             border-radius: var(--radius);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-family: var(--font);
             transition: var(--transition);
             background: var(--gray-50);
@@ -766,14 +717,100 @@
         }
         .form-expandable .form-body .form-group textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 50px;
         }
         .form-expandable .form-body .form-actions {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
+            gap: 6px;
+            margin-top: 10px;
+            padding-top: 10px;
             border-top: 1px solid var(--gray-100);
+        }
+
+        /* ===== SELECT VEHICLE/DRIVER DROPDOWN ===== */
+        .select-dropdown {
+            position: relative;
+            width: 100%;
+        }
+        .select-dropdown .dropdown-trigger {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            background: var(--white);
+            color: var(--gray-800);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        .select-dropdown .dropdown-trigger:hover {
+            border-color: var(--primary);
+        }
+        .select-dropdown .dropdown-trigger .selected-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .select-dropdown .dropdown-trigger .selected-item img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .select-dropdown .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+        .select-dropdown .dropdown-menu.open {
+            display: block;
+            animation: fadeInUp 0.2s ease;
+        }
+        .select-dropdown .dropdown-menu .dropdown-item {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .select-dropdown .dropdown-menu .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .select-dropdown .dropdown-menu .dropdown-item:hover {
+            background: var(--gray-50);
+        }
+        .select-dropdown .dropdown-menu .dropdown-item img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .select-dropdown .dropdown-menu .dropdown-item .item-info {
+            flex: 1;
+        }
+        .select-dropdown .dropdown-menu .dropdown-item .item-info .name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--gray-800);
+        }
+        .select-dropdown .dropdown-menu .dropdown-item .item-info .detail {
+            font-size: 0.7rem;
+            color: var(--gray-500);
         }
 
         /* ===== LOGIN SCREEN ===== */
@@ -794,25 +831,25 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         .login-banner img {
             width: 80%;
-            max-width: 350px;
+            max-width: 300px;
             height: auto;
             object-fit: contain;
             display: block;
         }
         .login-form-wrap {
-            max-width: 380px;
+            max-width: 340px;
             width: 100%;
         }
         .login-form-wrap .logo-mobile {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .login-form-wrap .logo-mobile h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 900;
             color: var(--gray-900);
         }
@@ -820,32 +857,32 @@
             color: var(--primary);
         }
         .login-form-wrap h2 {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 800;
             color: var(--gray-900);
             margin-bottom: 4px;
         }
         .login-form-wrap p.sub {
             color: var(--gray-500);
-            font-size: 0.9rem;
-            margin-bottom: 28px;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
         }
         .login-form-wrap .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         .login-form-wrap .form-group label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--gray-600);
             margin-bottom: 4px;
         }
         .login-form-wrap .form-group input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: 1.5px solid var(--gray-200);
             border-radius: var(--radius);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-family: var(--font);
             transition: var(--transition);
             background: var(--gray-50);
@@ -859,12 +896,12 @@
         }
         .login-form-wrap .login-btn {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border: none;
             border-radius: var(--radius);
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
@@ -881,8 +918,8 @@
         }
         .login-btn .btn-loader {
             display: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: #fff;
             border-radius: 50%;
@@ -908,17 +945,17 @@
         }
         #loginError {
             color: var(--red);
-            font-size: 0.8rem;
-            margin-top: 12px;
+            font-size: 0.75rem;
+            margin-top: 10px;
             text-align: center;
             font-weight: 500;
-            min-height: 20px;
+            min-height: 18px;
         }
         .login-form-wrap .login-footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 18px;
             color: var(--gray-400);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
         /* ===== APP SHELL ===== */
@@ -935,7 +972,7 @@
         /* ===== HEADER ===== */
         .app-header {
             height: var(--header-h);
-            padding: 0 16px;
+            padding: 0 12px;
             background: var(--white);
             border-bottom: 1px solid var(--gray-200);
             display: flex;
@@ -948,7 +985,7 @@
         .app-header .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             cursor: pointer;
             transition: var(--transition);
         }
@@ -956,7 +993,7 @@
             opacity: 0.8;
         }
         .app-header .brand h1 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 800;
             color: var(--gray-900);
             letter-spacing: -0.5px;
@@ -965,8 +1002,8 @@
             color: var(--primary);
         }
         .app-header .brand .badge-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--green);
             display: inline-block;
@@ -980,13 +1017,13 @@
         .app-header .header-actions button {
             background: none;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: var(--radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--gray-500);
             cursor: pointer;
             transition: var(--transition);
@@ -996,13 +1033,13 @@
             color: var(--gray-700);
         }
         .app-header .header-actions .avatar-btn {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--primary);
             color: #fff;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1017,11 +1054,11 @@
 
         /* ===== TOOLBAR ===== */
         .toolbar {
-            padding: 8px 16px;
+            padding: 6px 12px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
             background: var(--white);
             border-bottom: 1px solid var(--gray-200);
@@ -1029,29 +1066,29 @@
         .toolbar .stats-pill {
             background: var(--primary-light);
             color: var(--primary-dark);
-            padding: 4px 14px;
+            padding: 4px 12px;
             border-radius: var(--radius-full);
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         .toolbar .stats-pill i {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
         .toolbar .search-box {
             flex: 1;
-            min-width: 140px;
+            min-width: 120px;
             position: relative;
         }
         .toolbar .search-box input {
             width: 100%;
-            padding: 8px 14px 8px 38px;
+            padding: 6px 12px 6px 34px;
             border-radius: var(--radius-full);
             border: 1.5px solid var(--gray-200);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-family: var(--font);
             background: var(--gray-50);
             transition: var(--transition);
@@ -1065,28 +1102,28 @@
         }
         .toolbar .search-box i {
             position: absolute;
-            left: 12px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray-400);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         .toolbar .filter-select {
-            padding: 8px 14px 8px 12px;
+            padding: 6px 12px 6px 10px;
             border-radius: var(--radius-full);
             border: 1.5px solid var(--gray-200);
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             font-family: var(--font);
             background: var(--gray-50);
             color: var(--gray-700);
             cursor: pointer;
             transition: var(--transition);
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 32px;
-            min-width: 110px;
+            background-position: right 10px center;
+            padding-right: 28px;
+            min-width: 100px;
         }
         .toolbar .filter-select:focus {
             outline: none;
@@ -1094,17 +1131,17 @@
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
         .toolbar .action-btn-sm {
-            padding: 6px 14px;
+            padding: 4px 12px;
             border-radius: var(--radius-full);
             border: none;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             font-family: var(--font);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             background: var(--gray-100);
             color: var(--gray-600);
         }
@@ -1125,7 +1162,7 @@
         .content-area {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 16px calc(var(--nav-h) + 16px + var(--safe-bottom));
+            padding: 12px 12px calc(var(--nav-h) + 12px + var(--safe-bottom));
             background: var(--gray-50);
         }
 
@@ -1144,7 +1181,7 @@
             align-items: stretch;
             justify-content: space-around;
             z-index: 100;
-            padding: 0 8px calc(4px + var(--safe-bottom));
+            padding: 0 6px calc(4px + var(--safe-bottom));
             max-width: 600px;
             margin: 0 auto;
         }
@@ -1157,7 +1194,7 @@
             gap: 2px;
             background: none;
             border: none;
-            font-size: 0.58rem;
+            font-size: 0.5rem;
             font-weight: 600;
             color: var(--gray-400);
             cursor: pointer;
@@ -1167,7 +1204,7 @@
             font-family: var(--font);
         }
         .bottom-nav .nav-item i {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             transition: var(--transition);
         }
         .bottom-nav .nav-item:hover {
@@ -1213,7 +1250,7 @@
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: var(--shadow-xl);
             overflow-y: auto;
-            padding: 20px 16px 80px;
+            padding: 16px 12px 80px;
         }
         .sidebar.open {
             transform: translateX(0);
@@ -1222,19 +1259,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 16px;
+            padding-bottom: 14px;
             border-bottom: 1px solid var(--gray-200);
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         .sidebar .sidebar-header h2 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 800;
             color: var(--gray-800);
         }
         .sidebar .sidebar-header button {
             background: none;
             border: none;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--gray-400);
             cursor: pointer;
             padding: 4px;
@@ -1244,27 +1281,27 @@
             color: var(--gray-600);
         }
         .sidebar .sidebar-section {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .sidebar .sidebar-section .section-title {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--gray-400);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             padding-left: 4px;
         }
         .sidebar .sidebar-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
+            gap: 10px;
+            padding: 8px 10px;
             border-radius: var(--radius);
             cursor: pointer;
             transition: var(--transition);
             color: var(--gray-600);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             background: none;
             border: none;
@@ -1277,9 +1314,9 @@
             color: var(--gray-800);
         }
         .sidebar .sidebar-item i {
-            width: 20px;
+            width: 18px;
             color: var(--primary);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         .sidebar .sidebar-item.danger {
             color: var(--red);
@@ -1295,17 +1332,17 @@
         .grid-cards {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 10px;
         }
         @media (min-width: 480px) {
             .grid-cards {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
         }
         .card {
             background: var(--white);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 14px;
             border: 1px solid var(--gray-200);
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
@@ -1319,17 +1356,17 @@
         .card .card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 8px;
         }
         .card .card-header .icon-wrap {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
             padding: 4px;
         }
@@ -1366,11 +1403,11 @@
         }
         .card .card-title {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: var(--gray-800);
         }
         .card .card-subtitle {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--gray-500);
         }
         .card .card-body {
@@ -1380,7 +1417,7 @@
             display: flex;
             justify-content: space-between;
             padding: 4px 0;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--gray-600);
             border-bottom: 1px solid var(--gray-100);
         }
@@ -1396,17 +1433,17 @@
         }
         .card .card-actions {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: wrap;
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px solid var(--gray-100);
         }
         .card .card-actions .btn-icon {
-            padding: 5px 10px;
+            padding: 4px 10px;
             border-radius: var(--radius-full);
             border: none;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
@@ -1465,9 +1502,9 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 2px 10px;
+            padding: 2px 8px;
             border-radius: var(--radius-full);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 600;
         }
         .status-badge.pending {
@@ -1483,87 +1520,127 @@
             color: var(--green);
         }
         .status-badge .dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             display: inline-block;
         }
 
         /* ===== STATS SECTION ===== */
-        #statsSection .stats-header {
+        .stats-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
         }
-        #statsSection .stats-header h2 {
-            font-size: 1.3rem;
+        .stats-header h2 {
+            font-size: 1.1rem;
             font-weight: 800;
             color: var(--gray-800);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
-        #statsSection .stats-header h2 i {
+        .stats-header h2 i {
             color: var(--primary);
         }
 
-        .assign-flow-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 16px;
-        }
-        .assign-flow-card .step-label {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--gray-700);
-            margin-bottom: 12px;
+        /* ===== DATE PICKER ===== */
+        .date-picker-container {
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 6px 12px;
+            background: var(--white);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
         }
-        .assign-flow-card .step-label i {
-            color: var(--primary);
+        .date-picker-container .date-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        .assign-flow-card select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: var(--radius);
+        .date-picker-container input[type="date"] {
+            padding: 6px 10px;
             border: 1.5px solid var(--gray-200);
-            font-size: 0.9rem;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
             font-family: var(--font);
             background: var(--gray-50);
             color: var(--gray-800);
             transition: var(--transition);
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
+            flex: 1;
+            min-width: 120px;
         }
-        .assign-flow-card select:focus {
+        .date-picker-container input[type="date"]:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
+        .date-picker-container .btn-date {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.7rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .date-picker-container .btn-date:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        .date-picker-container .btn-date.today {
+            background: var(--gray-400);
+        }
+        .date-picker-container .btn-date.today:hover {
+            background: var(--gray-500);
+        }
+
+        /* ===== ASSIGN FLOW ===== */
+        .assign-flow-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
+        }
+        .assign-flow-card .step-label {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .assign-flow-card .step-label i {
+            color: var(--primary);
+        }
         .assign-flow-card .selected-preview {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
+            gap: 10px;
+            padding: 10px 14px;
             background: var(--gray-50);
             border-radius: var(--radius);
-            margin-top: 8px;
+            margin-top: 6px;
             border: 1px solid var(--gray-200);
         }
         .assign-flow-card .selected-preview img {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: var(--radius);
             object-fit: cover;
             border: 2px solid var(--gray-200);
@@ -1573,11 +1650,11 @@
         }
         .assign-flow-card .selected-preview .info .name {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--gray-800);
         }
         .assign-flow-card .selected-preview .info .detail {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: var(--gray-500);
         }
 
@@ -1585,18 +1662,18 @@
         .stats-cards-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 16px;
+            gap: 10px;
+            margin-top: 14px;
         }
         @media (min-width: 480px) {
             .stats-cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
         }
         .stats-card-item {
             background: var(--white);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 14px;
             border: 1px solid var(--gray-200);
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
@@ -1610,16 +1687,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .stats-card-item .stats-card-header .status-badge {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
         }
         .stats-card-item .stats-card-body .detail-row {
             display: flex;
             justify-content: space-between;
             padding: 4px 0;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--gray-600);
             border-bottom: 1px solid var(--gray-100);
         }
@@ -1635,16 +1712,16 @@
         }
         .stats-card-item .stats-card-actions {
             display: flex;
-            gap: 6px;
-            margin-top: 10px;
-            padding-top: 10px;
+            gap: 4px;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px solid var(--gray-100);
         }
         .stats-card-item .stats-card-actions .btn-icon {
-            padding: 5px 10px;
+            padding: 4px 10px;
             border-radius: var(--radius-full);
             border: none;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
@@ -1687,7 +1764,7 @@
             background: var(--white);
             border-radius: var(--radius-xl);
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             max-height: 90vh;
             overflow: hidden;
             box-shadow: var(--shadow-xl);
@@ -1696,7 +1773,7 @@
             flex-direction: column;
         }
         .modal-header {
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-bottom: 1px solid var(--gray-200);
             display: flex;
             justify-content: space-between;
@@ -1705,20 +1782,20 @@
             background: var(--gray-50);
         }
         .modal-header h3 {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--gray-800);
         }
         .modal-header .close-btn {
             background: none;
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--gray-400);
             cursor: pointer;
             transition: var(--transition);
@@ -1728,16 +1805,16 @@
             color: var(--gray-600);
         }
         .modal-body {
-            padding: 20px;
+            padding: 18px;
             overflow-y: auto;
             flex: 1;
         }
         .modal-body .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .modal-body .form-group label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--gray-600);
             margin-bottom: 4px;
@@ -1746,10 +1823,10 @@
         .modal-body .form-group select,
         .modal-body .form-group textarea {
             width: 100%;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border: 1.5px solid var(--gray-200);
             border-radius: var(--radius);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-family: var(--font);
             transition: var(--transition);
             background: var(--gray-50);
@@ -1764,19 +1841,19 @@
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
         .modal-footer {
-            padding: 12px 20px 16px;
+            padding: 10px 18px 14px;
             border-top: 1px solid var(--gray-200);
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: flex-end;
             flex-shrink: 0;
             background: var(--gray-50);
         }
         .modal-footer .btn {
-            padding: 8px 20px;
+            padding: 6px 18px;
             border-radius: var(--radius-full);
             border: none;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
@@ -1799,18 +1876,18 @@
             box-shadow: 0 4px 12px var(--primary-glow);
         }
 
-        /* ===== USER PROFILE POPUP ===== */
+        /* ===== USER POPUP ===== */
         .user-popup {
             position: fixed;
-            top: 70px;
-            right: 16px;
+            top: 64px;
+            right: 14px;
             z-index: 500;
             background: var(--white);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            padding: 18px;
             box-shadow: var(--shadow-xl);
             border: 1px solid var(--gray-200);
-            min-width: 220px;
+            min-width: 200px;
             display: none;
             animation: fadeInUp 0.3s ease;
         }
@@ -1820,14 +1897,14 @@
         .user-popup .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding-bottom: 12px;
+            gap: 10px;
+            padding-bottom: 10px;
             border-bottom: 1px solid var(--gray-200);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .user-popup .user-info .avatar-large {
-            width: 48px;
-            height: 48px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: var(--primary);
             color: #fff;
@@ -1835,15 +1912,15 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         .user-popup .user-info .details .name {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: var(--gray-800);
         }
         .user-popup .user-info .details .email {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: var(--gray-500);
         }
         .user-popup .user-actions {
@@ -1852,11 +1929,11 @@
             gap: 4px;
         }
         .user-popup .user-actions button {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: var(--radius);
             border: none;
             background: none;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--gray-600);
             cursor: pointer;
@@ -1865,7 +1942,7 @@
             font-family: var(--font);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .user-popup .user-actions button:hover {
             background: var(--gray-50);
@@ -1881,39 +1958,39 @@
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .app-header .brand h1 {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
             .toolbar .stats-pill {
-                font-size: 0.6rem;
-                padding: 2px 10px;
+                font-size: 0.55rem;
+                padding: 2px 8px;
             }
             .toolbar .search-box input {
-                font-size: 0.75rem;
-                padding: 6px 12px 6px 32px;
+                font-size: 0.7rem;
+                padding: 4px 10px 4px 28px;
             }
             .card {
-                padding: 12px;
+                padding: 10px;
             }
             .modal {
                 max-width: 100%;
                 border-radius: var(--radius-lg);
-                margin: 8px;
+                margin: 6px;
             }
             .sidebar {
-                width: 260px;
+                width: 240px;
             }
             .bottom-nav .nav-item i {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             .bottom-nav .nav-item {
-                font-size: 0.5rem;
+                font-size: 0.45rem;
             }
             .upload-box {
-                width: 100px;
-                height: 100px;
+                width: 80px;
+                height: 80px;
             }
             .upload-box .placeholder-icon {
-                font-size: 2rem;
+                font-size: 1.6rem;
             }
         }
         @media (min-width: 600px) {
@@ -2100,6 +2177,15 @@
         const UPLOAD_PRESET = 'h3eyhc2o';
 
         // ==============================================================
+        // ERB FUEL PRICES (Zambia Energy Regulation Board)
+        // ==============================================================
+        const ERB_FUEL_PRICES = {
+            petrol: 33.50,
+            diesel: 31.20,
+            kerosene: 29.80
+        };
+
+        // ==============================================================
         // GLOBALS
         // ==============================================================
         let allVehicles = [];
@@ -2171,9 +2257,6 @@
             document.body.style.overflow = 'auto';
         }
 
-        // ==============================================================
-        // EXPANDABLE FORMS
-        // ==============================================================
         function toggleFormExpand(element) {
             element.classList.toggle('expanded');
         }
@@ -2206,8 +2289,7 @@
                     if (res.event === 'success') {
                         const info = res.info;
                         const url = info.secure_url;
-                        
-                        // Update the box with the uploaded image
+
                         box.classList.add('has-image');
                         box.innerHTML = `
                             <img src="${url}" alt="Uploaded image">
@@ -2215,9 +2297,9 @@
                                 <i class="fas fa-times"></i>
                             </button>
                         `;
-                        
+
                         hiddenInput.value = url;
-                        
+
                         if (callback) callback(url);
                         showToast('Upload successful!', 'success');
                     }
@@ -2228,7 +2310,7 @@
         function removeUploadImage(boxId, hiddenInputId) {
             const box = document.getElementById(boxId);
             const hiddenInput = document.getElementById(hiddenInputId);
-            
+
             if (box) {
                 box.classList.remove('has-image');
                 box.innerHTML = `
@@ -2236,12 +2318,63 @@
                     <div class="placeholder-text">Tap to upload</div>
                 `;
             }
-            
+
             if (hiddenInput) {
                 hiddenInput.value = '';
             }
-            
+
             showToast('Image removed', 'info');
+        }
+
+        // ==============================================================
+        // CUSTOM DROPDOWN FOR VEHICLE/DRIVER SELECTION
+        // ==============================================================
+        function createCustomDropdown(items, onSelect, placeholder, renderItem) {
+            const container = document.createElement('div');
+            container.className = 'select-dropdown';
+
+            const trigger = document.createElement('div');
+            trigger.className = 'dropdown-trigger';
+            trigger.innerHTML = `
+                <span class="selected-item">${placeholder}</span>
+                <i class="fas fa-chevron-down"></i>
+            `;
+
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+
+            items.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'dropdown-item';
+                itemEl.innerHTML = renderItem(item);
+                itemEl.onclick = function(e) {
+                    e.stopPropagation();
+                    onSelect(item, index);
+                    menu.classList.remove('open');
+                    const selectedInfo = renderItem(item);
+                    trigger.innerHTML = `
+                        <span class="selected-item">${selectedInfo}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    `;
+                };
+                menu.appendChild(itemEl);
+            });
+
+            trigger.onclick = function(e) {
+                e.stopPropagation();
+                menu.classList.toggle('open');
+            };
+
+            document.addEventListener('click', function(e) {
+                if (!container.contains(e.target)) {
+                    menu.classList.remove('open');
+                }
+            });
+
+            container.appendChild(trigger);
+            container.appendChild(menu);
+
+            return container;
         }
 
         // ==============================================================
@@ -2266,7 +2399,6 @@
                     return;
                 }
 
-                // Check if admin exists in DB
                 const adminSnap = await db.ref(`admins/${user.uid}`).once('value');
                 if (!adminSnap.exists()) {
                     await db.ref(`admins/${user.uid}`).set({
@@ -2372,7 +2504,6 @@
                         status: data.assignedDriver ? 'active' : 'inactive',
                         driverId: data.assignedDriver || '',
                         driverName: '',
-                        // Calculate totals from stats
                         totalFuel: 0,
                         totalDistance: 0,
                         totalRevenue: 0,
@@ -2402,7 +2533,6 @@
                         status: data.lat ? 'active' : 'inactive',
                         lat: data.lat || null,
                         lng: data.lng || null,
-                        // Calculate totals from stats
                         totalHours: 0,
                         totalRevenue: 0,
                         totalStats: 0,
@@ -2477,8 +2607,7 @@
                 loadStats(),
                 loadReports()
             ]);
-            
-            // Calculate totals for vehicles
+
             allVehicles.forEach(v => {
                 const vehicleStats = allStats.filter(s => s.vehicleId === v.id);
                 v.totalFuel = vehicleStats.reduce((sum, s) => sum + (s.fuelUsed || 0), 0);
@@ -2486,30 +2615,28 @@
                 v.totalRevenue = vehicleStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
                 v.totalHours = vehicleStats.reduce((sum, s) => sum + (s.hoursOut || 0), 0);
                 v.statCount = vehicleStats.length;
-                
-                // Get current driver
-                const currentStat = vehicleStats.filter(s => s.status === 'completed').sort((a,b) => b.endTime - a.endTime)[0];
+
+                const currentStat = vehicleStats.filter(s => s.status === 'completed').sort((a, b) => b.endTime - a
+                    .endTime)[0];
                 if (currentStat) {
                     v.driverName = currentStat.driverName;
                     v.driverId = currentStat.driverId;
                 }
             });
-            
-            // Calculate totals for drivers
+
             allDrivers.forEach(d => {
                 const driverStats = allStats.filter(s => s.driverId === d.id);
                 d.totalHours = driverStats.reduce((sum, s) => sum + (s.hoursOut || 0), 0);
                 d.totalRevenue = driverStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
                 d.totalStats = driverStats.length;
-                
-                // Get assigned vehicles
+
                 const vehicleIds = [...new Set(driverStats.map(s => s.vehicleId))];
                 d.assignedVehicles = vehicleIds.map(id => {
                     const v = allVehicles.find(veh => veh.id === id);
                     return v ? v.name : 'Unknown';
                 });
             });
-            
+
             renderCurrentTab();
             updateStats();
         }
@@ -2557,7 +2684,6 @@
         }
 
         function renderStats() {
-            // Filter stats by selected date
             const selectedDateStart = new Date(selectedDate);
             selectedDateStart.setHours(0, 0, 0, 0);
             const selectedDateEnd = new Date(selectedDate);
@@ -2573,124 +2699,94 @@
                     <h2><i class="fas fa-chart-bar"></i> Fleet Stats</h2>
                 </div>
 
-                <!-- Date Picker -->
                 <div class="date-picker-container">
                     <span class="date-label"><i class="fas fa-calendar-alt"></i> Date:</span>
                     <input type="date" id="datePicker" value="${selectedDate}" onchange="onDateChange(this.value)">
                     <button class="btn-date" onclick="onDateChange(document.getElementById('datePicker').value)">
                         <i class="fas fa-search"></i> View
                     </button>
-                    <button class="btn-date" style="background:var(--gray-400);" onclick="onDateChange(new Date().toISOString().split('T')[0])">
+                    <button class="btn-date today" onclick="onDateChange(new Date().toISOString().split('T')[0])">
                         <i class="fas fa-clock"></i> Today
                     </button>
                 </div>
 
-                <!-- Stats Count -->
-                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
                     <span class="status-badge pending"><span class="dot"></span> Pending: ${filteredStats.filter(s => s.status === 'pending').length}</span>
                     <span class="status-badge signed"><span class="dot"></span> Signed: ${filteredStats.filter(s => s.status === 'signed').length}</span>
                     <span class="status-badge completed"><span class="dot"></span> Completed: ${filteredStats.filter(s => s.status === 'completed').length}</span>
                 </div>
 
-                <!-- Assign Vehicle - Expandable Form -->
-                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
-                    <div class="form-header">
-                        <h4><i class="fas fa-truck" style="color:var(--primary);"></i> Assign Vehicle</h4>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
+                ${createExpandableForm('Assign Vehicle', 'fa-truck', `
+                    <div class="form-group">
+                        <label>Select Vehicle</label>
+                        <div id="vehicleDropdownContainer"></div>
                     </div>
-                    <div class="form-body">
-                        <div class="form-group">
-                            <label>Select Vehicle</label>
-                            <select id="vehicleSelect" onchange="onVehicleSelect(this.value)">
-                                <option value="">-- Select a vehicle --</option>
-                                ${allVehicles.map(v => `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`).join('')}
-                            </select>
-                        </div>
-                        <div id="vehiclePreview" class="selected-preview" style="display:none;">
-                            <img id="vehiclePreviewImg" src="" alt="Vehicle">
-                            <div class="info">
-                                <div class="name" id="vehiclePreviewName"></div>
-                                <div class="detail" id="vehiclePreviewDetail"></div>
-                            </div>
+                    <div id="vehiclePreview" class="selected-preview" style="display:none;">
+                        <img id="vehiclePreviewImg" src="" alt="Vehicle">
+                        <div class="info">
+                            <div class="name" id="vehiclePreviewName"></div>
+                            <div class="detail" id="vehiclePreviewDetail"></div>
                         </div>
                     </div>
-                </div>
+                `)}
 
-                <!-- Assign Driver - Expandable Form -->
-                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
-                    <div class="form-header">
-                        <h4><i class="fas fa-user-md" style="color:var(--secondary);"></i> Assign Driver</h4>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
+                ${createExpandableForm('Assign Driver', 'fa-user-md', `
+                    <div class="form-group">
+                        <label>Select Driver</label>
+                        <div id="driverDropdownContainer"></div>
                     </div>
-                    <div class="form-body">
-                        <div class="form-group">
-                            <label>Select Driver</label>
-                            <select id="driverSelect" onchange="onDriverSelect(this.value)">
-                                <option value="">-- Select a driver --</option>
-                                ${allDrivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.phone)})</option>`).join('')}
-                            </select>
-                        </div>
-                        <div id="driverPreview" class="selected-preview" style="display:none;">
-                            <img id="driverPreviewImg" src="" alt="Driver">
-                            <div class="info">
-                                <div class="name" id="driverPreviewName"></div>
-                                <div class="detail" id="driverPreviewDetail"></div>
-                            </div>
+                    <div id="driverPreview" class="selected-preview" style="display:none;">
+                        <img id="driverPreviewImg" src="" alt="Driver">
+                        <div class="info">
+                            <div class="name" id="driverPreviewName"></div>
+                            <div class="detail" id="driverPreviewDetail"></div>
                         </div>
                     </div>
-                </div>
+                `)}
 
-                <!-- Starting Statistics - Expandable Form -->
-                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
-                    <div class="form-header">
-                        <h4><i class="fas fa-clipboard-list" style="color:var(--primary);"></i> Starting Statistics</h4>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                    <div class="form-body">
-                        <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                            <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
-                                <div><span class="label">Name:</span> <span id="formVehicleName" style="font-weight:500;color:var(--gray-800);"></span></div>
-                                <div><span class="label">Plate:</span> <span id="formVehiclePlate" style="font-weight:500;color:var(--gray-800);"></span></div>
-                                <div><span class="label">Color:</span> <span id="formVehicleColor" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            </div>
-                        </div>
-                        <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                            <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver Details</div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
-                                <div><span class="label">Name:</span> <span id="formDriverName" style="font-weight:500;color:var(--gray-800);"></span></div>
-                                <div><span class="label">Phone:</span> <span id="formDriverPhone" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-clock"></i> Time Out</label>
-                            <input type="time" id="statsTimeOut" value="${new Date().toTimeString().slice(0,5)}">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-road"></i> KM (Mileage Out)</label>
-                            <input type="number" id="statsMileageOut" placeholder="e.g. 12345" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-gas-pump"></i> Fuel Out (Litres)</label>
-                            <input type="number" id="statsFuelOut" placeholder="e.g. 50" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> Date & Time</label>
-                            <div class="readonly-value" id="statsDateTime">${new Date().toLocaleString()}</div>
-                        </div>
-                        <div class="form-actions">
-                            <button class="btn btn-primary" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
+                ${createExpandableForm('Starting Statistics', 'fa-clipboard-list', `
+                    <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                        <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Vehicle Details</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
+                            <div><span class="label">Name:</span> <span id="formVehicleName" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            <div><span class="label">Plate:</span> <span id="formVehiclePlate" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            <div><span class="label">Color:</span> <span id="formVehicleColor" style="font-weight:500;color:var(--gray-800);"></span></div>
                         </div>
                     </div>
-                </div>
+                    <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                        <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Driver Details</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
+                            <div><span class="label">Name:</span> <span id="formDriverName" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            <div><span class="label">Phone:</span> <span id="formDriverPhone" style="font-weight:500;color:var(--gray-800);"></span></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Time Out</label>
+                        <input type="time" id="statsTimeOut" value="${new Date().toTimeString().slice(0,5)}">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-road"></i> KM (Mileage Out)</label>
+                        <input type="number" id="statsMileageOut" placeholder="e.g. 12345" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-gas-pump"></i> Fuel Out (Litres)</label>
+                        <input type="number" id="statsFuelOut" placeholder="e.g. 50" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Date & Time</label>
+                        <div class="readonly-value" id="statsDateTime">${new Date().toLocaleString()}</div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
+                    </div>
+                `)}
 
-                <!-- Stats Cards -->
                 <div class="stats-cards-grid" id="statsCardsGrid">
                     ${filteredStats.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-chart-bar"></i><h3>No stats for this date</h3><p>Select a different date or create a new stat entry.</p></div>' :
                     filteredStats.sort((a,b) => b.startTime - a.startTime).map(s => `
                         <div class="stats-card-item" onclick="openStatDetail('${s.id}')">
                             <div class="stats-card-header">
-                                <div><strong>${escapeHtml(s.vehicleName)}</strong> <span style="font-size:0.75rem;color:var(--gray-500);">${escapeHtml(s.vehiclePlate)}</span></div>
+                                <div><strong>${escapeHtml(s.vehicleName)}</strong> <span style="font-size:0.7rem;color:var(--gray-500);">${escapeHtml(s.vehiclePlate)}</span></div>
                                 <span class="status-badge ${s.status}"><span class="dot"></span> ${s.status.charAt(0).toUpperCase() + s.status.slice(1)}</span>
                             </div>
                             <div class="stats-card-body">
@@ -2711,144 +2807,98 @@
                 </div>
             `;
             document.getElementById('contentArea').innerHTML = html;
+
+            // Initialize custom dropdowns
+            setTimeout(() => {
+                initVehicleDropdown();
+                initDriverDropdown();
+            }, 100);
         }
 
-        function renderVehicles() {
-            let filtered = allVehicles.filter(v => {
-                const ms = (v.name || '').toLowerCase().includes(searchTerm) ||
-                    (v.plate || '').toLowerCase().includes(searchTerm);
-                const mf = statusFilter === 'all' || v.status === statusFilter;
-                return ms && mf;
-            });
-
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-truck" style="color:var(--primary);"></i> Vehicles</h2>
-                    <div class="page-actions">
-                        <button class="btn-primary" onclick="openAddVehicleModal()"><i class="fas fa-plus"></i> Add Vehicle</button>
-                        <button class="btn-success" onclick="exportVehiclesCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+        function createExpandableForm(headerText, iconClass, content) {
+            return `
+                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
+                    <div class="form-header">
+                        <h4><i class="fas ${iconClass}" style="color:var(--primary);"></i> ${headerText}</h4>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="form-body">
+                        ${content}
                     </div>
                 </div>
-                <div class="grid-cards">
-                    ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-truck"></i><h3>No vehicles found</h3></div>' :
-                    filtered.map(v => `
-                        <div class="card" onclick="openVehicleDetail('${v.id}')">
-                            <div class="card-header">
-                                <div class="icon-wrap teal">
-                                    ${v.image ? `<img src="${v.image}" alt="Vehicle">` : `<i class="fas fa-car"></i>`}
-                                </div>
-                                <div>
-                                    <div class="card-title">${escapeHtml(v.name || 'Unnamed')}</div>
-                                    <div class="card-subtitle">${escapeHtml(v.plate || 'No plate')}</div>
-                                </div>
-                                <div style="margin-left:auto;">
-                                    <span class="status-badge ${v.status}"><span class="dot"></span> ${v.status.charAt(0).toUpperCase() + v.status.slice(1)}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="detail-row"><span class="label">Color</span><span class="value">${escapeHtml(v.color || 'N/A')}</span></div>
-                                <div class="detail-row"><span class="label">Driver</span><span class="value">${escapeHtml(v.driverName || 'Unassigned')}</span></div>
-                                <div class="detail-row"><span class="label">Total Fuel</span><span class="value">${v.totalFuel.toFixed(1)} L</span></div>
-                                <div class="detail-row"><span class="label">Total Distance</span><span class="value">${v.totalDistance.toFixed(1)} km</span></div>
-                                <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${v.totalRevenue.toFixed(2)}</span></div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn-icon teal" onclick="event.stopPropagation();editVehicle('${v.id}')"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn-icon red" onclick="event.stopPropagation();deleteVehicle('${v.id}')"><i class="fas fa-trash"></i> Delete</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
             `;
-            document.getElementById('contentArea').innerHTML = html;
         }
 
-        function renderDrivers() {
-            let filtered = allDrivers.filter(d => {
-                const ms = (d.name || '').toLowerCase().includes(searchTerm) ||
-                    (d.phone || '').toLowerCase().includes(searchTerm);
-                const mf = statusFilter === 'all' || d.status === statusFilter;
-                return ms && mf;
-            });
+        // ==============================================================
+        // CUSTOM DROPDOWN INITIALIZATION
+        // ==============================================================
+        function initVehicleDropdown() {
+            const container = document.getElementById('vehicleDropdownContainer');
+            if (!container) return;
 
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-user-md" style="color:var(--secondary);"></i> Drivers</h2>
-                    <div class="page-actions">
-                        <button class="btn-primary" onclick="openAddDriverModal()"><i class="fas fa-plus"></i> Add Driver</button>
-                        <button class="btn-success" onclick="exportDriversCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+            const dropdown = createCustomDropdown(
+                allVehicles,
+                (vehicle) => {
+                    selectedVehicle = vehicle;
+                    const preview = document.getElementById('vehiclePreview');
+                    if (preview) {
+                        preview.style.display = 'flex';
+                        document.getElementById('vehiclePreviewImg').src = vehicle.image ||
+                            'https://via.placeholder.com/40?text=Car';
+                        document.getElementById('vehiclePreviewName').textContent = vehicle.name;
+                        document.getElementById('vehiclePreviewDetail').textContent =
+                            `${vehicle.plate} · ${vehicle.color}`;
+                    }
+                },
+                '<span style="color:var(--gray-400);">Select a vehicle...</span>',
+                (v) => `
+                    <img src="${v.image || 'https://via.placeholder.com/32?text=Car'}" alt="${escapeHtml(v.name)}">
+                    <div class="item-info">
+                        <div class="name">${escapeHtml(v.name)}</div>
+                        <div class="detail">${escapeHtml(v.plate)} · ${escapeHtml(v.color)}</div>
                     </div>
-                </div>
-                <div class="grid-cards">
-                    ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-user-md"></i><h3>No drivers found</h3></div>' :
-                    filtered.map(d => `
-                        <div class="card" onclick="openDriverDetail('${d.id}')">
-                            <div class="card-header">
-                                <div class="icon-wrap purple">
-                                    ${d.image ? `<img src="${d.image}" alt="Driver">` : `<i class="fas fa-user"></i>`}
-                                </div>
-                                <div>
-                                    <div class="card-title">${escapeHtml(d.name || 'Unnamed')}</div>
-                                    <div class="card-subtitle">${escapeHtml(d.phone || 'N/A')}</div>
-                                </div>
-                                <div style="margin-left:auto;">
-                                    <span class="status-badge ${d.status}"><span class="dot"></span> ${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="detail-row"><span class="label">Email</span><span class="value">${escapeHtml(d.email || 'N/A')}</span></div>
-                                <div class="detail-row"><span class="label">Total Hours</span><span class="value">${d.totalHours.toFixed(1)} hrs</span></div>
-                                <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${d.totalRevenue.toFixed(2)}</span></div>
-                                <div class="detail-row"><span class="label">Total Trips</span><span class="value">${d.totalStats}</span></div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn-icon teal" onclick="event.stopPropagation();editDriver('${d.id}')"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn-icon red" onclick="event.stopPropagation();deleteDriver('${d.id}')"><i class="fas fa-trash"></i> Delete</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            document.getElementById('contentArea').innerHTML = html;
+                `
+            );
+            container.appendChild(dropdown);
         }
 
-        function renderReports() {
-            let html = `
-                <div class="page-header">
-                    <h2><i class="fas fa-file-alt" style="color:var(--accent);"></i> Reports</h2>
-                </div>
-                <div class="grid-cards">
-                    ${allReports.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-file-alt"></i><h3>No reports generated yet</h3><p>Complete stats to generate automatic reports.</p></div>' :
-                    allReports.sort((a,b) => b.date - a.date).map(r => `
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="icon-wrap amber"><i class="fas fa-file-alt"></i></div>
-                                <div>
-                                    <div class="card-title">${escapeHtml(r.vehicleName)}</div>
-                                    <div class="card-subtitle">${escapeHtml(r.driverName)}</div>
-                                </div>
-                                <div style="margin-left:auto;">
-                                    <span style="font-size:0.7rem;color:var(--gray-500);">${formatDate(r.date)}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="detail-row"><span class="label">Mileage</span><span class="value">${r.mileageOut || 0} → ${r.mileageParked || 0} km</span></div>
-                                <div class="detail-row"><span class="label">Distance</span><span class="value">${r.distanceTraveled || 0} km</span></div>
-                                <div class="detail-row"><span class="label">Fuel</span><span class="value">${r.fuelOut || 0} → ${r.fuelParked || 0} L (${r.fuelUsed || 0} L used)</span></div>
-                                <div class="detail-row"><span class="label">Hours Out</span><span class="value">${r.hoursOut || 0} hrs</span></div>
-                                <div class="detail-row"><span class="label">Revenue</span><span class="value">ZMW ${r.revenue || 0}</span></div>
-                                <div class="detail-row"><span class="label">Admin</span><span class="value">${escapeHtml(r.adminName || 'N/A')}</span></div>
-                                <div class="detail-row"><span class="label">Comment</span><span class="value">${escapeHtml(r.adminComment || 'No comment')}</span></div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn-icon teal" onclick="viewReportDetail('${r.id}')"><i class="fas fa-eye"></i> View</button>
-                                <button class="btn-icon blue" onclick="downloadReportCSV('${r.id}')"><i class="fas fa-download"></i> Download CSV</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            document.getElementById('contentArea').innerHTML = html;
+        function initDriverDropdown() {
+            const container = document.getElementById('driverDropdownContainer');
+            if (!container) return;
+
+            const dropdown = createCustomDropdown(
+                allDrivers,
+                (driver) => {
+                    selectedDriver = driver;
+                    const preview = document.getElementById('driverPreview');
+                    if (preview) {
+                        preview.style.display = 'flex';
+                        document.getElementById('driverPreviewImg').src = driver.image ||
+                            'https://via.placeholder.com/40?text=Driver';
+                        document.getElementById('driverPreviewName').textContent = driver.name;
+                        document.getElementById('driverPreviewDetail').textContent = driver.phone;
+
+                        document.getElementById('formVehicleName').textContent = selectedVehicle ? selectedVehicle
+                            .name : 'N/A';
+                        document.getElementById('formVehiclePlate').textContent = selectedVehicle ? selectedVehicle
+                            .plate : 'N/A';
+                        document.getElementById('formVehicleColor').textContent = selectedVehicle ? selectedVehicle
+                            .color : 'N/A';
+                        document.getElementById('formDriverName').textContent = driver ? driver.name : 'N/A';
+                        document.getElementById('formDriverPhone').textContent = driver ? driver.phone : 'N/A';
+                        document.getElementById('statsDateTime').textContent = new Date().toLocaleString();
+                    }
+                },
+                '<span style="color:var(--gray-400);">Select a driver...</span>',
+                (d) => `
+                    <img src="${d.image || 'https://via.placeholder.com/32?text=Driver'}" alt="${escapeHtml(d.name)}">
+                    <div class="item-info">
+                        <div class="name">${escapeHtml(d.name)}</div>
+                        <div class="detail">${escapeHtml(d.phone)}</div>
+                    </div>
+                `
+            );
+            container.appendChild(dropdown);
         }
 
         // ==============================================================
@@ -2867,26 +2917,25 @@
             const v = allVehicles.find(x => x.id === vehicleId);
             if (!v) return;
 
-            // Get all stats for this vehicle
             const vehicleStats = allStats.filter(s => s.vehicleId === vehicleId);
             const completedStats = vehicleStats.filter(s => s.status === 'completed');
 
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '🚛 Vehicle Details';
             document.getElementById('modalBody').innerHTML = `
-                <div style="text-align:center;margin-bottom:16px;">
-                    ${v.image ? `<img src="${v.image}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);">` : `<div style="width:120px;height:120px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto;"><i class="fas fa-car" style="font-size:3rem;color:var(--primary);"></i></div>`}
+                <div style="text-align:center;margin-bottom:14px;">
+                    ${v.image ? `<img src="${v.image}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);">` : `<div style="width:100px;height:100px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto;"><i class="fas fa-car" style="font-size:2.5rem;color:var(--primary);"></i></div>`}
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);margin-bottom:14px;">
                     <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.name)}</span></div>
                     <div><span class="label">Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.plate)}</span></div>
                     <div><span class="label">Color:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.color)}</span></div>
                     <div><span class="label">Status:</span> <span class="status-badge ${v.status}"><span class="dot"></span> ${v.status.charAt(0).toUpperCase() + v.status.slice(1)}</span></div>
                     <div><span class="label">Current Driver:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.driverName || 'Unassigned')}</span></div>
                 </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray-200);margin-bottom:12px;">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:8px;">📊 Lifetime Statistics</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;border:1px solid var(--gray-200);margin-bottom:10px;">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:6px;">📊 Lifetime Statistics</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Total Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${v.statCount}</span></div>
                         <div><span class="label">Completed Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${completedStats.length}</span></div>
                         <div><span class="label">Total Fuel Used:</span> <span style="font-weight:500;color:var(--gray-800);">${v.totalFuel.toFixed(1)} L</span></div>
@@ -2895,7 +2944,7 @@
                         <div><span class="label">Total Hours:</span> <span style="font-weight:500;color:var(--gray-800);">${v.totalHours.toFixed(1)} hrs</span></div>
                     </div>
                 </div>
-                <div style="font-size:0.8rem;color:var(--gray-500);text-align:center;">
+                <div style="font-size:0.75rem;color:var(--gray-500);text-align:center;">
                     <i class="fas fa-info-circle"></i> Tap on a stat card to view detailed trip information
                 </div>
             `;
@@ -2911,36 +2960,35 @@
             const d = allDrivers.find(x => x.id === driverId);
             if (!d) return;
 
-            // Get all stats for this driver
             const driverStats = allStats.filter(s => s.driverId === driverId);
             const completedStats = driverStats.filter(s => s.status === 'completed');
 
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '👤 Driver Details';
             document.getElementById('modalBody').innerHTML = `
-                <div style="text-align:center;margin-bottom:16px;">
-                    ${d.image ? `<img src="${d.image}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--secondary);">` : `<div style="width:120px;height:120px;border-radius:50%;background:var(--secondary-light);display:flex;align-items:center;justify-content:center;margin:0 auto;"><i class="fas fa-user" style="font-size:3rem;color:var(--secondary);"></i></div>`}
+                <div style="text-align:center;margin-bottom:14px;">
+                    ${d.image ? `<img src="${d.image}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--secondary);">` : `<div style="width:100px;height:100px;border-radius:50%;background:var(--secondary-light);display:flex;align-items:center;justify-content:center;margin:0 auto;"><i class="fas fa-user" style="font-size:2.5rem;color:var(--secondary);"></i></div>`}
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);margin-bottom:14px;">
                     <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(d.name)}</span></div>
                     <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(d.phone)}</span></div>
                     <div><span class="label">Email:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(d.email)}</span></div>
                     <div><span class="label">Status:</span> <span class="status-badge ${d.status}"><span class="dot"></span> ${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</span></div>
                 </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray-200);margin-bottom:12px;">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:8px;">📊 Lifetime Statistics</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;border:1px solid var(--gray-200);margin-bottom:10px;">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:6px;">📊 Lifetime Statistics</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Total Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${d.totalStats}</span></div>
                         <div><span class="label">Completed Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${completedStats.length}</span></div>
                         <div><span class="label">Total Hours Worked:</span> <span style="font-weight:500;color:var(--gray-800);">${d.totalHours.toFixed(1)} hrs</span></div>
                         <div><span class="label">Total Revenue:</span> <span style="font-weight:700;color:var(--green);">ZMW ${d.totalRevenue.toFixed(2)}</span></div>
                     </div>
                 </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:8px;">🚛 Assigned Vehicles</div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:6px;">🚛 Assigned Vehicles</div>
                     ${d.assignedVehicles.length > 0 ? 
-                        d.assignedVehicles.map(v => `<div style="padding:4px 0;font-size:0.85rem;color:var(--gray-600);border-bottom:1px solid var(--gray-100);">• ${escapeHtml(v)}</div>`).join('') :
-                        '<div style="font-size:0.85rem;color:var(--gray-500);text-align:center;">No vehicles assigned yet</div>'
+                        d.assignedVehicles.map(v => `<div style="padding:4px 0;font-size:0.8rem;color:var(--gray-600);border-bottom:1px solid var(--gray-100);">• ${escapeHtml(v)}</div>`).join('') :
+                        '<div style="font-size:0.8rem;color:var(--gray-500);text-align:center;">No vehicles assigned yet</div>'
                     }
                 </div>
             `;
@@ -2952,47 +3000,6 @@
         // ==============================================================
         // STATS FLOW FUNCTIONS
         // ==============================================================
-        window.onVehicleSelect = function(vehicleId) {
-            selectedVehicle = allVehicles.find(v => v.id === vehicleId);
-            const preview = document.getElementById('vehiclePreview');
-
-            if (selectedVehicle) {
-                preview.style.display = 'flex';
-                document.getElementById('vehiclePreviewImg').src = selectedVehicle.image ||
-                    'https://via.placeholder.com/48?text=Car';
-                document.getElementById('vehiclePreviewName').textContent = selectedVehicle.name;
-                document.getElementById('vehiclePreviewDetail').textContent =
-                    `${selectedVehicle.plate} · ${selectedVehicle.color}`;
-            } else {
-                preview.style.display = 'none';
-            }
-        };
-
-        window.onDriverSelect = function(driverId) {
-            selectedDriver = allDrivers.find(d => d.id === driverId);
-            const preview = document.getElementById('driverPreview');
-
-            if (selectedDriver) {
-                preview.style.display = 'flex';
-                document.getElementById('driverPreviewImg').src = selectedDriver.image ||
-                    'https://via.placeholder.com/48?text=Driver';
-                document.getElementById('driverPreviewName').textContent = selectedDriver.name;
-                document.getElementById('driverPreviewDetail').textContent = selectedDriver.phone;
-
-                // Auto-fill vehicle and driver details in the form
-                document.getElementById('formVehicleName').textContent = selectedVehicle ? selectedVehicle.name : 'N/A';
-                document.getElementById('formVehiclePlate').textContent = selectedVehicle ? selectedVehicle.plate :
-                'N/A';
-                document.getElementById('formVehicleColor').textContent = selectedVehicle ? selectedVehicle.color :
-                'N/A';
-                document.getElementById('formDriverName').textContent = selectedDriver ? selectedDriver.name : 'N/A';
-                document.getElementById('formDriverPhone').textContent = selectedDriver ? selectedDriver.phone : 'N/A';
-                document.getElementById('statsDateTime').textContent = new Date().toLocaleString();
-            } else {
-                preview.style.display = 'none';
-            }
-        };
-
         window.submitStats = async function() {
             if (!selectedVehicle || !selectedDriver) {
                 showToast('Please select both a vehicle and a driver.', 'error');
@@ -3040,9 +3047,8 @@
                     hoursOut: 0
                 });
 
-                // Reset form
-                document.getElementById('vehicleSelect').value = '';
-                document.getElementById('driverSelect').value = '';
+                document.getElementById('vehicleDropdownContainer').innerHTML = '';
+                document.getElementById('driverDropdownContainer').innerHTML = '';
                 document.getElementById('vehiclePreview').style.display = 'none';
                 document.getElementById('driverPreview').style.display = 'none';
                 selectedVehicle = null;
@@ -3076,7 +3082,6 @@
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
 
-            // Check if stat is already completed
             if (stat.status === 'completed') {
                 showToast('This stat is already completed. View the report instead.', 'warning');
                 return;
@@ -3085,17 +3090,17 @@
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '🚩 End of Day Stats';
             document.getElementById('modalBody').innerHTML = `
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Vehicle Details</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehicleName)}</span></div>
                         <div><span class="label">Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehiclePlate)}</span></div>
                         <div><span class="label">Color:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehicleColor)}</span></div>
                     </div>
                 </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver Details</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Driver Details</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverName)}</span></div>
                         <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverPhone)}</span></div>
                     </div>
@@ -3147,9 +3152,9 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
-                // Update stats to completed
+                // Update to pending first, then will be signed by driver
                 await db.ref(`driverStats/${statId}`).update({
-                    status: 'completed',
+                    status: 'pending',
                     timeParked: timeParked,
                     mileageParked: mileageParked,
                     fuelParked: fuelParked,
@@ -3159,42 +3164,11 @@
                     distanceTraveled: distanceTraveled,
                     fuelUsed: fuelUsed,
                     hoursOut: hoursOut,
-                    reportGenerated: true
-                });
-
-                // Generate report
-                const reportRef = db.ref('driverReports').push();
-                await reportRef.set({
-                    statId: statId,
-                    vehicleId: stat.vehicleId,
-                    vehicleName: stat.vehicleName,
-                    vehiclePlate: stat.vehiclePlate,
-                    vehicleColor: stat.vehicleColor,
-                    vehicleImage: stat.vehicleImage,
-                    driverId: stat.driverId,
-                    driverName: stat.driverName,
-                    driverPhone: stat.driverPhone,
-                    driverImage: stat.driverImage,
-                    timeOut: stat.timeOut,
-                    mileageOut: stat.mileageOut,
-                    fuelOut: stat.fuelOut,
-                    timeParked: timeParked,
-                    mileageParked: mileageParked,
-                    fuelParked: fuelParked,
-                    revenue: revenue,
-                    adminComment: adminComment,
-                    adminName: currentUser ? currentUser.name : 'Admin',
-                    adminEmail: currentUser ? currentUser.email : 'admin@monitoring.com',
-                    distanceTraveled: distanceTraveled,
-                    fuelUsed: fuelUsed,
-                    hoursOut: hoursOut,
-                    date: Date.now(),
-                    startTime: stat.startTime,
-                    endTime: Date.now()
+                    reportGenerated: false
                 });
 
                 closeModal('detailModal');
-                showToast('End of Day submitted! Report generated automatically.', 'success');
+                showToast('End of Day submitted! Waiting for driver signature.', 'success');
                 await refreshAll();
                 renderStats();
             } catch (err) {
@@ -3214,6 +3188,9 @@
             return diff > 0 ? Math.round(diff * 10) / 10 : 0;
         }
 
+        // ==============================================================
+        // STAT DETAIL VIEW
+        // ==============================================================
         window.openStatDetail = function(statId) {
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
@@ -3221,21 +3198,21 @@
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '📊 Stat Details';
             document.getElementById('modalBody').innerHTML = `
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Vehicle</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehicleName)}</span></div>
                         <div><span class="label">Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehiclePlate)}</span></div>
                     </div>
                 </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Driver</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverName)}</span></div>
                         <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverPhone)}</span></div>
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                     <div><span class="label">Status:</span> <span class="status-badge ${stat.status}" style="display:inline-flex;"><span class="dot"></span> ${stat.status.charAt(0).toUpperCase() + stat.status.slice(1)}</span></div>
                     <div><span class="label">Date:</span> <span style="font-weight:500;color:var(--gray-800);">${formatDate(stat.startTime)}</span></div>
                     <div><span class="label">Time Out:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.timeOut || 'N/A'}</span></div>
@@ -3258,10 +3235,12 @@
             openModal('detailModal');
         };
 
+        // ==============================================================
+        // REPORT VIEWS
+        // ==============================================================
         window.viewReport = function(statId) {
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
-            // Find the report
             const report = allReports.find(r => r.statId === statId);
             if (report) {
                 viewReportDetail(report.id);
@@ -3277,21 +3256,21 @@
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '📄 Full Report';
             document.getElementById('modalBody').innerHTML = `
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:700;font-size:1.1rem;color:var(--gray-800);margin-bottom:8px;">${escapeHtml(report.vehicleName)}</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:700;font-size:1rem;color:var(--gray-800);margin-bottom:6px;">${escapeHtml(report.vehicleName)}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Vehicle Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.vehiclePlate)}</span></div>
                         <div><span class="label">Vehicle Color:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.vehicleColor)}</span></div>
                     </div>
                 </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:700;font-size:1.1rem;color:var(--gray-800);margin-bottom:8px;">${escapeHtml(report.driverName)}</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:700;font-size:1rem;color:var(--gray-800);margin-bottom:6px;">${escapeHtml(report.driverName)}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                         <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.driverPhone)}</span></div>
                         <div><span class="label">Email:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.driverEmail || 'N/A')}</span></div>
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem;color:var(--gray-600);">
                     <div><span class="label">Date:</span> <span style="font-weight:500;color:var(--gray-800);">${formatDate(report.date)}</span></div>
                     <div><span class="label">Time Out:</span> <span style="font-weight:500;color:var(--gray-800);">${report.timeOut || 'N/A'}</span></div>
                     <div><span class="label">Time Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${report.timeParked || 'N/A'}</span></div>
@@ -3363,7 +3342,6 @@
                     return;
                 }
                 await db.ref(`driverStats/${statId}`).remove();
-                // Also remove associated report if exists
                 const report = allReports.find(r => r.statId === statId);
                 if (report) {
                     await db.ref(`driverReports/${report.id}`).remove();
@@ -3399,8 +3377,7 @@
             document.getElementById('modalSaveBtn').textContent = 'Add Vehicle';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
-            
-            // Setup upload box
+
             setTimeout(() => {
                 setupUploadBox('vehicleUploadBox', 'vImage');
             }, 100);
@@ -3462,8 +3439,7 @@
             document.getElementById('modalSaveBtn').textContent = 'Save Changes';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
-            
-            // Setup upload box
+
             setTimeout(() => {
                 setupUploadBox('vehicleUploadBox', 'vImage');
             }, 100);
@@ -3533,8 +3509,7 @@
             document.getElementById('modalSaveBtn').textContent = 'Add Driver';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
-            
-            // Setup upload box
+
             setTimeout(() => {
                 setupUploadBox('driverUploadBox', 'dImage');
             }, 100);
@@ -3611,8 +3586,7 @@
             document.getElementById('modalSaveBtn').textContent = 'Save Changes';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
-            
-            // Setup upload box
+
             setTimeout(() => {
                 setupUploadBox('driverUploadBox', 'dImage');
             }, 100);
@@ -3669,7 +3643,9 @@
             }
 
             const rows = [
-                ['Vehicle Name', 'Plate', 'Color', 'Status', 'Current Driver', 'Total Trips', 'Completed Trips', 'Total Fuel (L)', 'Total Distance (km)', 'Total Revenue (ZMW)', 'Total Hours'],
+                ['Vehicle Name', 'Plate', 'Color', 'Status', 'Current Driver', 'Total Trips', 'Completed Trips',
+                    'Total Fuel (L)', 'Total Distance (km)', 'Total Revenue (ZMW)', 'Total Hours'
+                ],
                 ...allVehicles.map(v => [
                     v.name || 'Unnamed',
                     v.plate || 'No plate',
@@ -3701,7 +3677,9 @@
             }
 
             const rows = [
-                ['Driver Name', 'Phone', 'Email', 'Status', 'Total Trips', 'Completed Trips', 'Total Hours Worked', 'Total Revenue (ZMW)', 'Assigned Vehicles'],
+                ['Driver Name', 'Phone', 'Email', 'Status', 'Total Trips', 'Completed Trips', 'Total Hours Worked',
+                    'Total Revenue (ZMW)', 'Assigned Vehicles'
+                ],
                 ...allDrivers.map(d => [
                     d.name || 'Unnamed',
                     d.phone || 'N/A',
@@ -3725,12 +3703,18 @@
         };
 
         // ==============================================================
-        // SIDEBAR FEATURES
+        // FUEL MANAGEMENT
         // ==============================================================
         window.openFuelManagement = function() {
             const container = document.getElementById('contentArea');
             const totalFuel = allStats.reduce((sum, s) => sum + (s.fuelUsed || 0), 0);
             const totalRevenue = allStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
+
+            // Calculate fuel cost based on ERB prices
+            const dieselPrice = ERB_FUEL_PRICES.diesel;
+            const petrolPrice = ERB_FUEL_PRICES.petrol;
+            const avgFuelPrice = (dieselPrice + petrolPrice) / 2;
+            const totalFuelCost = totalFuel * avgFuelPrice;
 
             let html = `
                 <div class="page-header">
@@ -3742,9 +3726,34 @@
                         <div class="card-body">
                             <div class="detail-row"><span class="label">Total Fuel Used</span><span class="value">${totalFuel.toFixed(1)} L</span></div>
                             <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${totalRevenue.toFixed(2)}</span></div>
+                            <div class="detail-row"><span class="label">Fuel Cost (ERB)</span><span class="value">ZMW ${totalFuelCost.toFixed(2)}</span></div>
+                            <div class="detail-row"><span class="label">Avg Fuel Price</span><span class="value">ZMW ${avgFuelPrice.toFixed(2)}/L</span></div>
+                            <div class="detail-row"><span class="label">Diesel Price</span><span class="value">ZMW ${dieselPrice.toFixed(2)}/L</span></div>
+                            <div class="detail-row"><span class="label">Petrol Price</span><span class="value">ZMW ${petrolPrice.toFixed(2)}/L</span></div>
                             <div class="detail-row"><span class="label">Efficiency</span><span class="value">${totalFuel > 0 ? (totalRevenue / totalFuel).toFixed(2) : '0'} ZMW/L</span></div>
                         </div>
                     </div>
+                </div>
+                <div class="grid-cards" style="margin-top:14px;">
+                    ${allVehicles.filter(v => v.totalFuel > 0).sort((a,b) => b.totalFuel - a.totalFuel).slice(0,10).map(v => `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="icon-wrap teal">
+                                    ${v.image ? `<img src="${v.image}" alt="Vehicle">` : `<i class="fas fa-car"></i>`}
+                                </div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(v.name)}</div>
+                                    <div class="card-subtitle">${escapeHtml(v.plate)}</div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Fuel Used</span><span class="value">${v.totalFuel.toFixed(1)} L</span></div>
+                                <div class="detail-row"><span class="label">Fuel Cost</span><span class="value">ZMW ${(v.totalFuel * avgFuelPrice).toFixed(2)}</span></div>
+                                <div class="detail-row"><span class="label">Distance</span><span class="value">${v.totalDistance.toFixed(1)} km</span></div>
+                                <div class="detail-row"><span class="label">Revenue</span><span class="value">ZMW ${v.totalRevenue.toFixed(2)}</span></div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
             container.innerHTML = html;
@@ -3752,6 +3761,9 @@
             toggleSidebar();
         };
 
+        // ==============================================================
+        // MAINTENANCE
+        // ==============================================================
         window.openMaintenance = function() {
             const container = document.getElementById('contentArea');
             let html = `
@@ -3764,6 +3776,153 @@
             document.getElementById('statsText').textContent = '🔧 Maintenance';
             toggleSidebar();
         };
+
+        // ==============================================================
+        // RENDER VEHICLES
+        // ==============================================================
+        function renderVehicles() {
+            let filtered = allVehicles.filter(v => {
+                const ms = (v.name || '').toLowerCase().includes(searchTerm) ||
+                    (v.plate || '').toLowerCase().includes(searchTerm);
+                const mf = statusFilter === 'all' || v.status === statusFilter;
+                return ms && mf;
+            });
+
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-truck" style="color:var(--primary);"></i> Vehicles</h2>
+                    <div class="page-actions" style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <button class="btn-primary" onclick="openAddVehicleModal()" style="padding:6px 14px;font-size:0.75rem;"><i class="fas fa-plus"></i> Add</button>
+                        <button class="btn-success" onclick="exportVehiclesCSV()" style="padding:6px 14px;font-size:0.75rem;"><i class="fas fa-file-excel"></i> CSV</button>
+                    </div>
+                </div>
+                <div class="grid-cards">
+                    ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-truck"></i><h3>No vehicles found</h3></div>' :
+                    filtered.map(v => `
+                        <div class="card" onclick="openVehicleDetail('${v.id}')">
+                            <div class="card-header">
+                                <div class="icon-wrap teal">
+                                    ${v.image ? `<img src="${v.image}" alt="Vehicle">` : `<i class="fas fa-car"></i>`}
+                                </div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(v.name || 'Unnamed')}</div>
+                                    <div class="card-subtitle">${escapeHtml(v.plate || 'No plate')}</div>
+                                </div>
+                                <div style="margin-left:auto;">
+                                    <span class="status-badge ${v.status}"><span class="dot"></span> ${v.status.charAt(0).toUpperCase() + v.status.slice(1)}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Color</span><span class="value">${escapeHtml(v.color || 'N/A')}</span></div>
+                                <div class="detail-row"><span class="label">Driver</span><span class="value">${escapeHtml(v.driverName || 'Unassigned')}</span></div>
+                                <div class="detail-row"><span class="label">Total Fuel</span><span class="value">${v.totalFuel.toFixed(1)} L</span></div>
+                                <div class="detail-row"><span class="label">Total Distance</span><span class="value">${v.totalDistance.toFixed(1)} km</span></div>
+                                <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${v.totalRevenue.toFixed(2)}</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon teal" onclick="event.stopPropagation();editVehicle('${v.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-icon red" onclick="event.stopPropagation();deleteVehicle('${v.id}')"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        // ==============================================================
+        // RENDER DRIVERS
+        // ==============================================================
+        function renderDrivers() {
+            let filtered = allDrivers.filter(d => {
+                const ms = (d.name || '').toLowerCase().includes(searchTerm) ||
+                    (d.phone || '').toLowerCase().includes(searchTerm);
+                const mf = statusFilter === 'all' || d.status === statusFilter;
+                return ms && mf;
+            });
+
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-user-md" style="color:var(--secondary);"></i> Drivers</h2>
+                    <div class="page-actions" style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <button class="btn-primary" onclick="openAddDriverModal()" style="padding:6px 14px;font-size:0.75rem;"><i class="fas fa-plus"></i> Add</button>
+                        <button class="btn-success" onclick="exportDriversCSV()" style="padding:6px 14px;font-size:0.75rem;"><i class="fas fa-file-excel"></i> CSV</button>
+                    </div>
+                </div>
+                <div class="grid-cards">
+                    ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-user-md"></i><h3>No drivers found</h3></div>' :
+                    filtered.map(d => `
+                        <div class="card" onclick="openDriverDetail('${d.id}')">
+                            <div class="card-header">
+                                <div class="icon-wrap purple">
+                                    ${d.image ? `<img src="${d.image}" alt="Driver">` : `<i class="fas fa-user"></i>`}
+                                </div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(d.name || 'Unnamed')}</div>
+                                    <div class="card-subtitle">${escapeHtml(d.phone || 'N/A')}</div>
+                                </div>
+                                <div style="margin-left:auto;">
+                                    <span class="status-badge ${d.status}"><span class="dot"></span> ${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Email</span><span class="value">${escapeHtml(d.email || 'N/A')}</span></div>
+                                <div class="detail-row"><span class="label">Total Hours</span><span class="value">${d.totalHours.toFixed(1)} hrs</span></div>
+                                <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${d.totalRevenue.toFixed(2)}</span></div>
+                                <div class="detail-row"><span class="label">Total Trips</span><span class="value">${d.totalStats}</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon teal" onclick="event.stopPropagation();editDriver('${d.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-icon red" onclick="event.stopPropagation();deleteDriver('${d.id}')"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        // ==============================================================
+        // RENDER REPORTS
+        // ==============================================================
+        function renderReports() {
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-file-alt" style="color:var(--accent);"></i> Reports</h2>
+                </div>
+                <div class="grid-cards">
+                    ${allReports.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-file-alt"></i><h3>No reports generated yet</h3><p>Complete stats to generate automatic reports.</p></div>' :
+                    allReports.sort((a,b) => b.date - a.date).map(r => `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="icon-wrap amber"><i class="fas fa-file-alt"></i></div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(r.vehicleName)}</div>
+                                    <div class="card-subtitle">${escapeHtml(r.driverName)}</div>
+                                </div>
+                                <div style="margin-left:auto;">
+                                    <span style="font-size:0.65rem;color:var(--gray-500);">${formatDate(r.date)}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Mileage</span><span class="value">${r.mileageOut || 0} → ${r.mileageParked || 0} km</span></div>
+                                <div class="detail-row"><span class="label">Distance</span><span class="value">${r.distanceTraveled || 0} km</span></div>
+                                <div class="detail-row"><span class="label">Fuel</span><span class="value">${r.fuelOut || 0} → ${r.fuelParked || 0} L (${r.fuelUsed || 0} L used)</span></div>
+                                <div class="detail-row"><span class="label">Hours Out</span><span class="value">${r.hoursOut || 0} hrs</span></div>
+                                <div class="detail-row"><span class="label">Revenue</span><span class="value">ZMW ${r.revenue || 0}</span></div>
+                                <div class="detail-row"><span class="label">Admin</span><span class="value">${escapeHtml(r.adminName || 'N/A')}</span></div>
+                                <div class="detail-row"><span class="label">Comment</span><span class="value">${escapeHtml(r.adminComment || 'No comment')}</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon teal" onclick="viewReportDetail('${r.id}')"><i class="fas fa-eye"></i> View</button>
+                                <button class="btn-icon blue" onclick="downloadReportCSV('${r.id}')"><i class="fas fa-download"></i> CSV</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
 
         // ==============================================================
         // TAB SWITCHING
@@ -3896,7 +4055,6 @@
             cleanupShutdownListeners();
         });
 
-        // Initialize
         setTimeout(() => {
             if (currentUser) {
                 renderDashboard();
