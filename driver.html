@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Driver · Daily Monitoring</title>
+  <title>Worker · Daily Monitoring</title>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * {
       margin: 0;
@@ -16,6 +13,7 @@
       box-sizing: border-box;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
+
     body {
       background: #ffffff;
       display: flex;
@@ -23,6 +21,7 @@
       align-items: flex-start;
       min-height: 100vh;
     }
+
     #app {
       max-width: 450px;
       width: 100%;
@@ -31,173 +30,323 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 20px rgba(0,0,0,0.02);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
+      padding-bottom: 80px;
     }
-    #mapContainer {
-      height: 70vh;
+
+    /* Off-day fullscreen message */
+    .offday-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      position: relative;
-      z-index: 1;
-    }
-    #bottomPanel {
-      flex: 1;
+      height: 100%;
       background: #ffffff;
-      border-top: 1px solid #e0e8e0;
-      display: flex;
-      flex-direction: column;
-      padding: 16px 14px 20px;
-      overflow-y: auto;
-    }
-    .driver-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .driver-avatar {
-      width: 50px;
-      height: 50px;
-      background: #2e5c3e;
-      border-radius: 30px;
+      z-index: 300;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .offday-message {
       font-size: 24px;
+      font-weight: 600;
+      color: #dc2626;
+      max-width: 350px;
     }
-    .driver-info {
-      flex: 1;
-    }
-    .driver-info h3 {
-      color: #1e3a2a;
+
+    .offday-message .worker-name {
+      color: #2e5c3e;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
-    .driver-city {
-      font-size: 14px;
-      font-weight: 400;
-      color: #5a7a62;
-      background: #f0f7f0;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-    .driver-info p {
-      color: #5a7a62;
-      font-size: 14px;
-    }
-    .car-badge {
-      background: #f0f7f0;
-      border-radius: 30px;
-      padding: 10px 18px;
-      margin: 8px 0;
-      border: 1px solid #c0dcc0;
-      color: #1e3a2a;
-      font-weight: 500;
+
+    /* Header */
+    .worker-header {
+      padding: 24px 20px 8px;
       text-align: center;
     }
-    .pill-btn {
+
+    .worker-header h2 {
+      color: #1e3a2a;
+      font-weight: 700;
+      font-size: 28px;
+    }
+
+    .date-display {
+      color: #5a7a62;
+      font-size: 16px;
+      margin-top: 6px;
+    }
+
+    /* Circular Shift Button */
+    .shift-circle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 30px 0 20px;
+    }
+
+    .shift-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
       background: #2e5c3e;
       color: white;
       border: none;
-      border-radius: 40px;
-      padding: 14px 20px;
       font-weight: 700;
-      font-size: 16px;
-      width: 100%;
+      font-size: 24px;
       cursor: pointer;
-      margin: 8px 0;
-    }
-    .outline-btn {
-      background: white;
-      border: 1.5px solid #2e5c3e;
-      color: #2e5c3e;
-      border-radius: 40px;
-      padding: 12px;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-      margin: 8px 0;
-    }
-    .red-pulse-btn {
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 14px 20px;
-      font-weight: 700;
-      font-size: 16px;
-      width: 100%;
-      cursor: pointer;
-      margin: 8px 0;
-      animation: pulse-red 1.5s infinite;
-      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
-    }
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
-      70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-    }
-    .dropdown-form {
-      background: #f4f9f4;
-      border-radius: 24px;
-      padding: 18px;
-      margin: 12px 0;
-      display: none;
-    }
-    .form-input {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 30px;
-      border: 1.5px solid #cbdcd0;
-      margin-bottom: 12px;
-      font-size: 15px;
-      background: white;
-    }
-    .emergency-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 8px;
-      margin: 16px 0;
-    }
-    .emergency-btn {
-      background: white;
-      border: 1.5px solid #b53b3b;
-      border-radius: 30px;
-      padding: 12px 4px;
-      color: #b53b3b;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      text-align: center;
-    }
-    .emergency-btn i {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 18px;
+      box-shadow: 0 10px 25px rgba(46, 92, 62, 0.3);
+      transition: transform 0.2s;
     }
 
-    /* Modals */
+    .shift-circle i {
+      font-size: 48px;
+    }
+
+    .shift-circle.pulse {
+      animation: pulse-green 2s infinite;
+    }
+
+    .shift-circle.red {
+      background: #dc2626;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+    }
+
+    .shift-circle.red.pulse {
+      animation: pulse-red 1.5s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(46, 92, 62, 0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(46, 92, 62, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 92, 62, 0); }
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+
+    .shift-timer {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a2a;
+      margin-top: 8px;
+    }
+
+    .shift-hint {
+      text-align: center;
+      color: #6b8a7a;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    /* Bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 450px;
+      margin: 0 auto;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 16px 20px;
+      border-top: 1px solid #e0e8e0;
+    }
+
+    .nav-item {
+      text-align: center;
+      color: #7e8b9c;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: #2e5c3e;
+      font-weight: 700;
+    }
+
+    .nav-item i {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Page views */
+    .page-view {
+      padding: 8px 16px;
+      display: none;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    /* Tasks */
+    .task-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 14px;
+      border: 1px solid #d0e0d0;
+    }
+
+    .task-title {
+      font-weight: 700;
+      color: #1e3a2a;
+      font-size: 16px;
+    }
+
+    .task-desc {
+      color: #4a6a5a;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .task-status {
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #e0f0e0;
+      color: #2e5c3e;
+    }
+
+    .expand-btn {
+      background: none;
+      border: 1px solid #2e5c3e;
+      color: #2e5c3e;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .task-detail {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .task-summary-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 20px;
+      border: 1px solid #cbdcd0;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    /* Toggle for Reports */
+    .toggle-container {
+      display: flex;
+      background: #eef3ef;
+      border-radius: 40px;
+      padding: 4px;
+      margin: 16px 0;
+    }
+
+    .toggle-option {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #5a7a62;
+    }
+
+    .toggle-option.active {
+      background: #2e5c3e;
+      color: white;
+    }
+
+    /* Period selector */
+    .period-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .period-pill {
+      background: #f0f5f0;
+      border: none;
+      border-radius: 40px;
+      padding: 10px 16px;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    /* Report cards */
+    .report-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid #d0e0d0;
+    }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #1e3a2a;
+      font-weight: 600;
+    }
+
+    .report-summary {
+      color: #3a5a4a;
+      margin: 8px 0;
+    }
+
+    .report-tasks {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #c0dcc0;
+    }
+
+    /* Modal */
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.3);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
       backdrop-filter: blur(2px);
       z-index: 200;
       display: none;
       align-items: center;
       justify-content: center;
     }
+
     .modal-card {
       background: white;
       border-radius: 32px;
       padding: 24px;
       width: 90%;
       max-width: 380px;
-      max-height: 80vh;
-      overflow-y: auto;
     }
+
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #2e5c3e;
@@ -207,151 +356,129 @@
       animation: spin 1s linear infinite;
       margin: 20px auto;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Reports Page */
-    .page-view {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: white;
-      z-index: 150;
-      overflow-y: auto;
-      padding: 20px 16px 90px;
-      display: none;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
-    .page-view.active { display: block; }
-    .page-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 30px;
+      border: 1.5px solid #cbdcd0;
+      margin-bottom: 12px;
+      font-size: 15px;
     }
-    .back-btn {
-      background: none;
+
+    .pill-btn {
+      background: #2e5c3e;
+      color: white;
       border: none;
-      font-size: 24px;
-      color: #2e5c3e;
+      border-radius: 40px;
+      padding: 14px;
+      font-weight: 700;
+      width: 100%;
       cursor: pointer;
     }
-    .report-card {
-      background: #f8fbf8;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid #d0e0d0;
-    }
-    .report-date {
-      font-weight: 700;
-      color: #1e3a2a;
-      margin-bottom: 8px;
-    }
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px dashed #c0dcc0;
-    }
-    .profit-positive {
+
+    .outline-btn {
+      background: white;
+      border: 1.5px solid #2e5c3e;
       color: #2e5c3e;
-      font-weight: 700;
+      border-radius: 40px;
+      padding: 12px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #6b8a7a;
+      padding: 40px 20px;
     }
   </style>
 </head>
 <body>
 <div id="app">
-  <!-- Map (70%) -->
-  <div id="mapContainer"></div>
+  <!-- Off-day fullscreen overlay -->
+  <div id="offdayFullscreen" class="offday-fullscreen" style="display: none;">
+    <div class="offday-message">
+      <span id="offdayWorkerName"></span><br>
+      Today is your day off.<br>
+      Please report early tomorrow.
+    </div>
+  </div>
 
-  <!-- Bottom Panel (30%) -->
-  <div id="bottomPanel">
-    <div class="driver-header">
-      <div class="driver-avatar"><i class="fas fa-user"></i></div>
-      <div class="driver-info">
-        <h3>
-          <span id="driverNameDisplay">Loading...</span>
-          <span id="driverCityDisplay" class="driver-city">—</span>
-        </h3>
-        <p id="driverEmailDisplay"></p>
-      </div>
+  <!-- Home Page -->
+  <div id="homePage" class="page-view active">
+    <div class="worker-header">
+      <h2 id="workerName">Loading...</h2>
+      <div class="date-display" id="currentDate"></div>
     </div>
 
-    <div id="assignedCarDisplay" class="car-badge">
-      <i class="fas fa-car"></i> <span id="carDetails">No car assigned</span>
-    </div>
-
-    <!-- Shift controls -->
-    <div id="shiftControlArea">
-      <button class="pill-btn" id="startShiftBtn"><i class="fas fa-play"></i> Start Shift</button>
-      <div id="startShiftForm" class="dropdown-form">
-        <input type="number" id="startFuelInput" class="form-input" placeholder="Starting Fuel (litres)" step="0.1">
-        <input type="number" id="fuelMoneyInput" class="form-input" placeholder="Fuel money given (ZMW)" step="10">
-        <input type="number" id="foodMoneyInput" class="form-input" placeholder="Food money given (ZMW)" step="10">
-        <input type="number" id="extraMoneyInput" class="form-input" placeholder="Extra money (ZMW)" step="10">
-        <button class="pill-btn" id="confirmStartShift">Confirm Start Shift</button>
+    <div id="shiftSection">
+      <div class="shift-circle-container">
+        <button class="shift-circle pulse" id="startShiftBtn">
+          <i class="fas fa-play"></i>
+          <span>Start Shift</span>
+        </button>
+        <button class="shift-circle red pulse" id="endShiftBtn" style="display:none;">
+          <i class="fas fa-stop"></i>
+          <span>End Shift</span>
+        </button>
       </div>
-
-      <div id="endShiftSection" style="display:none;">
-        <button class="red-pulse-btn" id="endShiftBtn"><i class="fas fa-stop-circle"></i> End Shift</button>
-        <div id="endShiftForm" class="dropdown-form">
-          <input type="number" id="endFuelInput" class="form-input" placeholder="Ending Fuel (litres)" step="0.1">
-          <input type="number" id="distanceInput" class="form-input" placeholder="Distance travelled (km)" step="0.1">
-          <input type="number" id="revenueInput" class="form-input" placeholder="Revenue generated (ZMW)" step="10">
-          <button class="pill-btn" id="confirmEndShift">Submit & End Shift</button>
-        </div>
-      </div>
+      <div class="shift-timer" id="shiftTimer" style="display:none;">00:00:00</div>
+      <div class="shift-hint" id="shiftHint">Only start when at your workplace</div>
     </div>
+  </div>
 
-    <!-- Emergency buttons -->
-    <div style="margin-top: 4px;">
-      <div style="font-weight: 600; color: #1e3a2a; margin-bottom: 8px;">⚠️ Emergency</div>
-      <div class="emergency-grid">
-        <div class="emergency-btn" id="breakdownBtn"><i class="fas fa-tools"></i> Breakdown</div>
-        <div class="emergency-btn" id="fuelEmergencyBtn"><i class="fas fa-gas-pump"></i> Fuel</div>
-        <div class="emergency-btn" id="otherEmergencyBtn"><i class="fas fa-ambulance"></i> Emergency</div>
-      </div>
+  <!-- Tasks Page -->
+  <div id="tasksPage" class="page-view">
+    <h3 style="color:#1e3a2a; margin-bottom:16px;" id="tasksDateTitle"></h3>
+    <div id="tasksListContainer"></div>
+  </div>
+
+  <!-- Reports Page -->
+  <div id="reportsPage" class="page-view">
+    <div class="toggle-container">
+      <div class="toggle-option active" data-tab="tasks">Completed Tasks</div>
+      <div class="toggle-option" data-tab="reports">Shift Reports</div>
     </div>
+    <div class="period-selector">
+      <select id="periodSelect" class="period-pill">
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="all">All Time</option>
+      </select>
+    </div>
+    <div id="reportsContent"></div>
+  </div>
 
-    <!-- My Reports button (navigates to full page) -->
-    <button class="outline-btn" id="reportsPageBtn"><i class="fas fa-file-alt"></i> My Reports</button>
-    <button class="outline-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  <!-- Settings Page -->
+  <div id="settingsPage" class="page-view">
+    <button class="pill-btn" id="logoutBtn" style="margin-top:20px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-page="home"><i class="fas fa-home"></i><span>Home</span></div>
+    <div class="nav-item" data-page="tasks"><i class="fas fa-tasks"></i><span>Tasks</span></div>
+    <div class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
+    <div class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
   </div>
 </div>
 
-<!-- Reports Full Page -->
-<div id="reportsPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeReportsPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">Shift Reports</h2>
-  </div>
-  <div id="reportsListContainer"></div>
-  <button class="pill-btn" id="downloadAllReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
-</div>
-
-<!-- Emergency Modal -->
-<div class="modal-overlay" id="emergencyModal">
+<!-- End Shift Report Modal -->
+<div class="modal-overlay" id="reportModal">
   <div class="modal-card">
-    <h3 id="emergencyTitle" style="color:#b53b3b;">Emergency</h3>
-    <p id="emergencySubtitle" style="margin-bottom:16px;">Provide additional details</p>
-    <textarea id="emergencyMessage" class="form-input" rows="3" placeholder="Describe the situation..."></textarea>
-    <button class="pill-btn" id="sendEmergencyBtn" style="background:#b53b3b;">Send Alert</button>
-    <button class="outline-btn" onclick="document.getElementById('emergencyModal').style.display='none'">Cancel</button>
-  </div>
-</div>
-
-<!-- Summary Modal -->
-<div class="modal-overlay" id="summaryModal">
-  <div class="modal-card">
-    <h3 style="color:#1e3a2a;">Shift Summary</h3>
-    <div id="summaryContent"></div>
-    <button class="pill-btn" onclick="document.getElementById('summaryModal').style.display='none'">OK</button>
-  </div>
-</div>
-
-<!-- Spinner Modal -->
-<div class="modal-overlay" id="spinnerModal">
-  <div class="modal-card" style="text-align:center;">
-    <div class="spinner"></div>
-    <p>Processing...</p>
+    <h3 style="color:#1e3a2a; margin-bottom:16px;">Daily Work Summary</h3>
+    <textarea id="workSummary" class="form-input" rows="4" placeholder="Describe what you accomplished today..."></textarea>
+    <button class="pill-btn" id="submitReportBtn">Submit & End Shift</button>
+    <button class="outline-btn" onclick="document.getElementById('reportModal').style.display='none'">Cancel</button>
   </div>
 </div>
 
@@ -374,287 +501,284 @@
   const auth = getAuth(app);
   const db = getDatabase(app);
 
-  let map, driverMarker;
-  let currentUser = null, driverData = null, assignedCar = null, currentShift = null;
-  let locationWatchId = null;
+  let currentUser = null;
+  let workerData = null;
+  let activeShift = null;
+  let shiftInterval = null;
+  let tasks = [];
 
   // Auth
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = 'index.html'; return; }
-    if (user.email.startsWith('admin@')) { window.location.href = 'admin.html'; return; }
+    if (!user.email.startsWith('worker@')) { window.location.href = 'index.html'; return; }
     currentUser = user;
-    document.getElementById('driverEmailDisplay').textContent = user.email;
-    
-    onValue(ref(db, 'drivers/' + user.uid), (snap) => {
-      if (snap.exists()) {
-        driverData = snap.val();
-        document.getElementById('driverNameDisplay').textContent = `${driverData.firstName || ''} ${driverData.lastName || 'Driver'}`;
-        // Update city display
-        document.getElementById('driverCityDisplay').textContent = driverData.city || '—';
-      }
-    });
-
-    initMap();
-    startLocationTracking();
-    loadAssignedCar();
-    checkActiveShift();
+    await loadWorkerData();
   });
 
-  function initMap() {
-    map = L.map('mapContainer').setView([-15.3875, 28.3228], 13); // Zambia default
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-  }
-
-  function startLocationTracking() {
-    if (navigator.geolocation) {
-      locationWatchId = navigator.geolocation.watchPosition(
-        async (pos) => {
-          const lat = pos.coords.latitude, lng = pos.coords.longitude;
-          if (driverMarker) map.removeLayer(driverMarker);
-          driverMarker = L.marker([lat, lng]).addTo(map).bindPopup('You are here');
-          map.setView([lat, lng], 18);
-          await updateLocationToFirebase(lat, lng);
-        },
-        (err) => console.warn(err),
-        { enableHighAccuracy: true, maximumAge: 60000 }
-      );
+  async function loadWorkerData() {
+    const workerRef = ref(db, 'workers/' + currentUser.uid);
+    const snap = await get(workerRef);
+    if (snap.exists()) {
+      workerData = snap.val();
+      document.getElementById('workerName').textContent = `Hi, ${workerData.fullName || 'Worker'}`;
+      handleOffDay();
+    } else {
+      workerData = { fullName: 'Worker', offDay: false };
+      await set(workerRef, workerData);
+      handleOffDay();
     }
-    // Also update every minute explicitly
-    setInterval(() => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          await updateLocationToFirebase(pos.coords.latitude, pos.coords.longitude);
-        });
-      }
-    }, 60000);
+    setCurrentDate();
+    loadTasks();
+    checkActiveShift();
   }
 
-  async function updateLocationToFirebase(lat, lng) {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      const data = await res.json();
-      const road = data.address?.road || data.address?.path || data.address?.suburb || 'Unknown';
-      const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown';
-      if (currentUser) {
-        await update(ref(db, 'drivers/' + currentUser.uid), { lat, lng, road, city, lastLocationUpdate: Date.now() });
-        document.getElementById('driverCityDisplay').textContent = city;
-      }
-    } catch (e) {
-      // fallback: just update lat/lng
-      if (currentUser) await update(ref(db, 'drivers/' + currentUser.uid), { lat, lng, lastLocationUpdate: Date.now() });
+  function handleOffDay() {
+    if (workerData.offDay) {
+      document.getElementById('offdayFullscreen').style.display = 'flex';
+      document.getElementById('offdayWorkerName').innerHTML = `<span class="worker-name">${workerData.fullName}</span>`;
+      document.getElementById('shiftSection').style.display = 'none';
+      // Disable shift start
+    } else {
+      document.getElementById('offdayFullscreen').style.display = 'none';
+      document.getElementById('shiftSection').style.display = 'block';
     }
   }
 
-  function loadAssignedCar() {
-    onValue(ref(db, 'cars'), (snap) => {
-      const cars = snap.val() ? Object.values(snap.val()) : [];
-      assignedCar = cars.find(c => c.assignedDriver === currentUser?.uid);
-      document.getElementById('carDetails').innerHTML = assignedCar ? `${assignedCar.name} (${assignedCar.plate})` : 'No car assigned';
+  function setCurrentDate() {
+    const d = new Date();
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    document.getElementById('currentDate').textContent = d.toLocaleDateString('en-GB', options);
+    document.getElementById('tasksDateTitle').textContent = `Today's Tasks · ${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+  }
+
+  // Shift handling
+  async function checkActiveShift() {
+    if (workerData.offDay) return;
+    const shiftRef = ref(db, `activeShifts/${currentUser.uid}`);
+    const snap = await get(shiftRef);
+    if (snap.exists()) {
+      activeShift = snap.val();
+      showActiveShiftUI();
+    } else {
+      showStartShiftUI();
+    }
+  }
+
+  function showStartShiftUI() {
+    document.getElementById('startShiftBtn').style.display = 'flex';
+    document.getElementById('endShiftBtn').style.display = 'none';
+    document.getElementById('shiftTimer').style.display = 'none';
+    document.getElementById('shiftHint').textContent = 'Only start when at your workplace';
+    if (shiftInterval) clearInterval(shiftInterval);
+  }
+
+  function showActiveShiftUI() {
+    document.getElementById('startShiftBtn').style.display = 'none';
+    document.getElementById('endShiftBtn').style.display = 'flex';
+    document.getElementById('shiftTimer').style.display = 'block';
+    document.getElementById('shiftHint').textContent = 'Shift in progress...';
+    startTimer();
+  }
+
+  function startTimer() {
+    if (shiftInterval) clearInterval(shiftInterval);
+    shiftInterval = setInterval(() => {
+      if (!activeShift) return;
+      const elapsed = Date.now() - activeShift.startTime;
+      const h = Math.floor(elapsed / 3600000);
+      const m = Math.floor((elapsed % 3600000) / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('shiftTimer').textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  document.getElementById('startShiftBtn').addEventListener('click', async () => {
+    if (workerData.offDay) { alert('You are off duty today.'); return; }
+    const shiftData = { startTime: Date.now() };
+    await set(ref(db, `activeShifts/${currentUser.uid}`), shiftData);
+    activeShift = shiftData;
+    showActiveShiftUI();
+  });
+
+  document.getElementById('endShiftBtn').addEventListener('click', () => {
+    document.getElementById('reportModal').style.display = 'flex';
+  });
+
+  document.getElementById('submitReportBtn').addEventListener('click', async () => {
+    const summary = document.getElementById('workSummary').value.trim();
+    if (!summary) { alert('Please provide a work summary'); return; }
+
+    const endTime = Date.now();
+    const completedTasks = tasks.filter(t => t.status === 'completed' && t.completedAt > activeShift.startTime);
+
+    const report = {
+      workerId: currentUser.uid,
+      workerName: workerData.fullName,
+      startTime: activeShift.startTime,
+      endTime,
+      summary,
+      completedTasks: completedTasks.map(t => ({ title: t.title, summary: t.summary || '' })),
+      durationMs: endTime - activeShift.startTime,
+      timestamp: endTime
+    };
+
+    await push(ref(db, `shiftReports/${currentUser.uid}`), report);
+    await set(ref(db, `activeShifts/${currentUser.uid}`), null);
+    activeShift = null;
+    document.getElementById('reportModal').style.display = 'none';
+    document.getElementById('workSummary').value = '';
+    showStartShiftUI();
+  });
+
+  // Tasks
+  function loadTasks() {
+    const tasksRef = ref(db, `tasks/${currentUser.uid}`);
+    onValue(tasksRef, (snap) => {
+      tasks = snap.val() ? Object.entries(snap.val()).map(([id, t]) => ({ id, ...t })) : [];
+      renderTasks();
     });
   }
 
-  async function checkActiveShift() {
-    const snap = await get(ref(db, `activeShifts/${currentUser.uid}`));
-    if (snap.exists()) {
-      currentShift = snap.val();
-      document.getElementById('startShiftBtn').style.display = 'none';
-      document.getElementById('endShiftSection').style.display = 'block';
+  function renderTasks() {
+    const container = document.getElementById('tasksListContainer');
+    const pending = tasks.filter(t => t.status !== 'completed');
+    if (pending.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list" style="font-size:48px; color:#c0dcc0; margin-bottom:16px;"></i><p>Please stand by for tasks</p></div>';
+      return;
+    }
+    container.innerHTML = pending.map(t => `
+      <div class="task-card" data-id="${t.id}">
+        <div class="task-title">${t.title}</div>
+        <div class="task-desc">${t.description || ''}</div>
+        <div class="task-meta">
+          <span class="task-status">Pending</span>
+          <button class="expand-btn"><i class="fas fa-chevron-down"></i> Expand</button>
+        </div>
+        <div class="task-detail">
+          <textarea class="task-summary-input" placeholder="Write summary of completed work..."></textarea>
+          <button class="pill-btn mark-done" style="margin-top:8px;">Mark as Done</button>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.expand-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const card = e.target.closest('.task-card');
+        const detail = card.querySelector('.task-detail');
+        const icon = btn.querySelector('i');
+        detail.style.display = detail.style.display === 'block' ? 'none' : 'block';
+        icon.className = detail.style.display === 'block' ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+      });
+    });
+
+    document.querySelectorAll('.mark-done').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const card = e.target.closest('.task-card');
+        const taskId = card.dataset.id;
+        const summary = card.querySelector('.task-summary-input').value.trim();
+        if (!summary) { alert('Please write a summary'); return; }
+        await update(ref(db, `tasks/${currentUser.uid}/${taskId}`), {
+          status: 'completed',
+          summary,
+          completedAt: Date.now()
+        });
+      });
+    });
+  }
+
+  // Reports page toggle
+  document.querySelectorAll('.toggle-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      loadReportsContent(opt.dataset.tab);
+    });
+  });
+
+  document.getElementById('periodSelect').addEventListener('change', () => {
+    const activeTab = document.querySelector('.toggle-option.active').dataset.tab;
+    loadReportsContent(activeTab);
+  });
+
+  async function loadReportsContent(tab) {
+    const container = document.getElementById('reportsContent');
+    const period = document.getElementById('periodSelect').value;
+    container.innerHTML = '<div class="spinner"></div>';
+
+    const now = Date.now();
+    const day = 86400000;
+
+    if (tab === 'tasks') {
+      const completed = tasks.filter(t => t.status === 'completed');
+      const filtered = completed.filter(t => {
+        if (period === 'today') return (now - t.completedAt) < day;
+        if (period === 'week') return (now - t.completedAt) < 7 * day;
+        if (period === 'month') return (now - t.completedAt) < 30 * day;
+        return true;
+      });
+      filtered.sort((a, b) => b.completedAt - a.completedAt);
+      container.innerHTML = filtered.length === 0 ? '<div class="empty-state">No completed tasks in this period</div>' : filtered.map(t => `
+        <div class="report-card">
+          <div class="report-header">
+            <span>${t.title}</span>
+            <span>${new Date(t.completedAt).toLocaleDateString()}</span>
+          </div>
+          <div class="report-summary">${t.summary || 'No summary'}</div>
+        </div>
+      `).join('');
     } else {
-      document.getElementById('startShiftBtn').style.display = 'block';
-      document.getElementById('endShiftSection').style.display = 'none';
+      const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
+      const reports = snap.val() ? Object.values(snap.val()) : [];
+      const filtered = reports.filter(r => {
+        if (period === 'today') return (now - r.timestamp) < day;
+        if (period === 'week') return (now - r.timestamp) < 7 * day;
+        if (period === 'month') return (now - r.timestamp) < 30 * day;
+        return true;
+      });
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
+      container.innerHTML = filtered.length === 0 ? '<div class="empty-state">No shift reports in this period</div>' : filtered.map(r => `
+        <div class="report-card">
+          <div class="report-header">
+            <span>${new Date(r.startTime).toLocaleDateString()}</span>
+            <span>${formatTime(r.startTime)} - ${formatTime(r.endTime)}</span>
+          </div>
+          <div class="report-summary">${r.summary}</div>
+          ${r.completedTasks && r.completedTasks.length ? `
+            <div class="report-tasks">
+              <strong>Completed Tasks:</strong>
+              ${r.completedTasks.map(t => `<div style="margin-top:6px;">• ${t.title}: ${t.summary}</div>`).join('')}
+            </div>
+          ` : ''}
+          <div style="margin-top:8px; font-size:13px; color:#5a7a62;">Duration: ${formatDuration(r.durationMs)}</div>
+        </div>
+      `).join('');
     }
   }
 
-  // Format time as HH:MM
   function formatTime(ts) {
-    const d = new Date(ts);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   function formatDuration(ms) {
-    const hours = Math.floor(ms / (1000 * 60 * 60));
-    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    return `${h}h ${m}m`;
   }
 
-  // Start shift
-  document.getElementById('startShiftBtn').addEventListener('click', () => {
-    document.getElementById('startShiftForm').style.display = 'block';
-  });
-  document.getElementById('confirmStartShift').addEventListener('click', async () => {
-    const startFuel = parseFloat(document.getElementById('startFuelInput').value);
-    if (isNaN(startFuel)) return alert('Enter starting fuel');
-    const shiftData = {
-      startTime: Date.now(),
-      startFuel,
-      fuelMoney: parseFloat(document.getElementById('fuelMoneyInput').value) || 0,
-      foodMoney: parseFloat(document.getElementById('foodMoneyInput').value) || 0,
-      extraMoney: parseFloat(document.getElementById('extraMoneyInput').value) || 0,
-      carId: assignedCar?.id || null,
-      carName: assignedCar?.name || 'N/A',
-      plate: assignedCar?.plate || 'N/A'
-    };
-    await set(ref(db, `activeShifts/${currentUser.uid}`), shiftData);
-    currentShift = shiftData;
-    document.getElementById('startShiftForm').style.display = 'none';
-    document.getElementById('startShiftBtn').style.display = 'none';
-    document.getElementById('endShiftSection').style.display = 'block';
-  });
-
-  // End shift
-  document.getElementById('endShiftBtn').addEventListener('click', () => {
-    document.getElementById('endShiftForm').style.display = 'block';
-  });
-  document.getElementById('confirmEndShift').addEventListener('click', async () => {
-    const endFuel = parseFloat(document.getElementById('endFuelInput').value);
-    const distance = parseFloat(document.getElementById('distanceInput').value);
-    const revenue = parseFloat(document.getElementById('revenueInput').value);
-    if (isNaN(endFuel) || isNaN(distance) || isNaN(revenue)) return alert('Fill all fields');
-
-    document.getElementById('spinnerModal').style.display = 'flex';
-    setTimeout(async () => {
-      const shift = currentShift;
-      const endTime = Date.now();
-      const fuelConsumed = shift.startFuel - endFuel;
-      const expenses = shift.fuelMoney + shift.foodMoney + shift.extraMoney;
-      const profit = revenue - expenses;
-      const durationMs = endTime - shift.startTime;
-
-      const report = {
-        driverId: currentUser.uid,
-        driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
-        carId: shift.carId, carName: shift.carName, plate: shift.plate,
-        startTime: shift.startTime, endTime,
-        startFuel: shift.startFuel, endFuel, fuelConsumed, distance, revenue,
-        fuelMoney: shift.fuelMoney, foodMoney: shift.foodMoney, extraMoney: shift.extraMoney,
-        totalExpenses: expenses, profit,
-        durationMs,
-        timestamp: Date.now()
-      };
-
-      await push(ref(db, `shiftReports/${currentUser.uid}`), report);
-      await set(ref(db, `activeShifts/${currentUser.uid}`), null);
-      
-      if (assignedCar) {
-        const carRef = ref(db, `cars/${assignedCar.id}`);
-        const carSnap = await get(carRef);
-        const carData = carSnap.val() || {};
-        await update(carRef, {
-          totalFuelConsumed: (carData.totalFuelConsumed || 0) + fuelConsumed,
-          totalDistance: (carData.totalDistance || 0) + distance
-        });
-      }
-
-      document.getElementById('spinnerModal').style.display = 'none';
-      
-      // Summary with times and duration
-      document.getElementById('summaryContent').innerHTML = `
-        <div class="summary-line"><span>Shift start:</span><span>${formatTime(shift.startTime)}</span></div>
-        <div class="summary-line"><span>Shift end:</span><span>${formatTime(endTime)}</span></div>
-        <div class="summary-line"><span>Duration:</span><span>${formatDuration(durationMs)}</span></div>
-        <div class="summary-line"><span>Start fuel:</span><span>${shift.startFuel} L</span></div>
-        <div class="summary-line"><span>End fuel:</span><span>${endFuel} L</span></div>
-        <div class="summary-line"><span>Fuel used:</span><span>${fuelConsumed.toFixed(1)} L</span></div>
-        <div class="summary-line"><span>Distance:</span><span>${distance} km</span></div>
-        <div class="summary-line"><span>Revenue:</span><span>ZMW ${revenue.toLocaleString()}</span></div>
-        <div class="summary-line"><span>Expenses:</span><span>ZMW ${expenses.toLocaleString()}</span></div>
-        <div class="summary-line"><span class="profit-positive">Profit:</span><span class="profit-positive">ZMW ${profit.toLocaleString()}</span></div>
-      `;
-      document.getElementById('summaryModal').style.display = 'flex';
-      
-      // Reset
-      currentShift = null;
-      document.getElementById('endShiftForm').style.display = 'none';
-      document.getElementById('startShiftBtn').style.display = 'block';
-      document.getElementById('endShiftSection').style.display = 'none';
-      ['startFuelInput','fuelMoneyInput','foodMoneyInput','extraMoneyInput','endFuelInput','distanceInput','revenueInput'].forEach(id => document.getElementById(id).value = '');
-    }, 1500);
-  });
-
-  // Emergency with styled modal
-  let currentEmergencyType = '';
-  function openEmergencyModal(type, title) {
-    currentEmergencyType = type;
-    document.getElementById('emergencyTitle').innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${title}`;
-    document.getElementById('emergencyMessage').value = '';
-    document.getElementById('emergencyModal').style.display = 'flex';
-  }
-  document.getElementById('breakdownBtn').addEventListener('click', () => openEmergencyModal('breakdown', 'Breakdown'));
-  document.getElementById('fuelEmergencyBtn').addEventListener('click', () => openEmergencyModal('fuel', 'Fuel Emergency'));
-  document.getElementById('otherEmergencyBtn').addEventListener('click', () => openEmergencyModal('emergency', 'Emergency'));
-  
-  document.getElementById('sendEmergencyBtn').addEventListener('click', async () => {
-    const msg = document.getElementById('emergencyMessage').value.trim();
-    if (!msg) return alert('Please describe the emergency');
-    await push(ref(db, 'driverReports'), {
-      driverId: currentUser.uid,
-      driverName: driverData ? `${driverData.firstName} ${driverData.lastName}` : currentUser.email,
-      type: currentEmergencyType,
-      message: msg,
-      timestamp: Date.now()
+  // Navigation
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      const page = item.dataset.page;
+      document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+      document.getElementById(page + 'Page').classList.add('active');
+      if (page === 'reports') loadReportsContent('tasks');
     });
-    document.getElementById('emergencyModal').style.display = 'none';
-    alert('Emergency sent to admin');
-  });
-
-  // Reports page
-  document.getElementById('reportsPageBtn').addEventListener('click', async () => {
-    document.getElementById('reportsPage').classList.add('active');
-    const container = document.getElementById('reportsListContainer');
-    container.innerHTML = '<div class="spinner"></div>';
-    
-    const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
-    const reports = snap.val() ? Object.values(snap.val()) : [];
-    reports.sort((a,b) => b.timestamp - a.timestamp);
-    
-    const formatDate = (ts) => {
-      const d = new Date(ts);
-      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    };
-    
-    container.innerHTML = reports.map(r => `
-      <div class="report-card">
-        <div class="report-date">${formatDate(r.startTime)}</div>
-        <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime - r.startTime))})</span></div>
-        <div class="summary-line"><span>Start fuel:</span><span>${r.startFuel} L</span></div>
-        <div class="summary-line"><span>End fuel:</span><span>${r.endFuel} L</span></div>
-        <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed.toFixed(1)} L</span></div>
-        <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
-        <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue.toLocaleString()}</span></div>
-        <div class="summary-line"><span>Expenses:</span><span>ZMW ${r.totalExpenses.toLocaleString()}</span></div>
-        <div class="summary-line"><span class="profit-positive">Profit:</span><span class="profit-positive">ZMW ${r.profit.toLocaleString()}</span></div>
-        <div style="margin-top:8px; font-size:13px; color:#5a7a62;">
-          <i class="fas fa-gas-pump"></i> Fuel money: ZMW ${r.fuelMoney} · Food: ZMW ${r.foodMoney} · Extra: ZMW ${r.extraMoney}
-        </div>
-      </div>
-    `).join('') || '<p>No reports yet.</p>';
-  });
-  
-  document.getElementById('closeReportsPage').addEventListener('click', () => {
-    document.getElementById('reportsPage').classList.remove('active');
-  });
-
-  document.getElementById('downloadAllReportsCsv').addEventListener('click', async () => {
-    const snap = await get(ref(db, `shiftReports/${currentUser.uid}`));
-    const reports = snap.val() ? Object.values(snap.val()) : [];
-    let csv = "Date,Car,Plate,StartTime,EndTime,Duration,StartFuel,EndFuel,FuelConsumed,Distance,Revenue,Expenses,Profit,FuelMoney,FoodMoney,ExtraMoney\n";
-    reports.forEach(r => {
-      csv += `"${new Date(r.startTime).toLocaleDateString()}",${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime - r.startTime))}",${r.startFuel},${r.endFuel},${r.fuelConsumed},${r.distance},${r.revenue},${r.totalExpenses},${r.profit},${r.fuelMoney},${r.foodMoney},${r.extraMoney}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `driver_${currentUser.uid}_reports.csv`;
-    a.click();
   });
 
   // Logout
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    if (locationWatchId) navigator.geolocation.clearWatch(locationWatchId);
-    await signOut(auth);
-    window.location.href = 'index.html';
-  });
+  document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth).then(() => window.location.href = 'index.html'));
 </script>
 </body>
 </html>
