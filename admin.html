@@ -3202,7 +3202,7 @@
                     return;
                 }
 
-                // Mark as completed (not signed)
+                // Mark as completed (NOT signed)
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'completed',
                     signature: 'completed',
