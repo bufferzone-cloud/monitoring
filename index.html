@@ -275,6 +275,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
@@ -289,6 +290,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getDatabase(app);
 
   document.getElementById('loginSubmit').addEventListener('click', async () => {
     const email = document.getElementById('emailInput').value.trim();
@@ -296,22 +298,143 @@
     const errorDiv = document.getElementById('loginError');
     errorDiv.textContent = '';
 
+    if (!email || !password) {
+      errorDiv.textContent = 'Please enter both email and password';
+      return;
+    }
+
     try {
+      // Show loading state
+      const loginBtn = document.getElementById('loginSubmit');
+      loginBtn.textContent = 'Logging in...';
+      loginBtn.disabled = true;
+
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       const user = userCred.user;
 
-      // Redirect based on email prefix
+      // Fetch admin details from database if admin
+      let adminData = null;
+      let redirectUrl = '';
+      
       if (user.email.startsWith('admin@')) {
-        window.location.href = 'admin.html';
+        // Fetch admin details from Firebase Database
+        const adminRef = ref(db, `admins/${user.uid}`);
+        const snapshot = await get(adminRef);
+        
+        if (snapshot.exists()) {
+          adminData = snapshot.val();
+        } else {
+          // If admin not found in database, create minimal record
+          adminData = {
+            fullName: 'Admin',
+            email: user.email,
+            phone: '',
+            createdAt: Date.now()
+          };
+        }
+        
+        // Store admin data in localStorage for the admin page to use
+        const adminSessionData = {
+          uid: user.uid,
+          email: user.email,
+          fullName: adminData.fullName || 'Admin',
+          phone: adminData.phone || '',
+          isAdmin: true,
+          loginTime: Date.now()
+        };
+        
+        localStorage.setItem('adminSession', JSON.stringify(adminSessionData));
+        sessionStorage.setItem('adminSession', JSON.stringify(adminSessionData));
+        
+        redirectUrl = 'admin.html';
       } else if (user.email.startsWith('worker@')) {
-        window.location.href = 'workers.html';
+        redirectUrl = 'workers.html';
       } else {
-        window.location.href = 'driver.html';
+        redirectUrl = 'driver.html';
       }
+
+      // Clear any existing session data for other user types
+      if (!user.email.startsWith('admin@')) {
+        localStorage.removeItem('adminSession');
+        sessionStorage.removeItem('adminSession');
+      }
+
+      // Redirect after successful login
+      window.location.href = redirectUrl;
+
     } catch (e) {
-      errorDiv.textContent = 'Login failed: ' + e.message;
+      console.error('Login error:', e);
+      let errorMessage = 'Login failed: ';
+      
+      switch (e.code) {
+        case 'auth/user-not-found':
+          errorMessage += 'No account found with this email';
+          break;
+        case 'auth/wrong-password':
+          errorMessage += 'Incorrect password';
+          break;
+        case 'auth/invalid-email':
+          errorMessage += 'Invalid email address';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage += 'Too many attempts. Please try again later';
+          break;
+        default:
+          errorMessage += e.message;
+      }
+      
+      errorDiv.textContent = errorMessage;
+    } finally {
+      // Reset button state
+      const loginBtn = document.getElementById('loginSubmit');
+      loginBtn.textContent = 'Login';
+      loginBtn.disabled = false;
     }
   });
+
+  // Handle Enter key on password field
+  document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      document.getElementById('loginSubmit').click();
+    }
+  });
+
+  // Handle Enter key on email field
+  document.getElementById('emailInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      document.getElementById('passwordInput').focus();
+    }
+  });
+
+  // Check if already logged in (for session persistence)
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.email.startsWith('admin@')) {
+      // Check if we have stored admin data
+      const storedAdmin = localStorage.getItem('adminSession');
+      if (!storedAdmin) {
+        // If not stored, fetch and store it
+        const adminRef = ref(db, `admins/${user.uid}`);
+        get(adminRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const adminData = snapshot.val();
+            const adminSessionData = {
+              uid: user.uid,
+              email: user.email,
+              fullName: adminData.fullName || 'Admin',
+              phone: adminData.phone || '',
+              isAdmin: true,
+              loginTime: Date.now()
+            };
+            localStorage.setItem('adminSession', JSON.stringify(adminSessionData));
+            sessionStorage.setItem('adminSession', JSON.stringify(adminSessionData));
+          }
+        });
+      }
+    }
+  });
+
+  // Import onAuthStateChanged
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 </script>
 </body>
 </html>
