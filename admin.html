@@ -2197,6 +2197,8 @@
         let selectedVehicle = null;
         let selectedDriver = null;
         let selectedDate = new Date().toISOString().split('T')[0];
+        let startDate = null;
+        let endDate = null;
         let isShutdown = false;
         let shutdownListeners = [];
 
@@ -2697,6 +2699,9 @@
             let html = `
                 <div class="stats-header">
                     <h2><i class="fas fa-chart-bar"></i> Fleet Stats</h2>
+                    <div>
+                        <button class="btn-success" onclick="exportDateRangeCSV()" style="padding:4px 12px;font-size:0.7rem;"><i class="fas fa-file-excel"></i> Export Date Range</button>
+                    </div>
                 </div>
 
                 <div class="date-picker-container">
@@ -3195,10 +3200,10 @@
                     return;
                 }
 
-                // Mark as completed
+                // Mark as completed directly (not signed)
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'completed',
-                    signature: 'signed',
+                    signature: 'completed',
                     signedAt: Date.now(),
                     reportGenerated: true
                 });
@@ -3361,7 +3366,6 @@
             const report = allReports.find(r => r.id === reportId);
             if (!report) return;
 
-            // CSV with headers in first row, data in subsequent rows
             const rows = [
                 ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email', 
                  'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)', 'Distance Traveled (km)', 
@@ -3398,6 +3402,130 @@
             a.click();
             showToast('Report downloaded as CSV!', 'success');
         };
+
+        // ==============================================================
+        // EXPORT DATE RANGE CSV
+        // ==============================================================
+        window.exportDateRangeCSV = function() {
+            // Create a modal for date range selection
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '📊 Export Date Range';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-start"></i> Start Date</label>
+                    <input type="date" id="exportStartDate" value="${selectedDate}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-end"></i> End Date</label>
+                    <input type="date" id="exportEndDate" value="${selectedDate}">
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-top:10px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">📈 Export Options</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
+                            <input type="radio" name="exportType" value="all" checked> All Stats
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
+                            <input type="radio" name="exportType" value="completed"> Only Completed
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
+                            <input type="radio" name="exportType" value="pending"> Only Pending
+                        </label>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
+                            <input type="radio" name="exportType" value="signed"> Only Signed
+                        </label>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = function() {
+                const startDate = document.getElementById('exportStartDate').value;
+                const endDate = document.getElementById('exportEndDate').value;
+                const exportType = document.querySelector('input[name="exportType"]:checked').value;
+                if (startDate && endDate) {
+                    if (new Date(startDate) > new Date(endDate)) {
+                        showToast('Start date must be before or equal to end date.', 'error');
+                        return;
+                    }
+                    exportDateRangeCSV(startDate, endDate, exportType);
+                    closeModal('detailModal');
+                } else {
+                    showToast('Please select both start and end dates.', 'error');
+                }
+            };
+            document.getElementById('modalSaveBtn').textContent = 'Export CSV';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        function exportDateRangeCSV(startDate, endDate, exportType = 'all') {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+
+            let filteredStats = allStats.filter(s => {
+                const statDate = new Date(s.startTime);
+                return statDate >= start && statDate <= end;
+            });
+
+            // Apply status filter
+            if (exportType === 'completed') {
+                filteredStats = filteredStats.filter(s => s.status === 'completed');
+            } else if (exportType === 'pending') {
+                filteredStats = filteredStats.filter(s => s.status === 'pending');
+            } else if (exportType === 'signed') {
+                filteredStats = filteredStats.filter(s => s.status === 'signed');
+            }
+
+            if (filteredStats.length === 0) {
+                showToast('No stats found for the selected date range.', 'warning');
+                return;
+            }
+
+            // Create CSV with headers
+            const rows = [
+                ['Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email',
+                    'Status', 'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)',
+                    'Distance Traveled (km)', 'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)',
+                    'Admin Name', 'Admin Email', 'Admin Comment'
+                ]
+            ];
+
+            // Add data rows
+            filteredStats.sort((a, b) => a.startTime - b.startTime).forEach(s => {
+                rows.push([
+                    formatDate(s.startTime),
+                    s.vehicleName || '',
+                    s.vehiclePlate || '',
+                    s.vehicleColor || '',
+                    s.driverName || '',
+                    s.driverPhone || '',
+                    s.driverEmail || 'N/A',
+                    s.status || 'pending',
+                    s.timeOut || 'N/A',
+                    s.timeParked || 'N/A',
+                    s.hoursOut || 0,
+                    s.mileageOut || 0,
+                    s.mileageParked || 0,
+                    s.distanceTraveled || 0,
+                    s.fuelOut || 0,
+                    s.fuelParked || 0,
+                    s.fuelUsed || 0,
+                    s.revenue || 0,
+                    s.adminName || 'Admin',
+                    s.adminEmail || 'admin@monitoring.com',
+                    s.adminComment || 'No comment'
+                ]);
+            });
+
+            const csvContent = rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `stats_export_${startDate}_to_${endDate}.csv`;
+            a.click();
+            showToast(`Exported ${filteredStats.length} records as CSV!`, 'success');
+        }
 
         window.deleteStat = async function(statId) {
             if (!confirm('Delete this stat entry?')) return;
