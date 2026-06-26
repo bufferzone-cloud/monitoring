@@ -2197,8 +2197,7 @@
         let selectedVehicle = null;
         let selectedDriver = null;
         let selectedDate = new Date().toISOString().split('T')[0];
-        let startDate = null;
-        let endDate = null;
+        let reportsSelectedDate = new Date().toISOString().split('T')[0];
         let isShutdown = false;
         let shutdownListeners = [];
 
@@ -2699,9 +2698,6 @@
             let html = `
                 <div class="stats-header">
                     <h2><i class="fas fa-chart-bar"></i> Fleet Stats</h2>
-                    <div>
-                        <button class="btn-success" onclick="exportDateRangeCSV()" style="padding:4px 12px;font-size:0.7rem;"><i class="fas fa-file-excel"></i> Export Date Range</button>
-                    </div>
                 </div>
 
                 <div class="date-picker-container">
@@ -2914,12 +2910,18 @@
         }
 
         // ==============================================================
-        // DATE CHANGE FUNCTION
+        // DATE CHANGE FUNCTIONS
         // ==============================================================
         window.onDateChange = function(date) {
             selectedDate = date;
             document.getElementById('datePicker').value = date;
             renderStats();
+        };
+
+        window.onReportsDateChange = function(date) {
+            reportsSelectedDate = date;
+            document.getElementById('reportsDatePicker').value = date;
+            renderReports();
         };
 
         // ==============================================================
@@ -3200,7 +3202,7 @@
                     return;
                 }
 
-                // Mark as completed directly (not signed)
+                // Mark as completed (not signed)
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'completed',
                     signature: 'completed',
@@ -3362,6 +3364,9 @@
             openModal('detailModal');
         };
 
+        // ==============================================================
+        // DOWNLOAD SINGLE REPORT CSV
+        // ==============================================================
         window.downloadReportCSV = function(reportId) {
             const report = allReports.find(r => r.id === reportId);
             if (!report) return;
@@ -3404,117 +3409,62 @@
         };
 
         // ==============================================================
-        // EXPORT DATE RANGE CSV
+        // DOWNLOAD DAILY REPORT CSV (ALL CARDS FOR SELECTED DATE)
         // ==============================================================
-        window.exportDateRangeCSV = function() {
-            // Create a modal for date range selection
-            const modal = document.getElementById('detailModal');
-            document.getElementById('modalTitle').textContent = '📊 Export Date Range';
-            document.getElementById('modalBody').innerHTML = `
-                <div class="form-group">
-                    <label><i class="fas fa-calendar-start"></i> Start Date</label>
-                    <input type="date" id="exportStartDate" value="${selectedDate}">
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-calendar-end"></i> End Date</label>
-                    <input type="date" id="exportEndDate" value="${selectedDate}">
-                </div>
-                <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-top:10px;border:1px solid var(--gray-200);">
-                    <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">📈 Export Options</div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
-                            <input type="radio" name="exportType" value="all" checked> All Stats
-                        </label>
-                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
-                            <input type="radio" name="exportType" value="completed"> Only Completed
-                        </label>
-                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
-                            <input type="radio" name="exportType" value="pending"> Only Pending
-                        </label>
-                        <label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--gray-600);">
-                            <input type="radio" name="exportType" value="signed"> Only Signed
-                        </label>
-                    </div>
-                </div>
-            `;
-            document.getElementById('modalSaveBtn').onclick = function() {
-                const startDate = document.getElementById('exportStartDate').value;
-                const endDate = document.getElementById('exportEndDate').value;
-                const exportType = document.querySelector('input[name="exportType"]:checked').value;
-                if (startDate && endDate) {
-                    if (new Date(startDate) > new Date(endDate)) {
-                        showToast('Start date must be before or equal to end date.', 'error');
-                        return;
-                    }
-                    exportDateRangeCSV(startDate, endDate, exportType);
-                    closeModal('detailModal');
-                } else {
-                    showToast('Please select both start and end dates.', 'error');
-                }
-            };
-            document.getElementById('modalSaveBtn').textContent = 'Export CSV';
-            document.getElementById('modalSaveBtn').style.display = 'block';
-            openModal('detailModal');
-        };
-
-        function exportDateRangeCSV(startDate, endDate, exportType = 'all') {
-            const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-
-            let filteredStats = allStats.filter(s => {
-                const statDate = new Date(s.startTime);
-                return statDate >= start && statDate <= end;
-            });
-
-            // Apply status filter
-            if (exportType === 'completed') {
-                filteredStats = filteredStats.filter(s => s.status === 'completed');
-            } else if (exportType === 'pending') {
-                filteredStats = filteredStats.filter(s => s.status === 'pending');
-            } else if (exportType === 'signed') {
-                filteredStats = filteredStats.filter(s => s.status === 'signed');
+        window.downloadDailyReportCSV = function() {
+            const date = document.getElementById('reportsDatePicker').value || reportsSelectedDate;
+            
+            if (!date) {
+                showToast('Please select a date first.', 'error');
+                return;
             }
 
-            if (filteredStats.length === 0) {
-                showToast('No stats found for the selected date range.', 'warning');
+            // Filter reports for the selected date
+            const dateStart = new Date(date);
+            dateStart.setHours(0, 0, 0, 0);
+            const dateEnd = new Date(date);
+            dateEnd.setHours(23, 59, 59, 999);
+
+            const dailyReports = allReports.filter(r => {
+                const reportDate = new Date(r.date);
+                return reportDate >= dateStart && reportDate <= dateEnd;
+            });
+
+            if (dailyReports.length === 0) {
+                showToast('No reports found for the selected date.', 'warning');
                 return;
             }
 
             // Create CSV with headers
             const rows = [
-                ['Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email',
-                    'Status', 'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)',
-                    'Distance Traveled (km)', 'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)',
-                    'Admin Name', 'Admin Email', 'Admin Comment'
-                ]
+                ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email', 
+                 'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)', 'Distance Traveled (km)', 
+                 'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)', 'Admin Name', 'Admin Email', 'Admin Comment']
             ];
 
             // Add data rows
-            filteredStats.sort((a, b) => a.startTime - b.startTime).forEach(s => {
+            dailyReports.sort((a, b) => a.date - b.date).forEach(r => {
                 rows.push([
-                    formatDate(s.startTime),
-                    s.vehicleName || '',
-                    s.vehiclePlate || '',
-                    s.vehicleColor || '',
-                    s.driverName || '',
-                    s.driverPhone || '',
-                    s.driverEmail || 'N/A',
-                    s.status || 'pending',
-                    s.timeOut || 'N/A',
-                    s.timeParked || 'N/A',
-                    s.hoursOut || 0,
-                    s.mileageOut || 0,
-                    s.mileageParked || 0,
-                    s.distanceTraveled || 0,
-                    s.fuelOut || 0,
-                    s.fuelParked || 0,
-                    s.fuelUsed || 0,
-                    s.revenue || 0,
-                    s.adminName || 'Admin',
-                    s.adminEmail || 'admin@monitoring.com',
-                    s.adminComment || 'No comment'
+                    formatDate(r.date),
+                    r.vehicleName || '',
+                    r.vehiclePlate || '',
+                    r.vehicleColor || '',
+                    r.driverName || '',
+                    r.driverPhone || '',
+                    r.driverEmail || 'N/A',
+                    r.timeOut || 'N/A',
+                    r.timeParked || 'N/A',
+                    r.hoursOut || 0,
+                    r.mileageOut || 0,
+                    r.mileageParked || 0,
+                    r.distanceTraveled || 0,
+                    r.fuelOut || 0,
+                    r.fuelParked || 0,
+                    r.fuelUsed || 0,
+                    r.revenue || 0,
+                    r.adminName || 'Admin',
+                    r.adminEmail || 'admin@monitoring.com',
+                    r.adminComment || 'No comment'
                 ]);
             });
 
@@ -3522,10 +3472,10 @@
             const blob = new Blob([csvContent], { type: 'text/csv' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `stats_export_${startDate}_to_${endDate}.csv`;
+            a.download = `daily_report_${date}.csv`;
             a.click();
-            showToast(`Exported ${filteredStats.length} records as CSV!`, 'success');
-        }
+            showToast(`Daily report downloaded! (${dailyReports.length} records)`, 'success');
+        };
 
         window.deleteStat = async function(statId) {
             if (!confirm('Delete this stat entry?')) return;
@@ -4080,13 +4030,45 @@
         // RENDER REPORTS
         // ==============================================================
         function renderReports() {
+            // Filter reports by selected date
+            const reportsDateStart = new Date(reportsSelectedDate);
+            reportsDateStart.setHours(0, 0, 0, 0);
+            const reportsDateEnd = new Date(reportsSelectedDate);
+            reportsDateEnd.setHours(23, 59, 59, 999);
+
+            const filteredReports = allReports.filter(r => {
+                const reportDate = new Date(r.date);
+                return reportDate >= reportsDateStart && reportDate <= reportsDateEnd;
+            });
+
             let html = `
                 <div class="page-header">
                     <h2><i class="fas fa-file-alt" style="color:var(--accent);"></i> Reports</h2>
                 </div>
+
+                <div class="date-picker-container">
+                    <span class="date-label"><i class="fas fa-calendar-alt"></i> Date:</span>
+                    <input type="date" id="reportsDatePicker" value="${reportsSelectedDate}" onchange="onReportsDateChange(this.value)">
+                    <button class="btn-date" onclick="onReportsDateChange(document.getElementById('reportsDatePicker').value)">
+                        <i class="fas fa-search"></i> View
+                    </button>
+                    <button class="btn-date today" onclick="onReportsDateChange(new Date().toISOString().split('T')[0])">
+                        <i class="fas fa-clock"></i> Today
+                    </button>
+                    <button class="btn-success" onclick="downloadDailyReportCSV()" style="padding:4px 12px;font-size:0.7rem;margin-left:auto;">
+                        <i class="fas fa-file-excel"></i> Download Daily Report
+                    </button>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+                    <span style="font-size:0.75rem;color:var(--gray-600);">
+                        <i class="fas fa-file-alt"></i> Total Reports: ${filteredReports.length}
+                    </span>
+                </div>
+
                 <div class="grid-cards">
-                    ${allReports.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-file-alt"></i><h3>No reports generated yet</h3><p>Complete stats to generate automatic reports.</p></div>' :
-                    allReports.sort((a,b) => b.date - a.date).map(r => `
+                    ${filteredReports.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-file-alt"></i><h3>No reports for this date</h3><p>Select a different date or complete End of Day to generate reports.</p></div>' :
+                    filteredReports.sort((a,b) => b.date - a.date).map(r => `
                         <div class="card">
                             <div class="card-header">
                                 <div class="icon-wrap amber"><i class="fas fa-file-alt"></i></div>
