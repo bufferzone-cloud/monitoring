@@ -2798,10 +2798,10 @@
                                 <div class="detail-row"><span class="label">Date</span><span class="value">${formatDate(s.startTime)}</span></div>
                             </div>
                             <div class="stats-card-actions">
-                                ${s.status === 'pending' ? `<button class="btn-icon primary" onclick="event.stopPropagation();openEndOfDay('${s.id}')"><i class="fas fa-flag-checkered"></i> End of Day</button>` : ''}
-                                ${s.status === 'pending' && s.timeParked ? `<button class="btn-icon success" onclick="event.stopPropagation();signEndOfDay('${s.id}')"><i class="fas fa-check"></i> Sign & Complete</button>` : ''}
+                                ${s.status === 'pending' ? `<button class="btn-icon primary" onclick="event.stopPropagation();signStat('${s.id}')"><i class="fas fa-check"></i> Sign</button>` : ''}
+                                ${s.status === 'signed' ? `<button class="btn-icon success" onclick="event.stopPropagation();openEndOfDay('${s.id}')"><i class="fas fa-flag-checkered"></i> End of Day</button>` : ''}
                                 ${s.status === 'completed' ? `<button class="btn-icon teal" onclick="event.stopPropagation();viewReport('${s.id}')"><i class="fas fa-file-alt"></i> Report</button>` : ''}
-                                ${s.status === 'pending' ? `<button class="btn-icon red" onclick="event.stopPropagation();deleteStat('${s.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                                ${s.status === 'pending' || s.status === 'signed' ? `<button class="btn-icon red" onclick="event.stopPropagation();deleteStat('${s.id}')"><i class="fas fa-trash"></i></button>` : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -3096,21 +3096,11 @@
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
 
-            // If already completed, just show the report
             if (stat.status === 'completed') {
-                viewReport(statId);
+                showToast('This stat is already completed. View the report instead.', 'warning');
                 return;
             }
 
-            // If already has End of Day data but not signed, show a summary and sign button
-            if (stat.timeParked && stat.mileageParked) {
-                if (confirm('End of Day data already submitted. Sign to complete?')) {
-                    signEndOfDay(statId);
-                }
-                return;
-            }
-
-            // Otherwise show the End of Day form
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '🚩 End of Day Stats';
             document.getElementById('modalBody').innerHTML = `
@@ -3149,9 +3139,6 @@
                     <label><i class="fas fa-comment"></i> Admin Comment</label>
                     <textarea id="eodAdminComment" placeholder="Any notes about this shift" rows="3"></textarea>
                 </div>
-                <div style="font-size:0.75rem;color:var(--gray-500);margin-top:6px;">
-                    <i class="fas fa-info-circle"></i> After submitting, driver will sign to complete the report.
-                </div>
             `;
             document.getElementById('modalSaveBtn').onclick = () => submitEndOfDay(statId);
             document.getElementById('modalSaveBtn').textContent = 'Submit End of Day';
@@ -3179,7 +3166,7 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
-                // Update with end of day data but keep status as pending
+                // Update to pending first
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'pending',
                     timeParked: timeParked,
@@ -3195,7 +3182,7 @@
                 });
 
                 closeModal('detailModal');
-                showToast('End of Day submitted! Driver must sign to complete.', 'success');
+                showToast('End of Day submitted! Waiting for driver signature.', 'success');
                 await refreshAll();
                 renderStats();
             } catch (err) {
@@ -3215,15 +3202,15 @@
                     return;
                 }
 
-                // Directly mark as COMPLETED and generate report
+                // Mark as completed (NOT signed)
                 await db.ref(`driverStats/${statId}`).update({
-                    status: 'completed',  // Direct to completed
-                    signature: 'signed',   // Record that driver signed
+                    status: 'completed',
+                    signature: 'completed',
                     signedAt: Date.now(),
                     reportGenerated: true
                 });
 
-                // Generate report immediately
+                // Generate report
                 const reportRef = db.ref('driverReports').push();
                 await reportRef.set({
                     statId: statId,
