@@ -571,7 +571,7 @@
             color: var(--gray-600);
         }
 
-        /* Upload box */
+        /* ===== UPLOAD BOX ===== */
         .upload-box {
             width: 100px;
             height: 100px;
@@ -727,7 +727,7 @@
             border-top: 1px solid var(--gray-100);
         }
 
-        /* ===== SELECT VEHICLE/DRIVER DROPDOWN ===== */
+        /* ===== CUSTOM DROPDOWN ===== */
         .select-dropdown {
             position: relative;
             width: 100%;
@@ -755,8 +755,8 @@
             gap: 8px;
         }
         .select-dropdown .dropdown-trigger .selected-item img {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             object-fit: cover;
         }
@@ -771,7 +771,7 @@
             border-radius: var(--radius);
             box-shadow: var(--shadow-lg);
             z-index: 100;
-            max-height: 250px;
+            max-height: 200px;
             overflow-y: auto;
             margin-top: 4px;
         }
@@ -795,8 +795,8 @@
             background: var(--gray-50);
         }
         .select-dropdown .dropdown-menu .dropdown-item img {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             object-fit: cover;
         }
@@ -1887,7 +1887,7 @@
             padding: 18px;
             box-shadow: var(--shadow-xl);
             border: 1px solid var(--gray-200);
-            min-width: 200px;
+            min-width: 180px;
             display: none;
             animation: fadeInUp 0.3s ease;
         }
@@ -1903,8 +1903,8 @@
             margin-bottom: 10px;
         }
         .user-popup .user-info .avatar-large {
-            width: 42px;
-            height: 42px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: var(--primary);
             color: #fff;
@@ -1912,15 +1912,15 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         .user-popup .user-info .details .name {
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--gray-800);
         }
         .user-popup .user-info .details .email {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--gray-500);
         }
         .user-popup .user-actions {
@@ -2099,8 +2099,6 @@
             </div>
         </div>
         <div class="user-actions">
-            <button onclick="toggleUserPopup()"><i class="fas fa-user"></i> Profile</button>
-            <button onclick="toggleSidebar(); toggleUserPopup();"><i class="fas fa-cog"></i> Settings</button>
             <button class="danger" onclick="logout(); toggleUserPopup();"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
@@ -2483,6 +2481,8 @@
                 document.getElementById('appShell').classList.remove('active');
                 document.getElementById('loginScreen').style.display = 'flex';
                 showToast('Logged out', 'info');
+                // Redirect to index.html (login page)
+                window.location.href = 'index.html';
             }
         }
 
@@ -2808,7 +2808,6 @@
             `;
             document.getElementById('contentArea').innerHTML = html;
 
-            // Initialize custom dropdowns
             setTimeout(() => {
                 initVehicleDropdown();
                 initDriverDropdown();
@@ -2852,7 +2851,7 @@
                 },
                 '<span style="color:var(--gray-400);">Select a vehicle...</span>',
                 (v) => `
-                    <img src="${v.image || 'https://via.placeholder.com/32?text=Car'}" alt="${escapeHtml(v.name)}">
+                    <img src="${v.image || 'https://via.placeholder.com/28?text=Car'}" alt="${escapeHtml(v.name)}">
                     <div class="item-info">
                         <div class="name">${escapeHtml(v.name)}</div>
                         <div class="detail">${escapeHtml(v.plate)} · ${escapeHtml(v.color)}</div>
@@ -2891,7 +2890,7 @@
                 },
                 '<span style="color:var(--gray-400);">Select a driver...</span>',
                 (d) => `
-                    <img src="${d.image || 'https://via.placeholder.com/32?text=Driver'}" alt="${escapeHtml(d.name)}">
+                    <img src="${d.image || 'https://via.placeholder.com/28?text=Driver'}" alt="${escapeHtml(d.name)}">
                     <div class="item-info">
                         <div class="name">${escapeHtml(d.name)}</div>
                         <div class="detail">${escapeHtml(d.phone)}</div>
@@ -3295,33 +3294,33 @@
             const report = allReports.find(r => r.id === reportId);
             if (!report) return;
 
+            // CSV with headers in first row, data in subsequent rows
             const rows = [
-                ['ZAMLIFT FLEET MANAGEMENT - DAILY REPORT'],
-                [''],
-                ['Date', formatDate(report.date)],
-                ['Generated By', `${report.adminName || 'Admin'} (${report.adminEmail || 'admin@monitoring.com'})`],
-                [''],
-                ['VEHICLE DETAILS'],
-                ['Name', report.vehicleName],
-                ['Plate', report.vehiclePlate],
-                ['Color', report.vehicleColor],
-                [''],
-                ['DRIVER DETAILS'],
-                ['Name', report.driverName],
-                ['Phone', report.driverPhone],
-                [''],
-                ['STATISTICS'],
-                ['Time Out', report.timeOut || 'N/A'],
-                ['Time Parked', report.timeParked || 'N/A'],
-                ['Hours Out', report.hoursOut || 0],
-                ['Mileage Out', `${report.mileageOut || 0} km`],
-                ['Mileage Parked', `${report.mileageParked || 0} km`],
-                ['Distance Traveled', `${report.distanceTraveled || 0} km`],
-                ['Fuel Out', `${report.fuelOut || 0} L`],
-                ['Fuel Parked', `${report.fuelParked || 0} L`],
-                ['Fuel Used', `${report.fuelUsed || 0} L`],
-                ['Revenue', `ZMW ${report.revenue || 0}`],
-                ['Admin Comment', report.adminComment || 'No comment']
+                ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email', 
+                 'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)', 'Distance Traveled (km)', 
+                 'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)', 'Admin Name', 'Admin Email', 'Admin Comment'],
+                [
+                    formatDate(report.date),
+                    report.vehicleName || '',
+                    report.vehiclePlate || '',
+                    report.vehicleColor || '',
+                    report.driverName || '',
+                    report.driverPhone || '',
+                    report.driverEmail || 'N/A',
+                    report.timeOut || 'N/A',
+                    report.timeParked || 'N/A',
+                    report.hoursOut || 0,
+                    report.mileageOut || 0,
+                    report.mileageParked || 0,
+                    report.distanceTraveled || 0,
+                    report.fuelOut || 0,
+                    report.fuelParked || 0,
+                    report.fuelUsed || 0,
+                    report.revenue || 0,
+                    report.adminName || 'Admin',
+                    report.adminEmail || 'admin@monitoring.com',
+                    report.adminComment || 'No comment'
+                ]
             ];
 
             const csvContent = rows.map(row => row.join(',')).join('\n');
