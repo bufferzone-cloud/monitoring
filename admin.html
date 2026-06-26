@@ -1,1469 +1,3039 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Admin · Driver & Worker Monitor</title>
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    body {
-      background: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-
-    #app {
-      max-width: 450px;
-      width: 100%;
-      background: #ffffff;
-      min-height: 100vh;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
-    }
-
-    #mapWrapper {
-      position: relative;
-      height: 70vh;
-      width: 100%;
-    }
-
-    #mapContainer {
-      height: 100%;
-      width: 100%;
-      z-index: 1;
-    }
-
-    /* Floating city selector */
-    .city-selector {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      z-index: 10;
-      background: white;
-      border-radius: 40px;
-      padding: 8px 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border: 1px solid #c0dcc0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-
-    .city-dropdown {
-      position: absolute;
-      top: 60px;
-      left: 16px;
-      background: white;
-      border-radius: 24px;
-      padding: 8px 0;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-      display: none;
-      z-index: 11;
-      min-width: 140px;
-    }
-
-    .city-option {
-      padding: 12px 20px;
-      cursor: pointer;
-      color: #1e3a2a;
-    }
-
-    .city-option:hover {
-      background: #f0f7f0;
-    }
-
-    /* Floating emergency button */
-    .emergency-float-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 10;
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 10px 18px;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .emergency-float-btn.pulse {
-      animation: pulse-red 1.5s infinite;
-    }
-
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
-      70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-    }
-
-    .emergency-badge {
-      background: white;
-      color: #dc2626;
-      border-radius: 20px;
-      padding: 2px 8px;
-      font-size: 12px;
-      margin-left: 4px;
-    }
-
-    /* Toast message */
-    .city-toast {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(30, 58, 42, 0.9);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 40px;
-      z-index: 20;
-      transition: opacity 0.5s;
-    }
-
-    #bottomPanel {
-      flex: 1;
-      background: #ffffff;
-      border-top: 1px solid #e0e8e0;
-      display: flex;
-      flex-direction: column;
-      padding: 16px 14px 20px;
-      overflow-y: auto;
-    }
-
-    .admin-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .admin-avatar {
-      width: 50px;
-      height: 50px;
-      background: #2e5c3e;
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-    }
-
-    .admin-info h3 {
-      color: #1e3a2a;
-      font-weight: 700;
-    }
-
-    .admin-info p {
-      color: #5a7a62;
-      font-size: 14px;
-    }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-      gap: 8px;
-      margin: 8px 0;
-    }
-
-    .action-btn {
-      background: white;
-      border: 1.5px solid #2e5c3e;
-      border-radius: 16px;
-      padding: 12px 4px;
-      text-align: center;
-      color: #2e5c3e;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .action-btn i {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .section-title {
-      font-weight: 700;
-      color: #1e3a2a;
-      margin: 16px 0 8px;
-    }
-
-    .driver-item {
-      background: #f8fbf8;
-      border-radius: 18px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      border-left: 5px solid #2e5c3e;
-      cursor: pointer;
-    }
-
-    .pill-btn {
-      background: #2e5c3e;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 14px 20px;
-      font-weight: 700;
-      font-size: 16px;
-      width: 100%;
-      cursor: pointer;
-      margin: 8px 0;
-    }
-
-    .outline-btn {
-      background: white;
-      border: 1.5px solid #2e5c3e;
-      color: #2e5c3e;
-      border-radius: 40px;
-      padding: 12px;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-      margin: 8px 0;
-    }
-
-    .dropdown-form {
-      background: #f4f9f4;
-      border-radius: 24px;
-      padding: 18px;
-      margin: 12px 0;
-      display: none;
-    }
-
-    .form-input,
-    .form-select {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 30px;
-      border: 1.5px solid #cbdcd0;
-      margin-bottom: 12px;
-      font-size: 15px;
-      background: white;
-    }
-
-    /* Modals & Pages */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(2px);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-card {
-      background: white;
-      border-radius: 32px;
-      padding: 24px;
-      width: 90%;
-      max-width: 380px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .page-view {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 150;
-      overflow-y: auto;
-      padding: 20px 16px 90px;
-      display: none;
-    }
-
-    .page-view.active {
-      display: block;
-    }
-
-    .page-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .back-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #2e5c3e;
-      cursor: pointer;
-    }
-
-    .emergency-card {
-      background: #fff5f5;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border-left: 5px solid #dc2626;
-    }
-
-    .emergency-title {
-      font-weight: 700;
-      color: #2e5c3e;
-    }
-
-    .horizontal-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .call-btn {
-      background: #2e5c3e;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 12px;
-      flex: 1;
-      font-weight: 600;
-    }
-
-    .track-red-btn {
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 12px;
-      flex: 1;
-      font-weight: 600;
-    }
-
-    .report-card {
-      background: #f8fbf8;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid #d0e0d0;
-    }
-
-    .report-date {
-      font-weight: 700;
-      color: #1e3a2a;
-      margin-bottom: 8px;
-    }
-
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px dashed #c0dcc0;
-    }
-
-    .profit-positive {
-      color: #2e5c3e;
-      font-weight: 700;
-    }
-
-    .car-icon {
-      font-size: 32px;
-      color: #2e5c3e;
-      margin-right: 12px;
-    }
-
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #2e5c3e;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Toggle Switch (Apple‑style) */
-    .toggle-switch {
-      display: flex;
-      background: #eef3ef;
-      border-radius: 40px;
-      padding: 4px;
-      margin: 16px 0;
-    }
-
-    .toggle-option {
-      flex: 1;
-      text-align: center;
-      padding: 12px;
-      border-radius: 40px;
-      font-weight: 600;
-      color: #5a7a62;
-      cursor: pointer;
-    }
-
-    .toggle-option.active {
-      background: #2e5c3e;
-      color: white;
-    }
-
-    .worker-status {
-      font-size: 13px;
-      color: #5a7a62;
-      margin-top: 4px;
-    }
-
-    .on-shift {
-      color: #2e5c3e;
-      font-weight: 600;
-    }
-
-    .off-shift {
-      color: #dc2626;
-    }
-
-    .task-card {
-      background: #f8fbf8;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 1px solid #d0e0d0;
-    }
-
-    .task-title {
-      font-weight: 700;
-      color: #1e3a2a;
-    }
-
-    .task-desc {
-      color: #4a6a5a;
-      margin: 6px 0;
-    }
-
-    /* iPhone style toggle (small) */
-    .dayoff-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 48px;
-      height: 24px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .3s;
-      border-radius: 24px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: #2e5c3e;
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(24px);
-    }
-
-    /* Timesheet table */
-    .timesheet-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .timesheet-table th,
-    .timesheet-table td {
-      border: 1px solid #d0e0d0;
-      padding: 6px 4px;
-      text-align: center;
-    }
-
-    .timesheet-table th {
-      background: #eef3ef;
-    }
-
-    /* Admin Page styles */
-    #adminsPage .admin-item {
-      background: #f8fbf8;
-      border-radius: 18px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      border-left: 5px solid #1e3a2a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    #adminsPage .admin-item .admin-info-small {
-      flex: 1;
-    }
-    
-    #adminsPage .admin-item .admin-actions {
-      display: flex;
-      gap: 8px;
-    }
-    
-    #adminsPage .admin-item .admin-actions button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 8px;
-      transition: background 0.2s;
-    }
-    
-    #adminsPage .admin-item .admin-actions .delete-btn {
-      color: #dc2626;
-    }
-    
-    #adminsPage .admin-item .admin-actions .delete-btn:hover {
-      background: #fee2e2;
-    }
-    
-    #adminsPage .admin-item .admin-actions .edit-btn {
-      color: #2e5c3e;
-    }
-    
-    #adminsPage .admin-item .admin-actions .edit-btn:hover {
-      background: #e6f0e6;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+    <title>ZAMLIFT · Fleet Management</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0D9488" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-database-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-storage-compat.js">
+    </script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript">
+    </script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #0D9488;
+            --primary-dark: #0F766E;
+            --primary-light: #CCFBF1;
+            --primary-glow: rgba(13, 148, 136, 0.25);
+            --secondary: #8B5CF6;
+            --secondary-light: #EDE9FE;
+            --accent: #F59E0B;
+            --accent-light: #FEF3C7;
+            --red: #EF4444;
+            --red-light: #FEE2E2;
+            --blue: #3B82F6;
+            --blue-light: #DBEAFE;
+            --green: #10B981;
+            --green-light: #D1FAE5;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.2);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --sidebar-width: 280px;
+            --header-h: 64px;
+            --nav-h: 68px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html {
+            font-size: 16px;
+            height: 100%;
+        }
+        body {
+            font-family: var(--font);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+        .hidden {
+            display: none !important;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .gap-2 {
+            gap: 8px;
+        }
+        .gap-3 {
+            gap: 12px;
+        }
+        .gap-4 {
+            gap: 16px;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mt-3 {
+            margin-top: 12px;
+        }
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+        .mb-3 {
+            margin-bottom: 12px;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-sm {
+            font-size: 0.8rem;
+        }
+        .text-xs {
+            font-size: 0.7rem;
+        }
+        .font-bold {
+            font-weight: 700;
+        }
+        .font-semibold {
+            font-weight: 600;
+        }
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        #toastContainer {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 92%;
+            width: 400px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            background: var(--gray-900);
+            color: var(--white);
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            animation: fadeInUp 0.35s ease;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .toast.success {
+            background: linear-gradient(135deg, #059669, #10B981);
+        }
+        .toast.error {
+            background: linear-gradient(135deg, #DC2626, #EF4444);
+        }
+        .toast.warning {
+            background: linear-gradient(135deg, #D97706, #F59E0B);
+        }
+        .toast i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .toast span {
+            flex: 1;
+        }
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 4px;
+            transition: 0.2s;
+        }
+        .toast .toast-close:hover {
+            color: #fff;
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--white);
+            animation: fadeIn 0.5s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .login-banner {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .login-banner img {
+            width: 80%;
+            max-width: 350px;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+        .login-form-wrap {
+            max-width: 380px;
+            width: 100%;
+        }
+        .login-form-wrap .logo-mobile {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .login-form-wrap .logo-mobile h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gray-900);
+        }
+        .login-form-wrap .logo-mobile h1 span {
+            color: var(--primary);
+        }
+        .login-form-wrap h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+        .login-form-wrap p.sub {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+        .login-form-wrap .form-group {
+            margin-bottom: 16px;
+        }
+        .login-form-wrap .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        .login-form-wrap .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-family: var(--font);
+            transition: var(--transition);
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .login-form-wrap .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .login-form-wrap .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+            box-shadow: 0 4px 16px var(--primary-glow);
+            margin-top: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-btn .btn-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .login-btn .btn-loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        .login-btn.loading .btn-text {
+            display: none;
+        }
+        .login-btn.loading .btn-loader {
+            display: block;
+        }
+        .login-btn.loading {
+            background: var(--green);
+            pointer-events: none;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(13, 148, 136, 0.35);
+        }
+        .login-btn:active {
+            transform: scale(0.97);
+        }
+        #loginError {
+            color: var(--red);
+            font-size: 0.8rem;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 500;
+            min-height: 20px;
+        }
+        .login-form-wrap .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--gray-400);
+            font-size: 0.75rem;
+        }
+
+        /* ===== APP SHELL ===== */
+        #appShell {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--gray-50);
+        }
+        #appShell.active {
+            display: flex;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            height: var(--header-h);
+            padding: 0 16px;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
+        }
+        .app-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .app-header .brand:hover {
+            opacity: 0.8;
+        }
+        .app-header .brand h1 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -0.5px;
+        }
+        .app-header .brand h1 span {
+            color: var(--primary);
+        }
+        .app-header .brand .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            display: inline-block;
+            animation: pulse-ring 2s infinite;
+        }
+        .app-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .app-header .header-actions button {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .app-header .header-actions button:hover {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+        .app-header .header-actions .avatar-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .app-header .header-actions .avatar-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            padding: 8px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .toolbar .stats-pill {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 4px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toolbar .stats-pill i {
+            font-size: 0.8rem;
+        }
+        .toolbar .search-box {
+            flex: 1;
+            min-width: 140px;
+            position: relative;
+        }
+        .toolbar .search-box input {
+            width: 100%;
+            padding: 8px 14px 8px 38px;
+            border-radius: var(--radius-full);
+            border: 1.5px solid var(--gray-200);
+            font-size: 0.8rem;
+            font-family: var(--font);
+            background: var(--gray-50);
+            transition: var(--transition);
+            color: var(--gray-800);
+        }
+        .toolbar .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .toolbar .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 0.85rem;
+        }
+        .toolbar .filter-select {
+            padding: 8px 14px 8px 12px;
+            border-radius: var(--radius-full);
+            border: 1.5px solid var(--gray-200);
+            font-size: 0.78rem;
+            font-family: var(--font);
+            background: var(--gray-50);
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            min-width: 110px;
+        }
+        .toolbar .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .toolbar .action-btn-sm {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        .toolbar .action-btn-sm:hover {
+            background: var(--gray-200);
+        }
+        .toolbar .action-btn-sm.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .toolbar .action-btn-sm.primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* ===== CONTENT ===== */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 16px calc(var(--nav-h) + 16px + var(--safe-bottom));
+            background: var(--gray-50);
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            align-items: stretch;
+            justify-content: space-around;
+            z-index: 100;
+            padding: 0 8px calc(4px + var(--safe-bottom));
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .bottom-nav .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            background: none;
+            border: none;
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px 0;
+            position: relative;
+            font-family: var(--font);
+        }
+        .bottom-nav .nav-item i {
+            font-size: 1.25rem;
+            transition: var(--transition);
+        }
+        .bottom-nav .nav-item:hover {
+            color: var(--gray-600);
+        }
+        .bottom-nav .nav-item.active {
+            color: var(--primary);
+        }
+        .bottom-nav .nav-item.active i {
+            transform: scale(1.05);
+        }
+        .bottom-nav .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 30%;
+            right: 30%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--white);
+            z-index: 400;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-xl);
+            overflow-y: auto;
+            padding: 20px 16px 80px;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+        }
+        .sidebar .sidebar-header h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--gray-800);
+        }
+        .sidebar .sidebar-header button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 4px;
+            transition: var(--transition);
+        }
+        .sidebar .sidebar-header button:hover {
+            color: var(--gray-600);
+        }
+        .sidebar .sidebar-section {
+            margin-bottom: 20px;
+        }
+        .sidebar .sidebar-section .section-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-400);
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+        .sidebar .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: var(--font);
+        }
+        .sidebar .sidebar-item:hover {
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .sidebar .sidebar-item i {
+            width: 20px;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        .sidebar .sidebar-item.danger {
+            color: var(--red);
+        }
+        .sidebar .sidebar-item.danger i {
+            color: var(--red);
+        }
+        .sidebar .sidebar-item.danger:hover {
+            background: var(--red-light);
+        }
+
+        /* ===== CARDS GRID ===== */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 480px) {
+            .grid-cards {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            animation: fadeInUp 0.4s ease;
+        }
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .card .card-header .icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            padding: 4px;
+        }
+        .card .card-header .icon-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 2px solid var(--gray-200);
+        }
+        .card .card-header .icon-wrap.green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .card .card-header .icon-wrap.teal {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .card .card-header .icon-wrap.purple {
+            background: var(--secondary-light);
+            color: var(--secondary);
+        }
+        .card .card-header .icon-wrap.amber {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .card .card-header .icon-wrap.red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+        .card .card-header .icon-wrap.blue {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+        .card .card-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gray-800);
+        }
+        .card .card-subtitle {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        .card .card-body {
+            padding: 4px 0;
+        }
+        .card .card-body .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .card .card-body .detail-row:last-child {
+            border-bottom: none;
+        }
+        .card .card-body .detail-row .label {
+            color: var(--gray-500);
+        }
+        .card .card-body .detail-row .value {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        .card .card-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--gray-100);
+        }
+        .card .card-actions .btn-icon {
+            padding: 5px 10px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        .card .card-actions .btn-icon:hover {
+            background: var(--gray-200);
+        }
+        .card .card-actions .btn-icon.green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .card .card-actions .btn-icon.green:hover {
+            background: var(--green);
+            color: #fff;
+        }
+        .card .card-actions .btn-icon.teal {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .card .card-actions .btn-icon.teal:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .card .card-actions .btn-icon.red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+        .card .card-actions .btn-icon.red:hover {
+            background: var(--red);
+            color: #fff;
+        }
+        .card .card-actions .btn-icon.amber {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .card .card-actions .btn-icon.amber:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+        .card .card-actions .btn-icon.blue {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+        .card .card-actions .btn-icon.blue:hover {
+            background: var(--blue);
+            color: #fff;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .status-badge.pending {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .status-badge.signed {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .status-badge.in-progress {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+        .status-badge.completed {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ===== STATS SECTION ===== */
+        #statsSection .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        #statsSection .stats-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #statsSection .stats-header h2 i {
+            color: var(--primary);
+        }
+
+        .assign-flow-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 16px;
+        }
+        .assign-flow-card .step-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .assign-flow-card .step-label i {
+            color: var(--primary);
+        }
+        .assign-flow-card select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            border: 1.5px solid var(--gray-200);
+            font-size: 0.9rem;
+            font-family: var(--font);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+        .assign-flow-card select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .assign-flow-card .selected-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            margin-top: 8px;
+            border: 1px solid var(--gray-200);
+        }
+        .assign-flow-card .selected-preview img {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            object-fit: cover;
+            border: 2px solid var(--gray-200);
+        }
+        .assign-flow-card .selected-preview .info {
+            flex: 1;
+        }
+        .assign-flow-card .selected-preview .info .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-800);
+        }
+        .assign-flow-card .selected-preview .info .detail {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+
+        .stats-form {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 16px;
+        }
+        .stats-form .form-group {
+            margin-bottom: 12px;
+        }
+        .stats-form .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        .stats-form .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-family: var(--font);
+            transition: var(--transition);
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .stats-form .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .stats-form .form-group .readonly-value {
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
+        }
+        .stats-form .btn-submit {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius);
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+        .stats-form .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .stats-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        @media (min-width: 480px) {
+            .stats-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+        .stats-card-item {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .stats-card-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .stats-card-item .stats-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .stats-card-item .stats-card-header .status-badge {
+            font-size: 0.6rem;
+        }
+        .stats-card-item .stats-card-body .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .stats-card-item .stats-card-body .detail-row:last-child {
+            border-bottom: none;
+        }
+        .stats-card-item .stats-card-body .detail-row .label {
+            color: var(--gray-500);
+        }
+        .stats-card-item .stats-card-body .detail-row .value {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        .stats-card-item .stats-card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--gray-100);
+        }
+        .stats-card-item .stats-card-actions .btn-icon {
+            padding: 5px 10px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        .stats-card-item .stats-card-actions .btn-icon:hover {
+            background: var(--gray-200);
+        }
+        .stats-card-item .stats-card-actions .btn-icon.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .stats-card-item .stats-card-actions .btn-icon.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            background: var(--gray-50);
+        }
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+        .modal-header .close-btn {
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .modal-header .close-btn:hover {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-body .form-group {
+            margin-bottom: 14px;
+        }
+        .modal-body .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        .modal-body .form-group input,
+        .modal-body .form-group select,
+        .modal-body .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-family: var(--font);
+            transition: var(--transition);
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .modal-body .form-group input:focus,
+        .modal-body .form-group select:focus,
+        .modal-body .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .modal-footer {
+            padding: 12px 20px 16px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            background: var(--gray-50);
+        }
+        .modal-footer .btn {
+            padding: 8px 20px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+        .modal-footer .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        .modal-footer .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+        .modal-footer .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .modal-footer .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .app-header .brand h1 {
+                font-size: 1rem;
+            }
+            .toolbar .stats-pill {
+                font-size: 0.6rem;
+                padding: 2px 10px;
+            }
+            .toolbar .search-box input {
+                font-size: 0.75rem;
+                padding: 6px 12px 6px 32px;
+            }
+            .card {
+                padding: 12px;
+            }
+            .modal {
+                max-width: 100%;
+                border-radius: var(--radius-lg);
+                margin: 8px;
+            }
+            .sidebar {
+                width: 260px;
+            }
+            .bottom-nav .nav-item i {
+                font-size: 1.1rem;
+            }
+            .bottom-nav .nav-item {
+                font-size: 0.5rem;
+            }
+        }
+        @media (min-width: 600px) {
+            .grid-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 900px) {
+            .grid-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stats-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
-<div id="app">
-  <!-- Map Wrapper -->
-  <div id="mapWrapper">
-    <div id="mapContainer"></div>
-    <!-- City Selector -->
-    <div class="city-selector" id="citySelectorBtn">
-      <i class="fas fa-city"></i> <span id="selectedCityDisplay">Lusaka</span> <i class="fas fa-chevron-down"></i>
-    </div>
-    <div class="city-dropdown" id="cityDropdown">
-      <div class="city-option" data-city="Lusaka" data-lat="-15.3875" data-lng="28.3228">Lusaka</div>
-      <div class="city-option" data-city="Ndola" data-lat="-12.9587" data-lng="28.6366">Ndola</div>
-      <div class="city-option" data-city="Kitwe" data-lat="-12.8024" data-lng="28.2132">Kitwe</div>
-    </div>
-    <!-- Emergency Float Button -->
-    <div class="emergency-float-btn" id="emergencyFloatBtn">
-      <i class="fas fa-exclamation-triangle"></i> Emergencies
-      <span class="emergency-badge" id="emergencyCount">0</span>
-    </div>
-    <!-- Toast -->
-    <div id="cityToast" class="city-toast" style="display:none;"></div>
-  </div>
 
-  <!-- Bottom Panel -->
-  <div id="bottomPanel">
-    <div class="admin-header">
-      <div class="admin-avatar"><i class="fas fa-user-cog"></i></div>
-      <div class="admin-info">
-        <h3 id="adminNameDisplay">Admin</h3>
-        <p id="adminEmailDisplay"></p>
-      </div>
-    </div>
-    <div class="action-grid">
-      <div class="action-btn" data-page="admins"><i class="fas fa-user-shield"></i><span>Admins</span></div>
-      <div class="action-btn" data-page="drivers"><i class="fas fa-users"></i><span>Drivers</span></div>
-      <div class="action-btn" data-page="cars"><i class="fas fa-car"></i><span>Cars</span></div>
-      <div class="action-btn" data-page="assign"><i class="fas fa-exchange-alt"></i><span>Assign</span></div>
-      <div class="action-btn" data-page="reports"><i class="fas fa-chart-bar"></i><span>Reports</span></div>
-    </div>
-    <div class="section-title"><i class="fas fa-location-dot"></i> Drivers closest to you</div>
-    <div id="driverProximityList"></div>
-    <button class="outline-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-</div>
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toastContainer"></div>
 
-<!-- Emergency Page -->
-<div id="emergencyPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeEmergencyPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Emergencies</h2>
-  </div>
-  <div id="emergencyListContainer"></div>
-</div>
-
-<!-- Admins Page -->
-<div id="adminsPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeAdminsPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">Admin Management</h2>
-  </div>
-  <button class="pill-btn" id="toggleAddAdminForm"><i class="fas fa-plus-circle"></i> Add Admin</button>
-  <div id="addAdminForm" class="dropdown-form">
-    <input type="text" id="adminFullName" class="form-input" placeholder="Full Name">
-    <input type="email" id="adminEmail" class="form-input" placeholder="Email (admin@...)">
-    <input type="tel" id="adminPhone" class="form-input" placeholder="Phone Number">
-    <input type="password" id="adminPassword" class="form-input" placeholder="Password">
-    <input type="password" id="adminConfirmPassword" class="form-input" placeholder="Confirm Password">
-    <button class="pill-btn" id="createAdminBtn">Create Admin</button>
-  </div>
-  <div class="section-title">Current Admins</div>
-  <div id="adminsListContainer"></div>
-</div>
-
-<!-- Drivers Page (with toggle) -->
-<div id="driversPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeDriversPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">Team</h2>
-  </div>
-  <!-- Toggle -->
-  <div class="toggle-switch">
-    <div class="toggle-option active" data-type="drivers">Drivers</div>
-    <div class="toggle-option" data-type="workers">Workers</div>
-  </div>
-  <!-- Drivers Section -->
-  <div id="driversSection">
-    <button class="pill-btn" id="toggleAddDriverForm"><i class="fas fa-plus-circle"></i> Add Driver</button>
-    <div id="addDriverForm" class="dropdown-form">
-      <input type="text" id="driverFirstName" class="form-input" placeholder="First Name">
-      <input type="text" id="driverLastName" class="form-input" placeholder="Last Name">
-      <input type="text" id="driverNRC" class="form-input" placeholder="NRC">
-      <input type="email" id="driverEmail" class="form-input" placeholder="Email">
-      <input type="tel" id="driverPhone" class="form-input" placeholder="Phone">
-      <input type="password" id="driverPassword" class="form-input" placeholder="Password">
-      <input type="password" id="driverConfirmPassword" class="form-input" placeholder="Confirm Password">
-      <button class="pill-btn" id="createDriverBtn">Create Driver</button>
-    </div>
-    <input type="text" id="searchDriverInput" class="form-input" placeholder="Search driver...">
-    <div id="driversListContainer"></div>
-  </div>
-  <!-- Workers Section -->
-  <div id="workersSection" style="display:none;">
-    <button class="pill-btn" id="toggleAddWorkerForm"><i class="fas fa-plus-circle"></i> Add Worker</button>
-    <div id="addWorkerForm" class="dropdown-form">
-      <input type="text" id="workerFullName" class="form-input" placeholder="Full Name">
-      <input type="tel" id="workerPhone" class="form-input" placeholder="Airtel Phone Number">
-      <input type="email" id="workerEmail" class="form-input" placeholder="Email (worker@...)">
-      <input type="password" id="workerPassword" class="form-input" placeholder="Password">
-      <input type="password" id="workerConfirmPassword" class="form-input" placeholder="Confirm Password">
-      <button class="pill-btn" id="createWorkerBtn">Create Worker</button>
-    </div>
-    <div id="workersListContainer"></div>
-  </div>
-</div>
-
-<!-- Cars Page -->
-<div id="carsPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeCarsPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">Vehicles</h2>
-  </div>
-  <button class="pill-btn" id="toggleAddCarForm"><i class="fas fa-plus-circle"></i> Add Vehicle</button>
-  <div id="addCarForm" class="dropdown-form">
-    <input type="text" id="carName" class="form-input" placeholder="Vehicle Name">
-    <input type="text" id="carPlate" class="form-input" placeholder="Number Plate">
-    <button class="pill-btn" id="addCarBtn">Add Vehicle</button>
-  </div>
-  <div id="carsListContainer"></div>
-</div>
-
-<!-- Assign Page (with toggle) -->
-<div id="assignPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeAssignPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">Assignments</h2>
-  </div>
-  <div class="toggle-switch">
-    <div class="toggle-option active" data-assign="drivers">Drivers</div>
-    <div class="toggle-option" data-assign="workers">Workers</div>
-  </div>
-  <div id="assignDriversSection">
-    <button class="pill-btn" id="toggleAssignForm"><i class="fas fa-link"></i> Assign Car to Driver</button>
-    <div id="assignForm" class="dropdown-form">
-      <select id="selectDriver" class="form-select"><option value="">Select Driver</option></select>
-      <select id="selectCar" class="form-select"><option value="">Select Car</option></select>
-      <button class="pill-btn" id="confirmAssignBtn">Assign</button>
-    </div>
-    <div class="section-title">Current Driver Assignments</div>
-    <div id="assignmentsList"></div>
-  </div>
-  <div id="assignWorkersSection" style="display:none;">
-    <div class="section-title">Workers</div>
-    <div id="workersAssignList"></div>
-  </div>
-</div>
-
-<!-- Reports Page (with toggle) -->
-<div id="reportsPage" class="page-view">
-  <div class="page-header">
-    <button class="back-btn" id="closeReportsPage"><i class="fas fa-arrow-left"></i></button>
-    <h2 style="color:#1e3a2a;">Reports</h2>
-  </div>
-  <div class="toggle-switch">
-    <div class="toggle-option active" data-report="drivers">Drivers</div>
-    <div class="toggle-option" data-report="workers">Workers</div>
-  </div>
-  <div id="reportsDriversSection">
-    <div style="display:flex; gap:8px; margin-bottom:16px;">
-      <select id="reportPeriodSelect" class="form-select" style="flex:1;">
-        <option value="all">All Time</option>
-        <option value="today">Today</option>
-        <option value="week">This Week</option>
-        <option value="month">This Month</option>
-      </select>
-      <button class="pill-btn" id="loadReportsBtn" style="width:auto;">Load</button>
-    </div>
-    <div id="reportsListContainer"></div>
-    <button class="pill-btn" id="downloadReportsCsv"><i class="fas fa-download"></i> Download CSV</button>
-  </div>
-  <div id="reportsWorkersSection" style="display:none;">
-    <div id="workersReportsList"></div>
-    <button class="pill-btn" id="viewTimesheetBtn"><i class="fas fa-clock"></i> View Timesheet (14 days)</button>
-  </div>
-</div>
-
-<!-- Modals -->
-<div class="modal-overlay" id="driverModal">
-  <div class="modal-card">
-    <h3 id="modalDriverName" style="color:#1e3a2a;"></h3>
-    <p id="modalDriverDetails"></p>
-    <div class="horizontal-buttons">
-      <button class="pill-btn" id="modalTrackBtn"><i class="fas fa-location-dot"></i> Track</button>
-      <button class="outline-btn" id="modalReportsBtn"><i class="fas fa-file-alt"></i> Reports</button>
-    </div>
-    <button class="outline-btn" onclick="document.getElementById('driverModal').style.display='none'">Close</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="carModal">
-  <div class="modal-card">
-    <h3 id="modalCarName" style="color:#1e3a2a;"></h3>
-    <p id="modalCarDetails"></p>
-    <button class="outline-btn" onclick="document.getElementById('carModal').style.display='none'">Close</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="workerModal">
-  <div class="modal-card">
-    <h3 id="modalWorkerName" style="color:#1e3a2a;"></h3>
-    <p id="modalWorkerDetails"></p>
-    <div class="section-title" style="margin-top:16px;">Completed Tasks</div>
-    <div id="workerCompletedTasks"></div>
-    <button class="pill-btn" id="assignTaskFromModalBtn" style="margin-top:16px;"><i class="fas fa-plus"></i> Assign Task</button>
-    <button class="outline-btn" onclick="document.getElementById('workerModal').style.display='none'">Close</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="taskModal">
-  <div class="modal-card">
-    <h3>Assign Task</h3>
-    <input type="text" id="taskTitle" class="form-input" placeholder="Task Title">
-    <textarea id="taskDescription" class="form-input" rows="3" placeholder="Task Description"></textarea>
-    <button class="pill-btn" id="saveTaskBtn">Assign Task</button>
-    <button class="outline-btn" onclick="document.getElementById('taskModal').style.display='none'">Cancel</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="timesheetModal">
-  <div class="modal-card" style="max-width:95%; width:95%;">
-    <h3>Timesheet (Last 14 Days)</h3>
-    <div id="timesheetContent" style="overflow-x:auto;"></div>
-    <button class="pill-btn" id="downloadTimesheetCsv" style="margin-top:16px;"><i class="fas fa-download"></i> Download CSV</button>
-    <button class="outline-btn" onclick="document.getElementById('timesheetModal').style.display='none'">Close</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="driverReportsModal">
-  <div class="modal-card">
-    <h3 style="color:#1e3a2a;">Driver Reports</h3>
-    <div id="driverReportsContent"></div>
-    <button class="outline-btn" onclick="document.getElementById('driverReportsModal').style.display='none'">Close</button>
-  </div>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-  import { getDatabase, ref, set, push, onValue, update, get, child, remove } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
-    authDomain: "monitoring-1a105.firebaseapp.com",
-    databaseURL: "https://monitoring-1a105-default-rtdb.firebaseio.com",
-    projectId: "monitoring-1a105",
-    storageBucket: "monitoring-1a105.firebasestorage.app",
-    messagingSenderId: "1095363656731",
-    appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-
-  let map;
-  let adminLocation = { lat: -15.3875, lng: 28.3228 };
-  let drivers = [];
-  let cars = [];
-  let workers = [];
-  let admins = [];
-  let driverMarkers = {};
-  let currentCity = "Lusaka";
-  let emergencies = [];
-  let unreadEmergencyCount = 0;
-  let lastReadEmergencyTimestamp = 0;
-  let currentWorkerId = null;
-
-  onAuthStateChanged(auth, (user) => {
-    if (!user || !user.email.startsWith('admin@')) { 
-      window.location.href = 'index.html'; 
-      return; 
-    }
-    document.getElementById('adminEmailDisplay').textContent = user.email;
-    initMap();
-    loadData();
-    listenEmergencies();
-    loadAdmins();
-  });
-
-  function initMap() {
-    map = L.map('mapContainer').setView([adminLocation.lat, adminLocation.lng], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    navigator.geolocation?.getCurrentPosition(pos => {
-      adminLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      if (currentCity === "Lusaka") map.setView([adminLocation.lat, adminLocation.lng], 13);
-      L.marker([adminLocation.lat, adminLocation.lng]).addTo(map).bindPopup('You (Admin)');
-      updateProximityList();
-    });
-  }
-
-  function loadData() {
-    onValue(ref(db, 'drivers'), (snap) => {
-      drivers = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({ id, ...d })) : [];
-      updateMapMarkers();
-      updateProximityList();
-      renderDriversList();
-      renderAssignSelects();
-      renderAssignmentsList();
-    });
-    onValue(ref(db, 'cars'), (snap) => {
-      cars = snap.val() ? Object.entries(snap.val()).map(([id, c]) => ({ id, ...c })) : [];
-      renderCarsList();
-      renderAssignSelects();
-    });
-    onValue(ref(db, 'workers'), (snap) => {
-      workers = snap.val() ? Object.entries(snap.val()).map(([id, w]) => ({ id, ...w })) : [];
-      renderWorkersList();
-      renderWorkersAssignList();
-    });
-  }
-
-  function loadAdmins() {
-    onValue(ref(db, 'admins'), (snap) => {
-      admins = snap.val() ? Object.entries(snap.val()).map(([id, a]) => ({ id, ...a })) : [];
-      renderAdminsList();
-    });
-  }
-
-  function updateMapMarkers() {
-    Object.values(driverMarkers).forEach(m => map.removeLayer(m));
-    driverMarkers = {};
-    const cityDrivers = drivers.filter(d => d.city === currentCity && d.lat && d.lng);
-    cityDrivers.forEach(d => {
-      driverMarkers[d.id] = L.marker([d.lat, d.lng]).addTo(map).bindPopup(`${d.firstName} ${d.lastName}<br>${d.road || ''}`);
-    });
-    if (cityDrivers.length === 0) showToast(`No drivers working in ${currentCity}`);
-  }
-
-  function showToast(msg) {
-    const toast = document.getElementById('cityToast');
-    toast.textContent = msg;
-    toast.style.display = 'block';
-    toast.style.opacity = '1';
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      setTimeout(() => toast.style.display = 'none', 500);
-    }, 2500);
-  }
-
-  function updateProximityList() {
-    const withCoords = drivers.filter(d => d.lat && d.lng);
-    withCoords.sort((a, b) => getDistance(adminLocation.lat, adminLocation.lng, a.lat, a.lng) - getDistance(adminLocation.lat, adminLocation.lng, b.lat, b.lng));
-    document.getElementById('driverProximityList').innerHTML = withCoords.slice(0,5).map(d => {
-      const car = cars.find(c => c.assignedDriver === d.id);
-      return `<div class="driver-item" onclick="showDriverModal('${d.id}')">
-        <div style="font-weight:700;">${d.firstName} ${d.lastName}</div>
-        <div style="font-size:14px;">${car ? car.name + ' (' + car.plate + ')' : 'No car'}</div>
-        <div style="font-size:13px; color:#5a7a62;"><i class="fas fa-map-pin"></i> ${d.road || 'Unknown'}, ${d.city || ''}</div>
-      </div>`;
-    }).join('');
-  }
-
-  function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  function formatTime(ts) {
-    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  function formatDuration(ms) {
-    const h = Math.floor(ms / 3600000);
-    const m = Math.floor((ms % 3600000) / 60000);
-    return `${h}h ${m}m`;
-  }
-
-  // City selector
-  document.getElementById('citySelectorBtn').addEventListener('click', () => document.getElementById('cityDropdown').style.display = 'block');
-  document.querySelectorAll('.city-option').forEach(opt => opt.addEventListener('click', () => {
-    currentCity = opt.dataset.city;
-    document.getElementById('selectedCityDisplay').textContent = currentCity;
-    document.getElementById('cityDropdown').style.display = 'none';
-    map.setView([parseFloat(opt.dataset.lat), parseFloat(opt.dataset.lng)], 13);
-    updateMapMarkers();
-  }));
-  document.addEventListener('click', (e) => { if (!e.target.closest('.city-selector')) document.getElementById('cityDropdown').style.display = 'none'; });
-
-  // Emergency
-  function listenEmergencies() {
-    onValue(ref(db, 'driverReports'), (snap) => {
-      emergencies = snap.val() ? Object.entries(snap.val()).map(([id, e]) => ({ id, ...e })) : [];
-      unreadEmergencyCount = emergencies.filter(e => e.timestamp > lastReadEmergencyTimestamp).length;
-      const btn = document.getElementById('emergencyFloatBtn');
-      document.getElementById('emergencyCount').textContent = unreadEmergencyCount;
-      if (unreadEmergencyCount > 0) btn.classList.add('pulse'); else btn.classList.remove('pulse');
-    });
-  }
-
-  document.getElementById('emergencyFloatBtn').addEventListener('click', () => {
-    document.getElementById('emergencyPage').classList.add('active');
-    renderEmergencyList();
-    lastReadEmergencyTimestamp = Date.now();
-    unreadEmergencyCount = 0;
-    updateEmergencyUI();
-  });
-
-  function updateEmergencyUI() {
-    const btn = document.getElementById('emergencyFloatBtn');
-    document.getElementById('emergencyCount').textContent = unreadEmergencyCount;
-    if (unreadEmergencyCount > 0) btn.classList.add('pulse'); else btn.classList.remove('pulse');
-  }
-
-  function renderEmergencyList() {
-    const cont = document.getElementById('emergencyListContainer');
-    if (emergencies.length === 0) { cont.innerHTML = '<p>No emergencies.</p>'; return; }
-    const sorted = [...emergencies].sort((a,b) => b.timestamp - a.timestamp);
-    cont.innerHTML = sorted.map(e => {
-      const driver = drivers.find(d => d.id === e.driverId);
-      return `<div class="emergency-card">
-        <div class="emergency-title"><i class="fas fa-exclamation-circle"></i> ${e.type?.toUpperCase() || 'EMERGENCY'}</div>
-        <p><strong>${e.driverName || 'Driver'}</strong> · ${new Date(e.timestamp).toLocaleTimeString()}</p>
-        <p>${e.message}</p>
-        <div class="horizontal-buttons">
-          <button class="call-btn" data-phone="${driver?.phone || ''}"><i class="fas fa-phone"></i> Call</button>
-          <button class="track-red-btn" data-driverid="${e.driverId}"><i class="fas fa-map-marker-alt"></i> Track</button>
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div id="loginScreen">
+        <div class="login-banner">
+            <img src="https://res.cloudinary.com/dd3lcymrk/image/upload/v1740934565/zamlift_logo_placeholder.png" alt="ZAMLIFT" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 200%22%3E%3Crect width=%22400%22 height=%22200%22 fill=%22%230D9488%22/%3E%3Ctext x=%22200%22 y=%22120%22 font-size=%2260%22 fill=%22%23fff%22 text-anchor=%22middle%22 font-family=%22sans-serif%22%3EZAMLIFT%3C/text%3E%3C/svg%3E'" />
         </div>
-      </div>`;
-    }).join('');
-    document.querySelectorAll('.call-btn').forEach(btn => btn.addEventListener('click', () => { const phone = btn.dataset.phone; if (phone) window.location.href = `tel:${phone}`; else alert('No phone number'); }));
-    document.querySelectorAll('.track-red-btn').forEach(btn => btn.addEventListener('click', () => { const driverId = btn.dataset.driverid; const driver = drivers.find(d => d.id === driverId); if (driver?.lat) { closeAllPages(); map.setView([driver.lat, driver.lng], 18); } else alert('Location unavailable'); }));
-  }
-
-  document.getElementById('closeEmergencyPage').addEventListener('click', () => document.getElementById('emergencyPage').classList.remove('active'));
-
-  // Driver modal
-  window.showDriverModal = function(driverId) {
-    const driver = drivers.find(d => d.id === driverId);
-    const car = cars.find(c => c.assignedDriver === driverId);
-    document.getElementById('modalDriverName').textContent = `${driver.firstName} ${driver.lastName}`;
-    document.getElementById('modalDriverDetails').innerHTML = `<p><i class="fas fa-envelope"></i> ${driver.email}<br><i class="fas fa-phone"></i> ${driver.phone || 'N/A'}<br><i class="fas fa-car"></i> ${car ? car.name + ' (' + car.plate + ')' : 'None'}</p>`;
-    document.getElementById('modalTrackBtn').onclick = () => { if (driver.lat) { closeAllPages(); map.setView([driver.lat, driver.lng], 18); document.getElementById('driverModal').style.display = 'none'; } else alert('No location'); };
-    document.getElementById('modalReportsBtn').onclick = () => showDriverReports(driverId);
-    document.getElementById('driverModal').style.display = 'flex';
-  };
-
-  async function showDriverReports(driverId) {
-    const modal = document.getElementById('driverReportsModal');
-    const content = document.getElementById('driverReportsContent');
-    content.innerHTML = '<div class="spinner"></div>';
-    modal.style.display = 'flex';
-    const snap = await get(ref(db, `shiftReports/${driverId}`));
-    const reports = snap.val() ? Object.values(snap.val()) : [];
-    reports.sort((a,b) => b.timestamp - a.timestamp);
-    const formatDate = ts => new Date(ts).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
-    content.innerHTML = reports.map(r => `
-      <div class="report-card">
-        <div class="report-date">${formatDate(r.startTime)}</div>
-        <div><i class="fas fa-car"></i> ${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime-r.startTime))})</span></div>
-        <div class="summary-line"><span>Fuel used:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
-        <div class="summary-line"><span>Distance:</span><span>${r.distance} km</span></div>
-        <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue?.toLocaleString()}</span></div>
-        <div class="summary-line"><span>Profit:</span><span>ZMW ${r.profit?.toLocaleString()}</span></div>
-      </div>
-    `).join('') || '<p>No reports</p>';
-  }
-
-  // Worker modal
-  window.showWorkerModal = async function(workerId) {
-    const w = workers.find(x => x.id === workerId);
-    currentWorkerId = workerId;
-    document.getElementById('modalWorkerName').textContent = w.fullName;
-    document.getElementById('modalWorkerDetails').innerHTML = `📞 ${w.phone} · ✉️ ${w.email}`;
-    
-    const snap = await get(ref(db, `tasks/${workerId}`));
-    const tasks = snap.val() ? Object.values(snap.val()).filter(t => t.status === 'completed') : [];
-    const tasksDiv = document.getElementById('workerCompletedTasks');
-    tasksDiv.innerHTML = tasks.length ? tasks.map(t => `<div class="task-card"><strong>${t.title}</strong><br>${t.summary || ''}</div>`).join('') : '<p>No completed tasks yet.</p>';
-    
-    document.getElementById('assignTaskFromModalBtn').onclick = () => { document.getElementById('taskModal').style.display = 'flex'; };
-    document.getElementById('workerModal').style.display = 'flex';
-  };
-
-  document.getElementById('saveTaskBtn').addEventListener('click', async () => {
-    const title = document.getElementById('taskTitle').value;
-    const desc = document.getElementById('taskDescription').value;
-    if (!title) return alert('Enter task title');
-    await push(ref(db, `tasks/${currentWorkerId}`), { title, description: desc, status: 'pending', createdAt: Date.now() });
-    document.getElementById('taskModal').style.display = 'none';
-    document.getElementById('taskTitle').value = '';
-    document.getElementById('taskDescription').value = '';
-  });
-
-  // Render functions
-  function renderDriversList() {
-    document.getElementById('driversListContainer').innerHTML = drivers.map(d => `<div class="driver-item" onclick="showDriverModal('${d.id}')"><strong>${d.firstName} ${d.lastName}</strong><br>${d.email}</div>`).join('');
-  }
-
-  function renderWorkersList() {
-    const cont = document.getElementById('workersListContainer');
-    cont.innerHTML = workers.map(w => {
-      const activeShift = w.activeShift || null;
-      const status = activeShift ? `<span class="on-shift">On shift since ${formatTime(activeShift.startTime)}</span>` : `<span class="off-shift">Off shift</span>`;
-      return `<div class="driver-item" onclick="showWorkerModal('${w.id}')">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong>${w.fullName}</strong>
-          <div class="dayoff-toggle" onclick="event.stopPropagation()">
-            <label class="switch">
-              <input type="checkbox" ${w.offDay ? 'checked' : ''} onchange="toggleDayOff('${w.id}', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
+        <div class="login-form-wrap">
+            <div class="logo-mobile">
+                <h1>ZAM<span>LIFT</span></h1>
+            </div>
+            <h2>Fleet Control</h2>
+            <p class="sub">Sign in to manage your fleet</p>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" value="admin@monitoring.com" placeholder="admin@monitoring.com" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" value="123456" placeholder="Password" />
+            </div>
+            <button id="loginBtn" class="login-btn">
+                <span class="btn-text"><i class="fas fa-arrow-right"></i> Sign In</span>
+                <span class="btn-loader"></span>
+            </button>
+            <div id="loginError"></div>
+            <div class="login-footer">Secure · Real-time · Powered by ZAMLIFT</div>
         </div>
-        <div class="worker-status">${status}</div>
-        <button class="outline-btn" style="margin-top:8px;" onclick="event.stopPropagation(); viewWorkerDailyReport('${w.id}')"><i class="fas fa-file-alt"></i> Daily Report</button>
-      </div>`;
-    }).join('');
-  }
+    </div>
 
-  function renderAdminsList() {
-    const cont = document.getElementById('adminsListContainer');
-    cont.innerHTML = admins.map(a => `
-      <div class="admin-item">
-        <div class="admin-info-small">
-          <strong>${a.fullName}</strong><br>
-          <small>${a.email} · ${a.phone}</small>
+    <!-- ===== APP SHELL ===== -->
+    <div id="appShell">
+
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <div class="brand" onclick="switchTab('dashboard')">
+                <span class="badge-dot"></span>
+                <h1>ZAM<span>LIFT</span></h1>
+            </div>
+            <div class="header-actions">
+                <button onclick="toggleSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                <div class="avatar-btn" onclick="toggleSidebar()" id="avatarBtn">A</div>
+            </div>
+        </header>
+
+        <!-- ===== TOOLBAR ===== -->
+        <div class="toolbar">
+            <div class="stats-pill" id="statsPill">
+                <i class="fas fa-truck"></i> <span id="statsText">Loading...</span>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search..." />
+            </div>
+            <select id="statusFilter" class="filter-select">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="signed">Signed</option>
+                <option value="completed">Completed</option>
+            </select>
+            <button class="action-btn-sm primary" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
         </div>
-        <div class="admin-actions">
-          <button class="delete-btn" onclick="deleteAdmin('${a.id}', '${a.email}')" title="Delete Admin">
-            <i class="fas fa-trash-alt"></i>
-          </button>
+
+        <!-- ===== CONTENT ===== -->
+        <div class="content-area" id="contentArea">
+            <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading data...</h3></div>
         </div>
-      </div>
-    `).join('') || '<p>No other admins found.</p>';
-  }
 
-  window.deleteAdmin = async (adminId, adminEmail) => {
-    if (!confirm(`Are you sure you want to delete admin ${adminEmail}?`)) return;
-    
-    try {
-      // Remove from Firebase Database
-      await remove(ref(db, `admins/${adminId}`));
-      showToast('Admin deleted successfully');
-    } catch (error) {
-      alert('Error deleting admin: ' + error.message);
-    }
-  };
+        <!-- ===== BOTTOM NAV ===== -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item" data-tab="dashboard"><i class="fas fa-home"></i><span>Home</span></button>
+            <button class="nav-item" data-tab="stats"><i class="fas fa-chart-bar"></i><span>Stats</span></button>
+            <button class="nav-item" data-tab="vehicles"><i class="fas fa-truck"></i><span>Vehicles</span></button>
+            <button class="nav-item" data-tab="drivers"><i class="fas fa-user-md"></i><span>Drivers</span></button>
+            <button class="nav-item" data-tab="reports"><i class="fas fa-file-alt"></i><span>Reports</span></button>
+        </nav>
+    </div>
 
-  window.toggleDayOff = async (workerId, value) => {
-    await update(ref(db, `workers/${workerId}`), { offDay: value });
-  };
+    <!-- ===== SIDEBAR ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-cog" style="color:var(--primary);margin-right:8px;"></i>ZAMLIFT Menu</h2>
+            <button onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
 
-  window.viewWorkerDailyReport = async (workerId) => {
-    const w = workers.find(x => x.id === workerId);
-    const snap = await get(ref(db, `shiftReports/${workerId}`));
-    const reports = snap.val() ? Object.values(snap.val()) : [];
-    const todayReport = reports.find(r => new Date(r.startTime).toDateString() === new Date().toDateString());
-    if (todayReport) {
-      alert(`${w.fullName} summary: ${todayReport.summary}\nTasks: ${todayReport.completedTasks?.map(t => t.title).join(', ') || 'None'}`);
-    } else {
-      alert('No report submitted today.');
-    }
-  };
+        <div class="sidebar-section">
+            <div class="section-title">Management</div>
+            <button class="sidebar-item" onclick="switchTab('dashboard');toggleSidebar();"><i class="fas fa-home"></i> Dashboard</button>
+            <button class="sidebar-item" onclick="switchTab('stats');toggleSidebar();"><i class="fas fa-chart-bar"></i> Stats</button>
+            <button class="sidebar-item" onclick="switchTab('vehicles');toggleSidebar();"><i class="fas fa-truck"></i> Vehicles</button>
+            <button class="sidebar-item" onclick="switchTab('drivers');toggleSidebar();"><i class="fas fa-user-md"></i> Drivers</button>
+            <button class="sidebar-item" onclick="switchTab('reports');toggleSidebar();"><i class="fas fa-file-alt"></i> Reports</button>
+        </div>
 
-  function renderCarsList() {
-    document.getElementById('carsListContainer').innerHTML = cars.map(c => {
-      const driver = drivers.find(d => d.id === c.assignedDriver);
-      return `<div class="driver-item" onclick="showCarModal('${c.id}')"><i class="fas fa-car-side car-icon"></i> ${c.name} (${c.plate})<br>Assigned: ${driver ? driver.firstName : 'None'}</div>`;
-    }).join('');
-  }
+        <div class="sidebar-section">
+            <div class="section-title">Operations</div>
+            <button class="sidebar-item" onclick="openFuelManagement();toggleSidebar();"><i class="fas fa-gas-pump"></i> Fuel Management</button>
+            <button class="sidebar-item" onclick="openMaintenance();toggleSidebar();"><i class="fas fa-wrench"></i> Maintenance</button>
+        </div>
 
-  window.showCarModal = async function(carId) {
-    const car = cars.find(c => c.id === carId);
-    const driver = drivers.find(d => d.id === car?.assignedDriver);
-    let totalIncome = 0;
-    for (let d of drivers) {
-      const snap = await get(ref(db, `shiftReports/${d.id}`));
-      if (snap.exists()) Object.values(snap.val()).forEach(r => { if (r.carId === carId) totalIncome += r.revenue || 0; });
-    }
-    document.getElementById('modalCarName').textContent = `${car.name} (${car.plate})`;
-    document.getElementById('modalCarDetails').innerHTML = `<p><i class="fas fa-user"></i> Assigned: ${driver ? driver.firstName : 'None'}</p><p><i class="fas fa-gas-pump"></i> Fuel: ${car.totalFuelConsumed || 0} L</p><p><i class="fas fa-road"></i> Distance: ${car.totalDistance || 0} km</p><p><i class="fas fa-money-bill"></i> Income: ZMW ${totalIncome.toLocaleString()}</p>`;
-    document.getElementById('carModal').style.display = 'flex';
-  };
+        <div class="sidebar-divider"></div>
 
-  function renderAssignSelects() {
-    const dSel = document.getElementById('selectDriver');
-    const cSel = document.getElementById('selectCar');
-    dSel.innerHTML = '<option value="">Select Driver</option>' + drivers.map(d => `<option value="${d.id}">${d.firstName} ${d.lastName}</option>`).join('');
-    cSel.innerHTML = '<option value="">Select Car</option>' + cars.map(c => `<option value="${c.id}">${c.name} (${c.plate})</option>`).join('');
-  }
+        <div class="sidebar-section">
+            <button class="sidebar-item danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
 
-  function renderAssignmentsList() {
-    document.getElementById('assignmentsList').innerHTML = drivers.map(d => {
-      const car = cars.find(c => c.assignedDriver === d.id);
-      return `<div class="driver-item">${d.firstName} ${d.lastName} — ${car ? car.name : 'None'} ${car ? `<button class="outline-btn" onclick="removeAssignment('${d.id}')">Remove</button>` : ''}</div>`;
-    }).join('');
-  }
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Details</h3>
+                <button class="close-btn" onclick="closeModal('detailModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter">
+                <button class="btn btn-secondary" onclick="closeModal('detailModal')">Cancel</button>
+                <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
 
-  window.removeAssignment = async (driverId) => {
-    const car = cars.find(c => c.assignedDriver === driverId);
-    if (car) await update(ref(db, `cars/${car.id}`), { assignedDriver: null });
-  };
+    <!-- ================================================================
+    JAVASCRIPT
+    ================================================================ -->
+    <script>
+        // ==============================================================
+        // FIREBASE CONFIG
+        // ==============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
+            authDomain: "monitoring-1a105.firebaseapp.com",
+            databaseURL: "https://monitoring-1a105-default-rtdb.firebaseio.com",
+            projectId: "monitoring-1a105",
+            storageBucket: "monitoring-1a105.firebasestorage.app",
+            messagingSenderId: "1095363656731",
+            appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-  function renderWorkersAssignList() {
-    document.getElementById('workersAssignList').innerHTML = workers.map(w => `<div class="driver-item" onclick="showWorkerModal('${w.id}')">${w.fullName}</div>`).join('');
-  }
+        // ==============================================================
+        // CLOUDINARY CONFIG
+        // ==============================================================
+        const CLOUD_NAME = 'dd3lcymrk';
+        const UPLOAD_PRESET = 'h3eyhc2o';
 
-  // Reports
-  document.getElementById('loadReportsBtn').addEventListener('click', async () => {
-    const period = document.getElementById('reportPeriodSelect').value;
-    const cont = document.getElementById('reportsListContainer');
-    cont.innerHTML = '<div class="spinner"></div>';
-    let allReports = [];
-    for (let d of drivers) {
-      const snap = await get(ref(db, `shiftReports/${d.id}`));
-      if (snap.exists()) Object.values(snap.val()).forEach(r => allReports.push({ ...r, driverName: d.firstName + ' ' + d.lastName }));
-    }
-    const now = Date.now(); const day = 86400000;
-    const filtered = allReports.filter(r => {
-      if (period === 'today') return (now - r.timestamp) < day;
-      if (period === 'week') return (now - r.timestamp) < 7*day;
-      if (period === 'month') return (now - r.timestamp) < 30*day;
-      return true;
-    });
-    filtered.sort((a,b) => b.timestamp - a.timestamp);
-    cont.innerHTML = filtered.map(r => `
-      <div class="report-card">
-        <div class="report-date">${new Date(r.startTime).toLocaleDateString()} · ${r.driverName}</div>
-        <div>${r.carName} (${r.plate})</div>
-        <div class="summary-line"><span>Shift:</span><span>${formatTime(r.startTime)} – ${formatTime(r.endTime)} (${formatDuration(r.durationMs || (r.endTime-r.startTime))})</span></div>
-        <div class="summary-line"><span>Fuel:</span><span>${r.fuelConsumed?.toFixed(1)} L</span></div>
-        <div class="summary-line"><span>Dist:</span><span>${r.distance} km</span></div>
-        <div class="summary-line"><span>Revenue:</span><span>ZMW ${r.revenue?.toLocaleString()}</span></div>
-        <div class="summary-line"><span>Profit:</span><span>ZMW ${r.profit?.toLocaleString()}</span></div>
-      </div>
-    `).join('') || '<p>No reports.</p>';
-  });
+        // ==============================================================
+        // GLOBALS
+        // ==============================================================
+        let allVehicles = [];
+        let allDrivers = [];
+        let allStats = [];
+        let allReports = [];
+        let currentUser = null;
+        let currentTab = 'dashboard';
+        let searchTerm = '';
+        let statusFilter = 'all';
+        let selectedVehicle = null;
+        let selectedDriver = null;
+        let currentStatId = null;
+        let isShutdown = false;
+        let shutdownListeners = [];
 
-  document.getElementById('downloadReportsCsv').addEventListener('click', async () => {
-    let csv = "Date,Driver,Car,Plate,Start,End,Duration,Fuel(L),Distance(km),Revenue(ZMW),Profit(ZMW)\n";
-    for (let d of drivers) {
-      const snap = await get(ref(db, `shiftReports/${d.id}`));
-      if (snap.exists()) Object.values(snap.val()).forEach(r => {
-        csv += `"${new Date(r.startTime).toLocaleDateString()}",${d.firstName} ${d.lastName},${r.carName},${r.plate},"${formatTime(r.startTime)}","${formatTime(r.endTime)}","${formatDuration(r.durationMs || (r.endTime-r.startTime))}",${r.fuelConsumed},${r.distance},${r.revenue},${r.profit}\n`;
-      });
-    }
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'all_reports.csv';
-    a.click();
-  });
-
-  // Timesheet (calendar view 14 days)
-  document.getElementById('viewTimesheetBtn').addEventListener('click', async () => {
-    const modal = document.getElementById('timesheetModal');
-    modal.style.display = 'flex';
-    const content = document.getElementById('timesheetContent');
-    const end = new Date();
-    const start = new Date(end.getTime() - 13 * 86400000);
-    
-    const dates = [];
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      dates.push(new Date(d));
-    }
-    
-    let html = '<table class="timesheet-table"><tr><th>Worker</th><th>Phone</th>';
-    dates.forEach(d => html += `<th>${d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric' })}</th>`);
-    html += '</tr>';
-    
-    for (let w of workers) {
-      html += `<tr><td>${w.fullName}</td><td>${w.phone}</td>`;
-      const snap = await get(ref(db, `shiftReports/${w.id}`));
-      const reports = snap.val() ? Object.values(snap.val()) : [];
-      for (let d of dates) {
-        const dayReport = reports.find(r => new Date(r.startTime).toDateString() === d.toDateString());
-        if (dayReport) {
-          html += `<td>${formatTime(dayReport.startTime)} - ${formatTime(dayReport.endTime)}</td>`;
-        } else {
-          html += `<td>—</td>`;
+        // ==============================================================
+        // UTILITIES
+        // ==============================================================
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            let icon = 'fas fa-info-circle';
+            if (type === 'success') icon = 'fas fa-check-circle';
+            else if (type === 'error') icon = 'fas fa-exclamation-circle';
+            else if (type === 'warning') icon = 'fas fa-exclamation-triangle';
+            toast.innerHTML =
+                `<i class="${icon}"></i><span>${msg}</span><button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+            container.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
         }
-      }
-      html += '</tr>';
-    }
-    html += '</table>';
-    content.innerHTML = html;
-    
-    document.getElementById('downloadTimesheetCsv').onclick = () => {
-      let csv = "Worker,Phone," + dates.map(d => d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric' })).join(',') + "\n";
-      workers.forEach(w => {
-        let row = `"${w.fullName}","${w.phone}"`;
-        dates.forEach(d => {
-          const dayReport = (async () => {
-            const snap = await get(ref(db, `shiftReports/${w.id}`));
-            const reps = snap.val() ? Object.values(snap.val()) : [];
-            return reps.find(r => new Date(r.startTime).toDateString() === d.toDateString());
-          })();
-          // For CSV we'll do it async properly inside the loop, but for brevity we'll build after fetching.
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatTime(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDate(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ==============================================================
+        // CLOUDINARY UPLOAD
+        // ==============================================================
+        function openCloudinaryUpload(callback, resourceType = 'image') {
+            const options = {
+                cloudName: CLOUD_NAME,
+                uploadPreset: UPLOAD_PRESET,
+                sources: ['local', 'url'],
+                maxFileSize: 155000000,
+                resourceType: resourceType,
+                clientAllowedFormats: resourceType === 'image' ? ['jpg', 'jpeg', 'png', 'gif', 'webp'] : ['mp4',
+                    'mov', 'avi', 'webm'
+                ],
+                maxFiles: 1
+            };
+            cloudinary.openUploadWidget(options, (err, res) => {
+                if (err) {
+                    showToast('Upload error: ' + err.message, 'error');
+                    return;
+                }
+                if (res.event === 'success') {
+                    const info = res.info;
+                    callback(info.secure_url);
+                    showToast('Upload successful!', 'success');
+                }
+            });
+        }
+
+        // ==============================================================
+        // AUTH
+        // ==============================================================
+        document.getElementById('loginBtn').onclick = async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pwd = document.getElementById('loginPassword').value;
+            const errEl = document.getElementById('loginError');
+            errEl.textContent = '';
+            const btn = document.getElementById('loginBtn');
+            btn.classList.add('loading');
+
+            try {
+                const cred = await auth.signInWithEmailAndPassword(email, pwd);
+                const user = cred.user;
+
+                if (!user.email.startsWith('admin@')) {
+                    await auth.signOut();
+                    btn.classList.remove('loading');
+                    errEl.textContent = 'Admin access only.';
+                    return;
+                }
+
+                // Check if admin exists in DB
+                const adminSnap = await db.ref(`admins/${user.uid}`).once('value');
+                if (!adminSnap.exists()) {
+                    await db.ref(`admins/${user.uid}`).set({
+                        fullName: 'Admin',
+                        email: user.email,
+                        phone: '',
+                        createdAt: Date.now()
+                    });
+                }
+
+                const adminData = adminSnap.val() || { fullName: 'Admin' };
+                currentUser = {
+                    uid: user.uid,
+                    userId: user.uid,
+                    name: adminData.fullName || 'Admin',
+                    email: user.email
+                };
+
+                document.getElementById('avatarBtn').textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appShell').classList.add('active');
+
+                await refreshAll();
+                setupShutdownListeners();
+                setupNavButtons();
+                setupToolbar();
+
+                document.querySelector('.nav-item[data-tab="dashboard"]').classList.add('active');
+                btn.classList.remove('loading');
+                showToast('Welcome back, ' + currentUser.name + '!', 'success');
+
+            } catch (err) {
+                console.error('Login error:', err);
+                btn.classList.remove('loading');
+                errEl.textContent = err.message;
+            }
+        };
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user && !currentUser) {
+                if (!user.email.startsWith('admin@')) {
+                    await auth.signOut();
+                    return;
+                }
+                const adminSnap = await db.ref(`admins/${user.uid}`).once('value');
+                const adminData = adminSnap.val() || { fullName: 'Admin' };
+                currentUser = {
+                    uid: user.uid,
+                    userId: user.uid,
+                    name: adminData.fullName || 'Admin',
+                    email: user.email
+                };
+                document.getElementById('avatarBtn').textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appShell').classList.add('active');
+                await refreshAll();
+                setupShutdownListeners();
+                setupNavButtons();
+                setupToolbar();
+                document.querySelector('.nav-item[data-tab="dashboard"]').classList.add('active');
+            } else if (!user && currentUser) {
+                cleanupShutdownListeners();
+                currentUser = null;
+                document.getElementById('appShell').classList.remove('active');
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('loginError').textContent = '';
+            }
         });
-      });
-      // Simple synchronous alternative: use the already fetched reports from the modal build.
-      // We'll just rebuild with the data we already have.
-      let csv2 = "Worker,Phone," + dates.map(d => d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric' })).join(',') + "\n";
-      workers.forEach(async (w) => {
-        const snap = await get(ref(db, `shiftReports/${w.id}`));
-        const reps = snap.val() ? Object.values(snap.val()) : [];
-        let row = `"${w.fullName}","${w.phone}"`;
-        dates.forEach(d => {
-          const dayReport = reps.find(r => new Date(r.startTime).toDateString() === d.toDateString());
-          row += ',' + (dayReport ? `"${formatTime(dayReport.startTime)} - ${formatTime(dayReport.endTime)}"` : '""');
+
+        function logout() {
+            if (confirm('Logout?')) {
+                cleanupShutdownListeners();
+                auth.signOut();
+                currentUser = null;
+                document.getElementById('appShell').classList.remove('active');
+                document.getElementById('loginScreen').style.display = 'flex';
+                showToast('Logged out', 'info');
+            }
+        }
+
+        // ==============================================================
+        // DATA LOADING
+        // ==============================================================
+        async function loadVehicles() {
+            const snap = await db.ref('cars').once('value');
+            const result = [];
+            if (snap.val()) {
+                Object.entries(snap.val()).forEach(([id, data]) => {
+                    result.push({
+                        id,
+                        ...data,
+                        name: data.name || 'Unnamed',
+                        plate: data.plate || 'No plate',
+                        color: data.color || 'N/A',
+                        image: data.image || '',
+                        status: data.assignedDriver ? 'active' : 'inactive',
+                        driverId: data.assignedDriver || '',
+                        driverName: ''
+                    });
+                });
+            }
+            allVehicles = result;
+            return result;
+        }
+
+        async function loadDrivers() {
+            const snap = await db.ref('drivers').once('value');
+            const result = [];
+            if (snap.val()) {
+                Object.entries(snap.val()).forEach(([id, data]) => {
+                    result.push({
+                        id,
+                        ...data,
+                        name: (data.firstName || '') + ' ' + (data.lastName || ''),
+                        firstName: data.firstName || '',
+                        lastName: data.lastName || '',
+                        phone: data.phone || '',
+                        email: data.email || '',
+                        image: data.image || '',
+                        status: data.lat ? 'active' : 'inactive',
+                        lat: data.lat || null,
+                        lng: data.lng || null
+                    });
+                });
+            }
+            allDrivers = result;
+            return result;
+        }
+
+        async function loadStats() {
+            const snap = await db.ref('driverStats').once('value');
+            const result = [];
+            if (snap.val()) {
+                Object.entries(snap.val()).forEach(([id, data]) => {
+                    result.push({
+                        id,
+                        ...data,
+                        vehicleName: data.vehicleName || '',
+                        vehiclePlate: data.vehiclePlate || '',
+                        vehicleColor: data.vehicleColor || '',
+                        vehicleImage: data.vehicleImage || '',
+                        driverName: data.driverName || '',
+                        driverPhone: data.driverPhone || '',
+                        driverImage: data.driverImage || '',
+                        timeOut: data.timeOut || '',
+                        mileageOut: data.mileageOut || '',
+                        fuelOut: data.fuelOut || '',
+                        startTime: data.startTime || Date.now(),
+                        status: data.status || 'pending',
+                        signature: data.signature || '',
+                        timeParked: data.timeParked || '',
+                        mileageParked: data.mileageParked || '',
+                        fuelParked: data.fuelParked || '',
+                        revenue: data.revenue || 0,
+                        adminComment: data.adminComment || '',
+                        adminName: data.adminName || '',
+                        adminEmail: data.adminEmail || '',
+                        endTime: data.endTime || null,
+                        reportGenerated: data.reportGenerated || false,
+                        distanceTraveled: data.distanceTraveled || 0,
+                        fuelUsed: data.fuelUsed || 0,
+                        hoursOut: data.hoursOut || 0
+                    });
+                });
+            }
+            allStats = result;
+            return result;
+        }
+
+        async function loadReports() {
+            const snap = await db.ref('driverReports').once('value');
+            const result = [];
+            if (snap.val()) {
+                Object.entries(snap.val()).forEach(([id, data]) => {
+                    result.push({
+                        id,
+                        ...data,
+                        date: data.date || Date.now()
+                    });
+                });
+            }
+            allReports = result;
+            return result;
+        }
+
+        async function refreshAll() {
+            await Promise.all([
+                loadVehicles(),
+                loadDrivers(),
+                loadStats(),
+                loadReports()
+            ]);
+            renderCurrentTab();
+            updateStats();
+        }
+
+        function updateStats() {
+            const stats = {
+                vehicles: allVehicles.length,
+                drivers: allDrivers.length,
+                pendingStats: allStats.filter(s => s.status === 'pending').length,
+                completedStats: allStats.filter(s => s.status === 'completed').length
+            };
+            document.getElementById('statsText').textContent =
+                `${stats.vehicles} veh · ${stats.drivers} drv · ${stats.pendingStats} pending · ${stats.completedStats} complete`;
+        }
+
+        // ==============================================================
+        // RENDER FUNCTIONS
+        // ==============================================================
+        function renderDashboard() {
+            const pendingStats = allStats.filter(s => s.status === 'pending');
+            const signedStats = allStats.filter(s => s.status === 'signed');
+            const completedStats = allStats.filter(s => s.status === 'completed');
+
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-home" style="color:var(--primary);"></i> Dashboard</h2>
+                </div>
+                <div class="grid-cards">
+                    <div class="card">
+                        <div class="card-header"><div class="icon-wrap teal"><i class="fas fa-truck"></i></div><div><div class="card-title">Vehicles</div><div class="card-subtitle">Total fleet</div></div></div>
+                        <div class="card-body"><div class="detail-row"><span class="label">Active</span><span class="value">${allVehicles.filter(v => v.status === 'active').length}</span></div><div class="detail-row"><span class="label">Total</span><span class="value">${allVehicles.length}</span></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="icon-wrap purple"><i class="fas fa-user-md"></i></div><div><div class="card-title">Drivers</div><div class="card-subtitle">On the road</div></div></div>
+                        <div class="card-body"><div class="detail-row"><span class="label">Active</span><span class="value">${allDrivers.filter(d => d.status === 'active').length}</span></div><div class="detail-row"><span class="label">Total</span><span class="value">${allDrivers.length}</span></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="icon-wrap amber"><i class="fas fa-chart-bar"></i></div><div><div class="card-title">Stats</div><div class="card-subtitle">Today's activity</div></div></div>
+                        <div class="card-body"><div class="detail-row"><span class="label">Pending</span><span class="value">${pendingStats.length}</span></div><div class="detail-row"><span class="label">Signed</span><span class="value">${signedStats.length}</span></div><div class="detail-row"><span class="label">Completed</span><span class="value">${completedStats.length}</span></div></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function renderStats() {
+            let html = `
+                <div class="stats-header">
+                    <h2><i class="fas fa-chart-bar"></i> Fleet Stats</h2>
+                </div>
+
+                <!-- Assign Vehicle Dropdown -->
+                <div class="assign-flow-card">
+                    <div class="step-label"><i class="fas fa-truck"></i> Step 1: Select Vehicle</div>
+                    <select id="vehicleSelect" onchange="onVehicleSelect(this.value)">
+                        <option value="">-- Select a vehicle --</option>
+                        ${allVehicles.map(v => `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`).join('')}
+                    </select>
+                    <div id="vehiclePreview" class="selected-preview" style="display:none;">
+                        <img id="vehiclePreviewImg" src="" alt="Vehicle">
+                        <div class="info">
+                            <div class="name" id="vehiclePreviewName"></div>
+                            <div class="detail" id="vehiclePreviewDetail"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assign Driver Dropdown -->
+                <div class="assign-flow-card" id="driverAssignCard" style="display:none;">
+                    <div class="step-label"><i class="fas fa-user-md"></i> Step 2: Select Driver</div>
+                    <select id="driverSelect" onchange="onDriverSelect(this.value)">
+                        <option value="">-- Select a driver --</option>
+                        ${allDrivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.phone)})</option>`).join('')}
+                    </select>
+                    <div id="driverPreview" class="selected-preview" style="display:none;">
+                        <img id="driverPreviewImg" src="" alt="Driver">
+                        <div class="info">
+                            <div class="name" id="driverPreviewName"></div>
+                            <div class="detail" id="driverPreviewDetail"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Form -->
+                <div class="stats-form" id="statsForm" style="display:none;">
+                    <div class="step-label"><i class="fas fa-clipboard-list"></i> Step 3: Starting Statistics</div>
+                    <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                        <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                            <div><span class="label">Name:</span> <span id="formVehicleName" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            <div><span class="label">Plate:</span> <span id="formVehiclePlate" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            <div><span class="label">Color:</span> <span id="formVehicleColor" style="font-weight:500;color:var(--gray-800);"></span></div>
+                        </div>
+                    </div>
+                    <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                        <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver Details</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                            <div><span class="label">Name:</span> <span id="formDriverName" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            <div><span class="label">Phone:</span> <span id="formDriverPhone" style="font-weight:500;color:var(--gray-800);"></span></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Time Out</label>
+                        <input type="time" id="statsTimeOut" value="${new Date().toTimeString().slice(0,5)}">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-road"></i> KM (Mileage Out)</label>
+                        <input type="number" id="statsMileageOut" placeholder="e.g. 12345" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-gas-pump"></i> Fuel Out (Litres)</label>
+                        <input type="number" id="statsFuelOut" placeholder="e.g. 50" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Date & Time</label>
+                        <div class="readonly-value" id="statsDateTime">${new Date().toLocaleString()}</div>
+                    </div>
+                    <button class="btn-submit" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
+                </div>
+
+                <!-- Stats Cards Grid -->
+                <div class="stats-cards-grid" id="statsCardsGrid">
+                    ${allStats.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-chart-bar"></i><h3>No stats recorded yet</h3><p>Use the form above to create your first stat entry.</p></div>' :
+                    allStats.sort((a,b) => b.startTime - a.startTime).map(s => `
+                        <div class="stats-card-item" onclick="openStatDetail('${s.id}')">
+                            <div class="stats-card-header">
+                                <div><strong>${escapeHtml(s.vehicleName)}</strong> <span style="font-size:0.75rem;color:var(--gray-500);">${escapeHtml(s.vehiclePlate)}</span></div>
+                                <span class="status-badge ${s.status}"><span class="dot"></span> ${s.status.charAt(0).toUpperCase() + s.status.slice(1)}</span>
+                            </div>
+                            <div class="stats-card-body">
+                                <div class="detail-row"><span class="label">Driver</span><span class="value">${escapeHtml(s.driverName)}</span></div>
+                                <div class="detail-row"><span class="label">Time Out</span><span class="value">${s.timeOut || 'N/A'}</span></div>
+                                <div class="detail-row"><span class="label">Mileage Out</span><span class="value">${s.mileageOut || 'N/A'} km</span></div>
+                                <div class="detail-row"><span class="label">Fuel Out</span><span class="value">${s.fuelOut || 'N/A'} L</span></div>
+                                <div class="detail-row"><span class="label">Date</span><span class="value">${formatDate(s.startTime)}</span></div>
+                            </div>
+                            <div class="stats-card-actions">
+                                ${s.status === 'pending' ? `<button class="btn-icon primary" onclick="event.stopPropagation();signStat('${s.id}')"><i class="fas fa-check"></i> Sign</button>` : ''}
+                                ${s.status === 'signed' ? `<button class="btn-icon green" onclick="event.stopPropagation();openEndOfDay('${s.id}')"><i class="fas fa-flag-checkered"></i> End of Day</button>` : ''}
+                                ${s.status === 'completed' ? `<button class="btn-icon teal" onclick="event.stopPropagation();viewReport('${s.id}')"><i class="fas fa-file-alt"></i> Report</button>` : ''}
+                                <button class="btn-icon red" onclick="event.stopPropagation();deleteStat('${s.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function renderVehicles() {
+            let filtered = allVehicles.filter(v => {
+                const ms = (v.name || '').toLowerCase().includes(searchTerm) ||
+                    (v.plate || '').toLowerCase().includes(searchTerm);
+                const mf = statusFilter === 'all' || v.status === statusFilter;
+                return ms && mf;
+            });
+
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-truck" style="color:var(--primary);"></i> Vehicles</h2>
+                    <div class="page-actions">
+                        <button class="btn-primary" onclick="openAddVehicleModal()"><i class="fas fa-plus"></i> Add Vehicle</button>
+                    </div>
+                </div>
+                <div class="grid-cards">
+                    ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-truck"></i><h3>No vehicles found</h3></div>' :
+                    filtered.map(v => `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="icon-wrap teal">
+                                    ${v.image ? `<img src="${v.image}" alt="Vehicle">` : `<i class="fas fa-car"></i>`}
+                                </div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(v.name || 'Unnamed')}</div>
+                                    <div class="card-subtitle">${escapeHtml(v.plate || 'No plate')}</div>
+                                </div>
+                                <div style="margin-left:auto;">
+                                    <span class="status-badge ${v.status}"><span class="dot"></span> ${v.status.charAt(0).toUpperCase() + v.status.slice(1)}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Color</span><span class="value">${escapeHtml(v.color || 'N/A')}</span></div>
+                                <div class="detail-row"><span class="label">Driver</span><span class="value">${escapeHtml(v.driverName || 'Unassigned')}</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon teal" onclick="editVehicle('${v.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-icon red" onclick="deleteVehicle('${v.id}')"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function renderDrivers() {
+            let filtered = allDrivers.filter(d => {
+                const ms = (d.name || '').toLowerCase().includes(searchTerm) ||
+                    (d.phone || '').toLowerCase().includes(searchTerm);
+                const mf = statusFilter === 'all' || d.status === statusFilter;
+                return ms && mf;
+            });
+
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-user-md" style="color:var(--secondary);"></i> Drivers</h2>
+                    <div class="page-actions">
+                        <button class="btn-primary" onclick="openAddDriverModal()"><i class="fas fa-plus"></i> Add Driver</button>
+                    </div>
+                </div>
+                <div class="grid-cards">
+                    ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-user-md"></i><h3>No drivers found</h3></div>' :
+                    filtered.map(d => `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="icon-wrap purple">
+                                    ${d.image ? `<img src="${d.image}" alt="Driver">` : `<i class="fas fa-user"></i>`}
+                                </div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(d.name || 'Unnamed')}</div>
+                                    <div class="card-subtitle">${escapeHtml(d.phone || 'N/A')}</div>
+                                </div>
+                                <div style="margin-left:auto;">
+                                    <span class="status-badge ${d.status}"><span class="dot"></span> ${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Email</span><span class="value">${escapeHtml(d.email || 'N/A')}</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon teal" onclick="editDriver('${d.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-icon red" onclick="deleteDriver('${d.id}')"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function renderReports() {
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-file-alt" style="color:var(--accent);"></i> Reports</h2>
+                </div>
+                <div class="grid-cards">
+                    ${allReports.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-file-alt"></i><h3>No reports generated yet</h3><p>Complete stats to generate automatic reports.</p></div>' :
+                    allReports.sort((a,b) => b.date - a.date).map(r => `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="icon-wrap amber"><i class="fas fa-file-alt"></i></div>
+                                <div>
+                                    <div class="card-title">${escapeHtml(r.vehicleName)}</div>
+                                    <div class="card-subtitle">${escapeHtml(r.driverName)}</div>
+                                </div>
+                                <div style="margin-left:auto;">
+                                    <span style="font-size:0.7rem;color:var(--gray-500);">${formatDate(r.date)}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row"><span class="label">Mileage</span><span class="value">${r.mileageOut || 0} → ${r.mileageParked || 0} km</span></div>
+                                <div class="detail-row"><span class="label">Distance</span><span class="value">${r.distanceTraveled || 0} km</span></div>
+                                <div class="detail-row"><span class="label">Fuel</span><span class="value">${r.fuelOut || 0} → ${r.fuelParked || 0} L (${r.fuelUsed || 0} L used)</span></div>
+                                <div class="detail-row"><span class="label">Hours Out</span><span class="value">${r.hoursOut || 0} hrs</span></div>
+                                <div class="detail-row"><span class="label">Revenue</span><span class="value">ZMW ${r.revenue || 0}</span></div>
+                                <div class="detail-row"><span class="label">Admin</span><span class="value">${escapeHtml(r.adminName || 'N/A')}</span></div>
+                                <div class="detail-row"><span class="label">Comment</span><span class="value">${escapeHtml(r.adminComment || 'No comment')}</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon teal" onclick="viewReportDetail('${r.id}')"><i class="fas fa-eye"></i> View</button>
+                                <button class="btn-icon blue" onclick="downloadReport('${r.id}')"><i class="fas fa-download"></i> Download</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        // ==============================================================
+        // STATS FLOW FUNCTIONS
+        // ==============================================================
+        window.onVehicleSelect = function(vehicleId) {
+            selectedVehicle = allVehicles.find(v => v.id === vehicleId);
+            const preview = document.getElementById('vehiclePreview');
+            const assignCard = document.getElementById('driverAssignCard');
+            const statsForm = document.getElementById('statsForm');
+
+            if (selectedVehicle) {
+                preview.style.display = 'flex';
+                document.getElementById('vehiclePreviewImg').src = selectedVehicle.image ||
+                    'https://via.placeholder.com/48?text=Car';
+                document.getElementById('vehiclePreviewName').textContent = selectedVehicle.name;
+                document.getElementById('vehiclePreviewDetail').textContent =
+                    `${selectedVehicle.plate} · ${selectedVehicle.color}`;
+                assignCard.style.display = 'block';
+                statsForm.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                assignCard.style.display = 'none';
+                statsForm.style.display = 'none';
+            }
+        };
+
+        window.onDriverSelect = function(driverId) {
+            selectedDriver = allDrivers.find(d => d.id === driverId);
+            const preview = document.getElementById('driverPreview');
+            const statsForm = document.getElementById('statsForm');
+
+            if (selectedDriver) {
+                preview.style.display = 'flex';
+                document.getElementById('driverPreviewImg').src = selectedDriver.image ||
+                    'https://via.placeholder.com/48?text=Driver';
+                document.getElementById('driverPreviewName').textContent = selectedDriver.name;
+                document.getElementById('driverPreviewDetail').textContent = selectedDriver.phone;
+                statsForm.style.display = 'block';
+
+                // Auto-fill vehicle and driver details in the form
+                document.getElementById('formVehicleName').textContent = selectedVehicle ? selectedVehicle.name : 'N/A';
+                document.getElementById('formVehiclePlate').textContent = selectedVehicle ? selectedVehicle.plate :
+                'N/A';
+                document.getElementById('formVehicleColor').textContent = selectedVehicle ? selectedVehicle.color :
+                'N/A';
+                document.getElementById('formDriverName').textContent = selectedDriver ? selectedDriver.name : 'N/A';
+                document.getElementById('formDriverPhone').textContent = selectedDriver ? selectedDriver.phone : 'N/A';
+                document.getElementById('statsDateTime').textContent = new Date().toLocaleString();
+            } else {
+                preview.style.display = 'none';
+                statsForm.style.display = 'none';
+            }
+        };
+
+        window.submitStats = async function() {
+            if (!selectedVehicle || !selectedDriver) {
+                showToast('Please select both a vehicle and a driver.', 'error');
+                return;
+            }
+
+            const timeOut = document.getElementById('statsTimeOut').value;
+            const mileageOut = parseFloat(document.getElementById('statsMileageOut').value) || 0;
+            const fuelOut = parseFloat(document.getElementById('statsFuelOut').value) || 0;
+
+            if (!timeOut || mileageOut === 0 || fuelOut === 0) {
+                showToast('Please fill in all fields (Time Out, Mileage Out, Fuel Out).', 'error');
+                return;
+            }
+
+            try {
+                const newRef = db.ref('driverStats').push();
+                await newRef.set({
+                    vehicleId: selectedVehicle.id,
+                    vehicleName: selectedVehicle.name,
+                    vehiclePlate: selectedVehicle.plate,
+                    vehicleColor: selectedVehicle.color,
+                    vehicleImage: selectedVehicle.image || '',
+                    driverId: selectedDriver.id,
+                    driverName: selectedDriver.name,
+                    driverPhone: selectedDriver.phone,
+                    driverImage: selectedDriver.image || '',
+                    timeOut: timeOut,
+                    mileageOut: mileageOut,
+                    fuelOut: fuelOut,
+                    startTime: Date.now(),
+                    status: 'pending',
+                    signature: '',
+                    timeParked: '',
+                    mileageParked: '',
+                    fuelParked: '',
+                    revenue: 0,
+                    adminComment: '',
+                    adminName: currentUser ? currentUser.name : 'Admin',
+                    adminEmail: currentUser ? currentUser.email : 'admin@monitoring.com',
+                    endTime: null,
+                    reportGenerated: false,
+                    distanceTraveled: 0,
+                    fuelUsed: 0,
+                    hoursOut: 0
+                });
+
+                // Reset form
+                document.getElementById('vehicleSelect').value = '';
+                document.getElementById('driverSelect').value = '';
+                document.getElementById('vehiclePreview').style.display = 'none';
+                document.getElementById('driverPreview').style.display = 'none';
+                document.getElementById('driverAssignCard').style.display = 'none';
+                document.getElementById('statsForm').style.display = 'none';
+                selectedVehicle = null;
+                selectedDriver = null;
+
+                showToast('Stats submitted successfully! Pending driver signature.', 'success');
+                await refreshAll();
+                renderStats();
+            } catch (err) {
+                showToast('Error submitting stats: ' + err.message, 'error');
+            }
+        };
+
+        window.signStat = async function(statId) {
+            if (!confirm('Mark this stat as signed by the driver?')) return;
+            try {
+                await db.ref(`driverStats/${statId}`).update({
+                    status: 'signed',
+                    signature: 'signed',
+                    signedAt: Date.now()
+                });
+                showToast('Stat signed successfully!', 'success');
+                await refreshAll();
+                renderStats();
+            } catch (err) {
+                showToast('Error signing stat: ' + err.message, 'error');
+            }
+        };
+
+        window.openEndOfDay = function(statId) {
+            const stat = allStats.find(s => s.id === statId);
+            if (!stat) return;
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '🚩 End of Day Stats';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehicleName)}</span></div>
+                        <div><span class="label">Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehiclePlate)}</span></div>
+                        <div><span class="label">Color:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehicleColor)}</span></div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver Details</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverName)}</span></div>
+                        <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverPhone)}</span></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Time Parked</label>
+                    <input type="time" id="eodTimeParked" value="${new Date().toTimeString().slice(0,5)}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-road"></i> Mileage Parked (km)</label>
+                    <input type="number" id="eodMileageParked" placeholder="e.g. 12450" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-gas-pump"></i> Fuel Parked (Litres)</label>
+                    <input type="number" id="eodFuelParked" placeholder="e.g. 30" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-money-bill"></i> Revenue Generated (ZMW)</label>
+                    <input type="number" id="eodRevenue" placeholder="e.g. 500" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-comment"></i> Admin Comment</label>
+                    <input type="text" id="eodAdminComment" placeholder="Any notes about this shift">
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = () => submitEndOfDay(statId);
+            document.getElementById('modalSaveBtn').textContent = 'Submit End of Day';
+            openModal('detailModal');
+        };
+
+        window.submitEndOfDay = async function(statId) {
+            const timeParked = document.getElementById('eodTimeParked').value;
+            const mileageParked = parseFloat(document.getElementById('eodMileageParked').value) || 0;
+            const fuelParked = parseFloat(document.getElementById('eodFuelParked').value) || 0;
+            const revenue = parseFloat(document.getElementById('eodRevenue').value) || 0;
+            const adminComment = document.getElementById('eodAdminComment').value.trim();
+
+            if (!timeParked || mileageParked === 0) {
+                showToast('Please fill in Time Parked and Mileage Parked.', 'error');
+                return;
+            }
+
+            try {
+                const stat = allStats.find(s => s.id === statId);
+                if (!stat) return;
+
+                const distanceTraveled = mileageParked - (stat.mileageOut || 0);
+                const fuelUsed = (stat.fuelOut || 0) - fuelParked;
+                const hoursOut = calculateHours(stat.timeOut, timeParked);
+
+                await db.ref(`driverStats/${statId}`).update({
+                    status: 'completed',
+                    timeParked: timeParked,
+                    mileageParked: mileageParked,
+                    fuelParked: fuelParked,
+                    revenue: revenue,
+                    adminComment: adminComment,
+                    endTime: Date.now(),
+                    distanceTraveled: distanceTraveled,
+                    fuelUsed: fuelUsed,
+                    hoursOut: hoursOut,
+                    reportGenerated: true
+                });
+
+                // Generate report
+                const reportRef = db.ref('driverReports').push();
+                await reportRef.set({
+                    statId: statId,
+                    vehicleId: stat.vehicleId,
+                    vehicleName: stat.vehicleName,
+                    vehiclePlate: stat.vehiclePlate,
+                    vehicleColor: stat.vehicleColor,
+                    vehicleImage: stat.vehicleImage,
+                    driverId: stat.driverId,
+                    driverName: stat.driverName,
+                    driverPhone: stat.driverPhone,
+                    driverImage: stat.driverImage,
+                    timeOut: stat.timeOut,
+                    mileageOut: stat.mileageOut,
+                    fuelOut: stat.fuelOut,
+                    timeParked: timeParked,
+                    mileageParked: mileageParked,
+                    fuelParked: fuelParked,
+                    revenue: revenue,
+                    adminComment: adminComment,
+                    adminName: currentUser ? currentUser.name : 'Admin',
+                    adminEmail: currentUser ? currentUser.email : 'admin@monitoring.com',
+                    distanceTraveled: distanceTraveled,
+                    fuelUsed: fuelUsed,
+                    hoursOut: hoursOut,
+                    date: Date.now(),
+                    startTime: stat.startTime,
+                    endTime: Date.now()
+                });
+
+                closeModal('detailModal');
+                showToast('End of Day submitted! Report generated automatically.', 'success');
+                await refreshAll();
+                renderStats();
+            } catch (err) {
+                showToast('Error submitting end of day: ' + err.message, 'error');
+            }
+        };
+
+        function calculateHours(timeOut, timeParked) {
+            if (!timeOut || !timeParked) return 0;
+            const [h1, m1] = timeOut.split(':').map(Number);
+            const [h2, m2] = timeParked.split(':').map(Number);
+            const start = new Date();
+            start.setHours(h1, m1, 0, 0);
+            const end = new Date();
+            end.setHours(h2, m2, 0, 0);
+            const diff = (end - start) / (1000 * 60 * 60);
+            return diff > 0 ? Math.round(diff * 10) / 10 : 0;
+        }
+
+        window.openStatDetail = function(statId) {
+            const stat = allStats.find(s => s.id === statId);
+            if (!stat) return;
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '📊 Stat Details';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehicleName)}</span></div>
+                        <div><span class="label">Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.vehiclePlate)}</span></div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverName)}</span></div>
+                        <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.driverPhone)}</span></div>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                    <div><span class="label">Status:</span> <span class="status-badge ${stat.status}" style="display:inline-flex;"><span class="dot"></span> ${stat.status.charAt(0).toUpperCase() + stat.status.slice(1)}</span></div>
+                    <div><span class="label">Date:</span> <span style="font-weight:500;color:var(--gray-800);">${formatDate(stat.startTime)}</span></div>
+                    <div><span class="label">Time Out:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.timeOut || 'N/A'}</span></div>
+                    <div><span class="label">Mileage Out:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.mileageOut || 0} km</span></div>
+                    <div><span class="label">Fuel Out:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.fuelOut || 0} L</span></div>
+                    ${stat.status === 'completed' ? `
+                        <div><span class="label">Time Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.timeParked || 'N/A'}</span></div>
+                        <div><span class="label">Mileage Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.mileageParked || 0} km</span></div>
+                        <div><span class="label">Fuel Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.fuelParked || 0} L</span></div>
+                        <div><span class="label">Distance Traveled:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.distanceTraveled || 0} km</span></div>
+                        <div><span class="label">Fuel Used:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.fuelUsed || 0} L</span></div>
+                        <div><span class="label">Hours Out:</span> <span style="font-weight:500;color:var(--gray-800);">${stat.hoursOut || 0} hrs</span></div>
+                        <div><span class="label">Revenue:</span> <span style="font-weight:500;color:var(--gray-800);">ZMW ${stat.revenue || 0}</span></div>
+                        <div><span class="label">Admin Comment:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.adminComment || 'No comment')}</span></div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').style.display = 'none';
+            document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
+            openModal('detailModal');
+        };
+
+        window.viewReport = function(statId) {
+            const stat = allStats.find(s => s.id === statId);
+            if (!stat) return;
+            // Find the report
+            const report = allReports.find(r => r.statId === statId);
+            if (report) {
+                viewReportDetail(report.id);
+            } else {
+                showToast('Report not found. Generate it by completing End of Day.', 'warning');
+            }
+        };
+
+        window.viewReportDetail = function(reportId) {
+            const report = allReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '📄 Full Report';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:700;font-size:1.1rem;color:var(--gray-800);margin-bottom:8px;">${escapeHtml(report.vehicleName)}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Vehicle Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.vehiclePlate)}</span></div>
+                        <div><span class="label">Vehicle Color:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.vehicleColor)}</span></div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:700;font-size:1.1rem;color:var(--gray-800);margin-bottom:8px;">${escapeHtml(report.driverName)}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.driverPhone)}</span></div>
+                        <div><span class="label">Email:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.driverEmail || 'N/A')}</span></div>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                    <div><span class="label">Date:</span> <span style="font-weight:500;color:var(--gray-800);">${formatDate(report.date)}</span></div>
+                    <div><span class="label">Time Out:</span> <span style="font-weight:500;color:var(--gray-800);">${report.timeOut || 'N/A'}</span></div>
+                    <div><span class="label">Time Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${report.timeParked || 'N/A'}</span></div>
+                    <div><span class="label">Hours Out:</span> <span style="font-weight:500;color:var(--gray-800);">${report.hoursOut || 0} hrs</span></div>
+                    <div><span class="label">Mileage Out:</span> <span style="font-weight:500;color:var(--gray-800);">${report.mileageOut || 0} km</span></div>
+                    <div><span class="label">Mileage Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${report.mileageParked || 0} km</span></div>
+                    <div><span class="label">Distance Traveled:</span> <span style="font-weight:500;color:var(--gray-800);">${report.distanceTraveled || 0} km</span></div>
+                    <div><span class="label">Fuel Out:</span> <span style="font-weight:500;color:var(--gray-800);">${report.fuelOut || 0} L</span></div>
+                    <div><span class="label">Fuel Parked:</span> <span style="font-weight:500;color:var(--gray-800);">${report.fuelParked || 0} L</span></div>
+                    <div><span class="label">Fuel Used:</span> <span style="font-weight:500;color:var(--gray-800);">${report.fuelUsed || 0} L</span></div>
+                    <div><span class="label">Revenue:</span> <span style="font-weight:700;color:var(--green);">ZMW ${report.revenue || 0}</span></div>
+                    <div style="grid-column:1/-1;"><span class="label">Admin:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.adminName || 'N/A')} (${escapeHtml(report.adminEmail || 'N/A')})</span></div>
+                    <div style="grid-column:1/-1;"><span class="label">Admin Comment:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.adminComment || 'No comment')}</span></div>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').style.display = 'none';
+            document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
+            openModal('detailModal');
+        };
+
+        window.downloadReport = function(reportId) {
+            const report = allReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            const content = `
+ZAMLIFT FLEET MANAGEMENT - DAILY REPORT
+========================================
+Date: ${formatDate(report.date)}
+Generated by: ${report.adminName || 'Admin'} (${report.adminEmail || 'admin@monitoring.com'})
+
+VEHICLE DETAILS
+---------------
+Name: ${report.vehicleName}
+Plate: ${report.vehiclePlate}
+Color: ${report.vehicleColor}
+
+DRIVER DETAILS
+--------------
+Name: ${report.driverName}
+Phone: ${report.driverPhone}
+
+STATISTICS
+----------
+Time Out: ${report.timeOut || 'N/A'}
+Time Parked: ${report.timeParked || 'N/A'}
+Hours Out: ${report.hoursOut || 0} hrs
+
+Mileage Out: ${report.mileageOut || 0} km
+Mileage Parked: ${report.mileageParked || 0} km
+Distance Traveled: ${report.distanceTraveled || 0} km
+
+Fuel Out: ${report.fuelOut || 0} L
+Fuel Parked: ${report.fuelParked || 0} L
+Fuel Used: ${report.fuelUsed || 0} L
+
+Revenue: ZMW ${report.revenue || 0}
+
+Admin Comment: ${report.adminComment || 'No comment'}
+
+========================================
+Report generated automatically by ZAMLIFT Fleet Management
+            `;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `report_${report.vehicleName}_${formatDate(report.date)}.txt`;
+            a.click();
+            showToast('Report downloaded!', 'success');
+        };
+
+        window.deleteStat = async function(statId) {
+            if (!confirm('Delete this stat entry?')) return;
+            try {
+                await db.ref(`driverStats/${statId}`).remove();
+                // Also remove associated report if exists
+                const report = allReports.find(r => r.statId === statId);
+                if (report) {
+                    await db.ref(`driverReports/${report.id}`).remove();
+                }
+                showToast('Stat deleted!', 'success');
+                await refreshAll();
+                renderStats();
+            } catch (err) {
+                showToast('Error deleting stat: ' + err.message, 'error');
+            }
+        };
+
+        // ==============================================================
+        // VEHICLE CRUD
+        // ==============================================================
+        window.openAddVehicleModal = function() {
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '🚛 Add Vehicle';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group"><label>Vehicle Name</label><input id="vName" placeholder="e.g. Truck 01"></div>
+                <div class="form-group"><label>Number Plate</label><input id="vPlate" placeholder="e.g. ABC 1234"></div>
+                <div class="form-group"><label>Color</label><input id="vColor" placeholder="e.g. White"></div>
+                <div class="form-group">
+                    <label>Vehicle Picture</label>
+                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('vImage').value = url; showToast('Image uploaded!', 'success'); })"><i class="fas fa-cloud-upload-alt"></i> Upload Image</button>
+                    <input type="hidden" id="vImage">
+                    <div id="vImagePreview" style="margin-top:8px;"></div>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = saveVehicle;
+            document.getElementById('modalSaveBtn').textContent = 'Add Vehicle';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        window.saveVehicle = async function() {
+            const name = document.getElementById('vName').value.trim();
+            const plate = document.getElementById('vPlate').value.trim();
+            const color = document.getElementById('vColor').value.trim();
+            const image = document.getElementById('vImage').value;
+
+            if (!name || !plate) {
+                showToast('Name and Plate are required.', 'error');
+                return;
+            }
+
+            try {
+                const newRef = db.ref('cars').push();
+                await newRef.set({
+                    name,
+                    plate,
+                    color: color || 'N/A',
+                    image: image || '',
+                    assignedDriver: null,
+                    totalFuelConsumed: 0,
+                    totalDistance: 0
+                });
+                closeModal('detailModal');
+                showToast('Vehicle added successfully!', 'success');
+                await refreshAll();
+                renderVehicles();
+            } catch (err) {
+                showToast('Error adding vehicle: ' + err.message, 'error');
+            }
+        };
+
+        window.editVehicle = async function(id) {
+            const v = allVehicles.find(x => x.id === id);
+            if (!v) return;
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '✏️ Edit Vehicle';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group"><label>Vehicle Name</label><input id="vName" value="${escapeHtml(v.name)}"></div>
+                <div class="form-group"><label>Number Plate</label><input id="vPlate" value="${escapeHtml(v.plate)}"></div>
+                <div class="form-group"><label>Color</label><input id="vColor" value="${escapeHtml(v.color)}"></div>
+                <div class="form-group">
+                    <label>Vehicle Picture</label>
+                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('vImage').value = url; document.getElementById('vImagePreview').innerHTML = '<img src=\"'+url+'\" style=\"width:80px;height:80px;border-radius:var(--radius);object-fit:cover;\">'; showToast('Image updated!', 'success'); })"><i class="fas fa-cloud-upload-alt"></i> Change Image</button>
+                    <input type="hidden" id="vImage" value="${escapeHtml(v.image)}">
+                    <div id="vImagePreview">${v.image ? '<img src="'+v.image+'" style="width:80px;height:80px;border-radius:var(--radius);object-fit:cover;">' : ''}</div>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = () => saveVehicleEdit(id);
+            document.getElementById('modalSaveBtn').textContent = 'Save Changes';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        window.saveVehicleEdit = async function(id) {
+            const name = document.getElementById('vName').value.trim();
+            const plate = document.getElementById('vPlate').value.trim();
+            const color = document.getElementById('vColor').value.trim();
+            const image = document.getElementById('vImage').value;
+
+            if (!name || !plate) {
+                showToast('Name and Plate are required.', 'error');
+                return;
+            }
+
+            try {
+                await db.ref(`cars/${id}`).update({
+                    name,
+                    plate,
+                    color: color || 'N/A',
+                    image: image || ''
+                });
+                closeModal('detailModal');
+                showToast('Vehicle updated!', 'success');
+                await refreshAll();
+                renderVehicles();
+            } catch (err) {
+                showToast('Error updating vehicle: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteVehicle = async function(id) {
+            if (!confirm('Delete this vehicle?')) return;
+            try {
+                await db.ref(`cars/${id}`).remove();
+                showToast('Vehicle deleted.', 'success');
+                await refreshAll();
+                renderVehicles();
+            } catch (err) {
+                showToast('Error deleting vehicle: ' + err.message, 'error');
+            }
+        };
+
+        // ==============================================================
+        // DRIVER CRUD
+        // ==============================================================
+        window.openAddDriverModal = function() {
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '👤 Add Driver';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group"><label>First Name</label><input id="dFirstName" placeholder="e.g. John"></div>
+                <div class="form-group"><label>Last Name</label><input id="dLastName" placeholder="e.g. Doe"></div>
+                <div class="form-group"><label>Phone</label><input id="dPhone" placeholder="e.g. +260 123 456 789"></div>
+                <div class="form-group"><label>Email</label><input id="dEmail" placeholder="driver@example.com"></div>
+                <div class="form-group"><label>Password</label><input id="dPassword" type="password" placeholder="Min 6 characters"></div>
+                <div class="form-group">
+                    <label>Driver Picture</label>
+                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('dImage').value = url; showToast('Image uploaded!', 'success'); })"><i class="fas fa-cloud-upload-alt"></i> Upload Image</button>
+                    <input type="hidden" id="dImage">
+                    <div id="dImagePreview" style="margin-top:8px;"></div>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = saveDriver;
+            document.getElementById('modalSaveBtn').textContent = 'Add Driver';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        window.saveDriver = async function() {
+            const firstName = document.getElementById('dFirstName').value.trim();
+            const lastName = document.getElementById('dLastName').value.trim();
+            const phone = document.getElementById('dPhone').value.trim();
+            const email = document.getElementById('dEmail').value.trim();
+            const password = document.getElementById('dPassword').value;
+            const image = document.getElementById('dImage').value;
+
+            if (!firstName || !lastName || !phone || !email || !password) {
+                showToast('All fields are required.', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters.', 'error');
+                return;
+            }
+
+            try {
+                const driverCred = await auth.createUserWithEmailAndPassword(email, password);
+                const driverUser = driverCred.user;
+
+                await db.ref(`drivers/${driverUser.uid}`).set({
+                    firstName,
+                    lastName,
+                    phone,
+                    email,
+                    image: image || '',
+                    lat: null,
+                    lng: null,
+                    city: ''
+                });
+
+                closeModal('detailModal');
+                showToast('Driver created successfully!', 'success');
+                await refreshAll();
+                renderDrivers();
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    showToast('This email is already registered.', 'error');
+                } else {
+                    showToast('Error: ' + err.message, 'error');
+                }
+            }
+        };
+
+        window.editDriver = async function(id) {
+            const d = allDrivers.find(x => x.id === id);
+            if (!d) return;
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '✏️ Edit Driver';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group"><label>First Name</label><input id="dFirstName" value="${escapeHtml(d.firstName)}"></div>
+                <div class="form-group"><label>Last Name</label><input id="dLastName" value="${escapeHtml(d.lastName)}"></div>
+                <div class="form-group"><label>Phone</label><input id="dPhone" value="${escapeHtml(d.phone)}"></div>
+                <div class="form-group"><label>Email</label><input id="dEmail" value="${escapeHtml(d.email)}"></div>
+                <div class="form-group">
+                    <label>Driver Picture</label>
+                    <button class="btn-primary" style="padding:8px 16px;font-size:0.8rem;" onclick="openCloudinaryUpload((url) => { document.getElementById('dImage').value = url; document.getElementById('dImagePreview').innerHTML = '<img src=\"'+url+'\" style=\"width:80px;height:80px;border-radius:var(--radius);object-fit:cover;\">'; showToast('Image updated!', 'success'); })"><i class="fas fa-cloud-upload-alt"></i> Change Image</button>
+                    <input type="hidden" id="dImage" value="${escapeHtml(d.image)}">
+                    <div id="dImagePreview">${d.image ? '<img src="'+d.image+'" style="width:80px;height:80px;border-radius:var(--radius);object-fit:cover;">' : ''}</div>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = () => saveDriverEdit(id);
+            document.getElementById('modalSaveBtn').textContent = 'Save Changes';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        window.saveDriverEdit = async function(id) {
+            const firstName = document.getElementById('dFirstName').value.trim();
+            const lastName = document.getElementById('dLastName').value.trim();
+            const phone = document.getElementById('dPhone').value.trim();
+            const email = document.getElementById('dEmail').value.trim();
+            const image = document.getElementById('dImage').value;
+
+            if (!firstName || !lastName || !phone || !email) {
+                showToast('All fields are required.', 'error');
+                return;
+            }
+
+            try {
+                await db.ref(`drivers/${id}`).update({
+                    firstName,
+                    lastName,
+                    phone,
+                    email,
+                    image: image || ''
+                });
+                closeModal('detailModal');
+                showToast('Driver updated!', 'success');
+                await refreshAll();
+                renderDrivers();
+            } catch (err) {
+                showToast('Error updating driver: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteDriver = async function(id) {
+            if (!confirm('Delete this driver?')) return;
+            try {
+                await db.ref(`drivers/${id}`).remove();
+                showToast('Driver deleted.', 'success');
+                await refreshAll();
+                renderDrivers();
+            } catch (err) {
+                showToast('Error deleting driver: ' + err.message, 'error');
+            }
+        };
+
+        // ==============================================================
+        // SIDEBAR FEATURES
+        // ==============================================================
+        window.openFuelManagement = function() {
+            const container = document.getElementById('contentArea');
+            const totalFuel = allStats.reduce((sum, s) => sum + (s.fuelUsed || 0), 0);
+            const totalRevenue = allStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
+
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-gas-pump" style="color:var(--accent);"></i> Fuel Management</h2>
+                </div>
+                <div class="grid-cards">
+                    <div class="card">
+                        <div class="card-header"><div class="icon-wrap amber"><i class="fas fa-chart-line"></i></div><div><div class="card-title">Fuel Consumption</div><div class="card-subtitle">All time</div></div></div>
+                        <div class="card-body">
+                            <div class="detail-row"><span class="label">Total Fuel Used</span><span class="value">${totalFuel.toFixed(1)} L</span></div>
+                            <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${totalRevenue.toFixed(2)}</span></div>
+                            <div class="detail-row"><span class="label">Efficiency</span><span class="value">${totalFuel > 0 ? (totalRevenue / totalFuel).toFixed(2) : '0'} ZMW/L</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            document.getElementById('statsText').textContent = '⛽ Fuel Management';
+            toggleSidebar();
+        };
+
+        window.openMaintenance = function() {
+            const container = document.getElementById('contentArea');
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-wrench" style="color:var(--accent);"></i> Maintenance</h2>
+                </div>
+                <div class="empty-state"><i class="fas fa-wrench"></i><h3>Maintenance module coming soon</h3></div>
+            `;
+            container.innerHTML = html;
+            document.getElementById('statsText').textContent = '🔧 Maintenance';
+            toggleSidebar();
+        };
+
+        // ==============================================================
+        // TAB SWITCHING
+        // ==============================================================
+        function renderCurrentTab() {
+            switch (currentTab) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'stats':
+                    renderStats();
+                    break;
+                case 'vehicles':
+                    renderVehicles();
+                    break;
+                case 'drivers':
+                    renderDrivers();
+                    break;
+                case 'reports':
+                    renderReports();
+                    break;
+                default:
+                    renderDashboard();
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            const el = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+            if (el) el.classList.add('active');
+            currentTab = tab;
+            searchTerm = '';
+            statusFilter = 'all';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            renderCurrentTab();
+            updateStats();
+        }
+
+        function setupNavButtons() {
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentTab = btn.dataset.tab;
+                    searchTerm = '';
+                    statusFilter = 'all';
+                    document.getElementById('searchInput').value = '';
+                    document.getElementById('statusFilter').value = 'all';
+                    renderCurrentTab();
+                    updateStats();
+                };
+            });
+        }
+
+        function setupToolbar() {
+            document.getElementById('searchInput').oninput = (e) => {
+                searchTerm = e.target.value.toLowerCase();
+                renderCurrentTab();
+            };
+            document.getElementById('statusFilter').onchange = (e) => {
+                statusFilter = e.target.value;
+                renderCurrentTab();
+            };
+            document.getElementById('refreshBtn').onclick = async () => {
+                await refreshAll();
+                showToast('Refreshed!', 'success');
+            };
+        }
+
+        // ==============================================================
+        // SHUTDOWN DETECTION
+        // ==============================================================
+        function setupShutdownListeners() {
+            const maintRef = db.ref('maintenance/fleetApp');
+            maintRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    isShutdown = true;
+                    handleShutdown('App under maintenance. Please try again later.');
+                } else {
+                    isShutdown = false;
+                }
+            });
+            shutdownListeners.push({ ref: maintRef });
+        }
+
+        function handleShutdown(msg) {
+            showToast(msg, 'error');
+            document.getElementById('appShell').classList.remove('active');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginError').textContent = msg;
+            if (currentUser) {
+                auth.signOut();
+                currentUser = null;
+            }
+            cleanupShutdownListeners();
+        }
+
+        function cleanupShutdownListeners() {
+            shutdownListeners.forEach(({ ref, listener }) => {
+                try { ref.off('value', listener); } catch (e) {}
+            });
+            shutdownListeners = [];
+        }
+
+        // ==============================================================
+        // INIT
+        // ==============================================================
+        console.log('✅ ZAMLIFT Fleet Management loaded');
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
         });
-        csv2 += row + '\n';
-      });
-      setTimeout(() => {
-        const blob = new Blob([csv2], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `timesheet_${start.toLocaleDateString()}_to_${end.toLocaleDateString()}.csv`;
-        a.click();
-      }, 500);
-    };
-  });
 
-  // Toggles
-  document.querySelectorAll('[data-type]').forEach(el => el.addEventListener('click', function() {
-    document.querySelectorAll('[data-type]').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById('driversSection').style.display = this.dataset.type === 'drivers' ? 'block' : 'none';
-    document.getElementById('workersSection').style.display = this.dataset.type === 'workers' ? 'block' : 'none';
-  }));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(m => {
+                    m.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+            }
+        });
 
-  document.querySelectorAll('[data-assign]').forEach(el => el.addEventListener('click', function() {
-    document.querySelectorAll('[data-assign]').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById('assignDriversSection').style.display = this.dataset.assign === 'drivers' ? 'block' : 'none';
-    document.getElementById('assignWorkersSection').style.display = this.dataset.assign === 'workers' ? 'block' : 'none';
-  }));
+        window.addEventListener('beforeunload', () => {
+            cleanupShutdownListeners();
+        });
 
-  document.querySelectorAll('[data-report]').forEach(el => el.addEventListener('click', function() {
-    document.querySelectorAll('[data-report]').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById('reportsDriversSection').style.display = this.dataset.report === 'drivers' ? 'block' : 'none';
-    document.getElementById('reportsWorkersSection').style.display = this.dataset.report === 'workers' ? 'block' : 'none';
-  }));
+        // Style modal inputs
+        document.addEventListener('DOMContentLoaded', () => {
+            const styleInputs = () => {
+                document.querySelectorAll('#modalBody .form-group input, #modalBody .form-group select, #modalBody .form-group textarea')
+                    .forEach(el => {
+                        el.style.width = '100%';
+                        el.style.padding = '10px 14px';
+                        el.style.border = '1.5px solid var(--gray-200)';
+                        el.style.borderRadius = 'var(--radius)';
+                        el.style.fontSize = '0.9rem';
+                        el.style.fontFamily = 'var(--font)';
+                        el.style.background = 'var(--gray-50)';
+                        el.style.color = 'var(--gray-800)';
+                    });
+            };
+            const observer = new MutationObserver(() => styleInputs());
+            observer.observe(document.getElementById('modalBody'), { childList: true, subtree: true });
+            styleInputs();
+        });
 
-  // Add admin
-  document.getElementById('toggleAddAdminForm').onclick = () => {
-    const form = document.getElementById('addAdminForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('createAdminBtn').onclick = async () => {
-    const fullName = document.getElementById('adminFullName').value;
-    const email = document.getElementById('adminEmail').value;
-    const phone = document.getElementById('adminPhone').value;
-    const pass = document.getElementById('adminPassword').value;
-    const confirm = document.getElementById('adminConfirmPassword').value;
-    
-    if (!fullName || !email || !phone || !pass) return alert('Please fill all fields');
-    if (pass !== confirm) return alert('Passwords mismatch');
-    if (!email.startsWith('admin@')) return alert('Email must start with admin@');
-    
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await set(ref(db, `admins/${cred.user.uid}`), { 
-        fullName, 
-        email, 
-        phone, 
-        createdAt: Date.now() 
-      });
-      await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
-      document.getElementById('addAdminForm').style.display = 'none';
-      document.getElementById('adminFullName').value = '';
-      document.getElementById('adminEmail').value = '';
-      document.getElementById('adminPhone').value = '';
-      document.getElementById('adminPassword').value = '';
-      document.getElementById('adminConfirmPassword').value = '';
-      showToast('Admin created successfully');
-    } catch (e) { 
-      alert('Error creating admin: ' + e.message); 
-    }
-  };
-
-  // Add worker
-  document.getElementById('toggleAddWorkerForm').onclick = () => {
-    const form = document.getElementById('addWorkerForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('createWorkerBtn').onclick = async () => {
-    const fullName = document.getElementById('workerFullName').value;
-    const phone = document.getElementById('workerPhone').value;
-    const email = document.getElementById('workerEmail').value;
-    const pass = document.getElementById('workerPassword').value;
-    const confirm = document.getElementById('workerConfirmPassword').value;
-    if (pass !== confirm) return alert('Passwords mismatch');
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await set(ref(db, `workers/${cred.user.uid}`), { fullName, phone, email, offDay: false });
-      await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
-      document.getElementById('addWorkerForm').style.display = 'none';
-    } catch (e) { alert(e.message); }
-  };
-
-  // Navigation
-  document.querySelectorAll('.action-btn').forEach(btn => btn.addEventListener('click', () => {
-    const page = btn.dataset.page;
-    document.getElementById(page + 'Page').classList.add('active');
-  }));
-
-  function closeAllPages() {
-    document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
-  }
-
-  document.getElementById('closeAdminsPage').onclick = closeAllPages;
-  document.getElementById('closeDriversPage').onclick = closeAllPages;
-  document.getElementById('closeCarsPage').onclick = closeAllPages;
-  document.getElementById('closeAssignPage').onclick = closeAllPages;
-  document.getElementById('closeReportsPage').onclick = closeAllPages;
-
-  // Driver form toggle
-  document.getElementById('toggleAddDriverForm').onclick = () => {
-    const form = document.getElementById('addDriverForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('createDriverBtn').onclick = async () => {
-    const email = document.getElementById('driverEmail').value;
-    const pass = document.getElementById('driverPassword').value;
-    const confirm = document.getElementById('driverConfirmPassword').value;
-    if (pass !== confirm) return alert('Passwords mismatch');
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      const uid = cred.user.uid;
-      await set(ref(db, 'drivers/' + uid), {
-        firstName: document.getElementById('driverFirstName').value,
-        lastName: document.getElementById('driverLastName').value,
-        nrc: document.getElementById('driverNRC').value,
-        email, phone: document.getElementById('driverPhone').value,
-        lat: null, lng: null
-      });
-      document.getElementById('addDriverForm').style.display = 'none';
-      await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
-    } catch (e) { alert(e.message); }
-  };
-
-  // Car
-  document.getElementById('toggleAddCarForm').onclick = () => {
-    const form = document.getElementById('addCarForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('addCarBtn').onclick = async () => {
-    const name = document.getElementById('carName').value;
-    const plate = document.getElementById('carPlate').value;
-    const newRef = push(ref(db, 'cars'));
-    await set(newRef, { name, plate, assignedDriver: null, totalFuelConsumed: 0, totalDistance: 0 });
-    document.getElementById('addCarForm').style.display = 'none';
-  };
-
-  // Assign car
-  document.getElementById('toggleAssignForm').onclick = () => {
-    const form = document.getElementById('assignForm');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  };
-  document.getElementById('confirmAssignBtn').onclick = async () => {
-    const driverId = document.getElementById('selectDriver').value;
-    const carId = document.getElementById('selectCar').value;
-    if (!driverId || !carId) return alert('Select both');
-    const prevCar = cars.find(c => c.assignedDriver === driverId);
-    if (prevCar) await update(ref(db, `cars/${prevCar.id}`), { assignedDriver: null });
-    await update(ref(db, `cars/${carId}`), { assignedDriver: driverId });
-    document.getElementById('assignForm').style.display = 'none';
-  };
-
-  // Search driver
-  document.getElementById('searchDriverInput').addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase();
-    const filtered = drivers.filter(d => (d.firstName + ' ' + d.lastName).toLowerCase().includes(q));
-    document.getElementById('driversListContainer').innerHTML = filtered.map(d => `<div class="driver-item" onclick="showDriverModal('${d.id}')">${d.firstName} ${d.lastName}</div>`).join('');
-  });
-
-  // Logout
-  document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
-</script>
+        // Initialize
+        setTimeout(() => {
+            if (currentUser) {
+                renderDashboard();
+            }
+        }, 500);
+    </script>
 </body>
 </html>
