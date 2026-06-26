@@ -181,7 +181,7 @@
 
     .action-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
       gap: 8px;
       margin: 8px 0;
     }
@@ -532,6 +532,52 @@
     .timesheet-table th {
       background: #eef3ef;
     }
+
+    /* Admin Page styles */
+    #adminsPage .admin-item {
+      background: #f8fbf8;
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      border-left: 5px solid #1e3a2a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    #adminsPage .admin-item .admin-info-small {
+      flex: 1;
+    }
+    
+    #adminsPage .admin-item .admin-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    #adminsPage .admin-item .admin-actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    
+    #adminsPage .admin-item .admin-actions .delete-btn {
+      color: #dc2626;
+    }
+    
+    #adminsPage .admin-item .admin-actions .delete-btn:hover {
+      background: #fee2e2;
+    }
+    
+    #adminsPage .admin-item .admin-actions .edit-btn {
+      color: #2e5c3e;
+    }
+    
+    #adminsPage .admin-item .admin-actions .edit-btn:hover {
+      background: #e6f0e6;
+    }
   </style>
 </head>
 <body>
@@ -567,6 +613,7 @@
       </div>
     </div>
     <div class="action-grid">
+      <div class="action-btn" data-page="admins"><i class="fas fa-user-shield"></i><span>Admins</span></div>
       <div class="action-btn" data-page="drivers"><i class="fas fa-users"></i><span>Drivers</span></div>
       <div class="action-btn" data-page="cars"><i class="fas fa-car"></i><span>Cars</span></div>
       <div class="action-btn" data-page="assign"><i class="fas fa-exchange-alt"></i><span>Assign</span></div>
@@ -585,6 +632,25 @@
     <h2 style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Emergencies</h2>
   </div>
   <div id="emergencyListContainer"></div>
+</div>
+
+<!-- Admins Page -->
+<div id="adminsPage" class="page-view">
+  <div class="page-header">
+    <button class="back-btn" id="closeAdminsPage"><i class="fas fa-arrow-left"></i></button>
+    <h2 style="color:#1e3a2a;">Admin Management</h2>
+  </div>
+  <button class="pill-btn" id="toggleAddAdminForm"><i class="fas fa-plus-circle"></i> Add Admin</button>
+  <div id="addAdminForm" class="dropdown-form">
+    <input type="text" id="adminFullName" class="form-input" placeholder="Full Name">
+    <input type="email" id="adminEmail" class="form-input" placeholder="Email (admin@...)">
+    <input type="tel" id="adminPhone" class="form-input" placeholder="Phone Number">
+    <input type="password" id="adminPassword" class="form-input" placeholder="Password">
+    <input type="password" id="adminConfirmPassword" class="form-input" placeholder="Confirm Password">
+    <button class="pill-btn" id="createAdminBtn">Create Admin</button>
+  </div>
+  <div class="section-title">Current Admins</div>
+  <div id="adminsListContainer"></div>
 </div>
 
 <!-- Drivers Page (with toggle) -->
@@ -760,8 +826,8 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-  import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getDatabase, ref, set, push, onValue, update, get, child, remove } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
@@ -782,6 +848,7 @@
   let drivers = [];
   let cars = [];
   let workers = [];
+  let admins = [];
   let driverMarkers = {};
   let currentCity = "Lusaka";
   let emergencies = [];
@@ -790,11 +857,15 @@
   let currentWorkerId = null;
 
   onAuthStateChanged(auth, (user) => {
-    if (!user || !user.email.startsWith('admin@')) { window.location.href = 'index.html'; return; }
+    if (!user || !user.email.startsWith('admin@')) { 
+      window.location.href = 'index.html'; 
+      return; 
+    }
     document.getElementById('adminEmailDisplay').textContent = user.email;
     initMap();
     loadData();
     listenEmergencies();
+    loadAdmins();
   });
 
   function initMap() {
@@ -826,6 +897,13 @@
       workers = snap.val() ? Object.entries(snap.val()).map(([id, w]) => ({ id, ...w })) : [];
       renderWorkersList();
       renderWorkersAssignList();
+    });
+  }
+
+  function loadAdmins() {
+    onValue(ref(db, 'admins'), (snap) => {
+      admins = snap.val() ? Object.entries(snap.val()).map(([id, a]) => ({ id, ...a })) : [];
+      renderAdminsList();
     });
   }
 
@@ -1024,6 +1102,35 @@
     }).join('');
   }
 
+  function renderAdminsList() {
+    const cont = document.getElementById('adminsListContainer');
+    cont.innerHTML = admins.map(a => `
+      <div class="admin-item">
+        <div class="admin-info-small">
+          <strong>${a.fullName}</strong><br>
+          <small>${a.email} · ${a.phone}</small>
+        </div>
+        <div class="admin-actions">
+          <button class="delete-btn" onclick="deleteAdmin('${a.id}', '${a.email}')" title="Delete Admin">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+    `).join('') || '<p>No other admins found.</p>';
+  }
+
+  window.deleteAdmin = async (adminId, adminEmail) => {
+    if (!confirm(`Are you sure you want to delete admin ${adminEmail}?`)) return;
+    
+    try {
+      // Remove from Firebase Database
+      await remove(ref(db, `admins/${adminId}`));
+      showToast('Admin deleted successfully');
+    } catch (error) {
+      alert('Error deleting admin: ' + error.message);
+    }
+  };
+
   window.toggleDayOff = async (workerId, value) => {
     await update(ref(db, `workers/${workerId}`), { offDay: value });
   };
@@ -1221,6 +1328,43 @@
     document.getElementById('reportsWorkersSection').style.display = this.dataset.report === 'workers' ? 'block' : 'none';
   }));
 
+  // Add admin
+  document.getElementById('toggleAddAdminForm').onclick = () => {
+    const form = document.getElementById('addAdminForm');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  };
+  document.getElementById('createAdminBtn').onclick = async () => {
+    const fullName = document.getElementById('adminFullName').value;
+    const email = document.getElementById('adminEmail').value;
+    const phone = document.getElementById('adminPhone').value;
+    const pass = document.getElementById('adminPassword').value;
+    const confirm = document.getElementById('adminConfirmPassword').value;
+    
+    if (!fullName || !email || !phone || !pass) return alert('Please fill all fields');
+    if (pass !== confirm) return alert('Passwords mismatch');
+    if (!email.startsWith('admin@')) return alert('Email must start with admin@');
+    
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await set(ref(db, `admins/${cred.user.uid}`), { 
+        fullName, 
+        email, 
+        phone, 
+        createdAt: Date.now() 
+      });
+      await signInWithEmailAndPassword(auth, 'admin@monitoring.com', '123456');
+      document.getElementById('addAdminForm').style.display = 'none';
+      document.getElementById('adminFullName').value = '';
+      document.getElementById('adminEmail').value = '';
+      document.getElementById('adminPhone').value = '';
+      document.getElementById('adminPassword').value = '';
+      document.getElementById('adminConfirmPassword').value = '';
+      showToast('Admin created successfully');
+    } catch (e) { 
+      alert('Error creating admin: ' + e.message); 
+    }
+  };
+
   // Add worker
   document.getElementById('toggleAddWorkerForm').onclick = () => {
     const form = document.getElementById('addWorkerForm');
@@ -1251,6 +1395,7 @@
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
   }
 
+  document.getElementById('closeAdminsPage').onclick = closeAllPages;
   document.getElementById('closeDriversPage').onclick = closeAllPages;
   document.getElementById('closeCarsPage').onclick = closeAllPages;
   document.getElementById('closeAssignPage').onclick = closeAllPages;
