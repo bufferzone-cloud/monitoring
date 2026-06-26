@@ -620,22 +620,73 @@
             color: var(--gray-600);
         }
 
-        /* Upload button */
-        .btn-upload {
-            padding: 8px 16px;
-            border-radius: var(--radius-full);
-            background: var(--blue);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.8rem;
-            display: inline-flex;
+        /* Upload button - styled as box */
+        .upload-box {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            justify-content: center;
+            background: var(--gray-50);
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-upload:hover {
-            background: #2563EB;
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        .upload-box:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+        .upload-box:active {
+            transform: scale(0.97);
+        }
+        .upload-box .placeholder-icon {
+            font-size: 2.5rem;
+            color: var(--gray-400);
+        }
+        .upload-box .placeholder-text {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            margin-top: 4px;
+            text-align: center;
+        }
+        .upload-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .upload-box.has-image .placeholder-icon,
+        .upload-box.has-image .placeholder-text {
+            display: none;
+        }
+        .upload-box .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--red);
+            color: #fff;
+            border: none;
+            font-size: 0.8rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            z-index: 10;
+        }
+        .upload-box .remove-btn:hover {
+            transform: scale(1.1);
+        }
+        .upload-box.has-image .remove-btn {
+            display: flex;
         }
 
         /* ===== EXPANDABLE FORMS ===== */
@@ -723,185 +774,6 @@
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid var(--gray-100);
-        }
-
-        /* ===== UPLOAD PREVIEW BOXES ===== */
-        .upload-preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .upload-preview-box {
-            width: 100px;
-            height: 100px;
-            border: 2px dashed var(--gray-300);
-            border-radius: var(--radius);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--gray-50);
-            transition: all var(--transition);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .upload-preview-box:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-        .upload-preview-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: var(--radius);
-        }
-        .upload-preview-box .placeholder-icon {
-            font-size: 2rem;
-            color: var(--gray-400);
-        }
-        .upload-preview-box .placeholder-text {
-            font-size: 0.6rem;
-            color: var(--gray-400);
-            margin-top: 4px;
-            text-align: center;
-        }
-        .upload-preview-box .remove-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--red);
-            color: #fff;
-            border: none;
-            font-size: 0.7rem;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-        .upload-preview-box .remove-btn:hover {
-            transform: scale(1.1);
-        }
-        .upload-preview-box.has-image .remove-btn {
-            display: flex;
-        }
-        .upload-preview-box.has-image .placeholder-icon,
-        .upload-preview-box.has-image .placeholder-text {
-            display: none;
-        }
-
-        /* ===== DATE PICKER ===== */
-        .date-picker-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: var(--white);
-            border-radius: var(--radius-full);
-            border: 1px solid var(--gray-200);
-            margin-bottom: 16px;
-        }
-        .date-picker-container input[type="date"] {
-            padding: 8px 12px;
-            border: 1.5px solid var(--gray-200);
-            border-radius: var(--radius);
-            font-size: 0.85rem;
-            font-family: var(--font);
-            background: var(--gray-50);
-            color: var(--gray-800);
-            transition: var(--transition);
-            flex: 1;
-            min-width: 140px;
-        }
-        .date-picker-container input[type="date"]:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-        .date-picker-container .date-label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--gray-600);
-            white-space: nowrap;
-        }
-        .date-picker-container .btn-date {
-            padding: 6px 14px;
-            border-radius: var(--radius-full);
-            background: var(--primary);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.75rem;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .date-picker-container .btn-date:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        /* ===== TOAST CONTAINER ===== */
-        #toastContainer {
-            position: fixed;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-width: 92%;
-            width: 400px;
-            pointer-events: none;
-        }
-        .toast {
-            padding: 14px 20px;
-            border-radius: var(--radius);
-            background: var(--gray-900);
-            color: var(--white);
-            font-size: 0.85rem;
-            font-weight: 500;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            pointer-events: auto;
-            animation: fadeInUp 0.35s ease;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .toast.success {
-            background: linear-gradient(135deg, #059669, #10B981);
-        }
-        .toast.error {
-            background: linear-gradient(135deg, #DC2626, #EF4444);
-        }
-        .toast.warning {
-            background: linear-gradient(135deg, #D97706, #F59E0B);
-        }
-        .toast i {
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        .toast span {
-            flex: 1;
-        }
-        .toast .toast-close {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            font-size: 0.9rem;
-            padding: 0 4px;
-            transition: 0.2s;
-        }
-        .toast .toast-close:hover {
-            color: #fff;
         }
 
         /* ===== LOGIN SCREEN ===== */
@@ -1438,6 +1310,7 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
             animation: fadeInUp 0.4s ease;
+            cursor: pointer;
         }
         .card:hover {
             box-shadow: var(--shadow-md);
@@ -1926,6 +1799,85 @@
             box-shadow: 0 4px 12px var(--primary-glow);
         }
 
+        /* ===== USER PROFILE POPUP ===== */
+        .user-popup {
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            z-index: 500;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+            min-width: 220px;
+            display: none;
+            animation: fadeInUp 0.3s ease;
+        }
+        .user-popup.active {
+            display: block;
+        }
+        .user-popup .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 12px;
+        }
+        .user-popup .user-info .avatar-large {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .user-popup .user-info .details .name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gray-800);
+        }
+        .user-popup .user-info .details .email {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+        .user-popup .user-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .user-popup .user-actions button {
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            border: none;
+            background: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+            font-family: var(--font);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-popup .user-actions button:hover {
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+        .user-popup .user-actions button.danger {
+            color: var(--red);
+        }
+        .user-popup .user-actions button.danger:hover {
+            background: var(--red-light);
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .app-header .brand h1 {
@@ -1955,6 +1907,13 @@
             }
             .bottom-nav .nav-item {
                 font-size: 0.5rem;
+            }
+            .upload-box {
+                width: 100px;
+                height: 100px;
+            }
+            .upload-box .placeholder-icon {
+                font-size: 2rem;
             }
         }
         @media (min-width: 600px) {
@@ -2016,7 +1975,7 @@
             </div>
             <div class="header-actions">
                 <button onclick="toggleSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
-                <div class="avatar-btn" onclick="toggleSidebar()" id="avatarBtn">A</div>
+                <div class="avatar-btn" onclick="toggleUserPopup()" id="avatarBtn">A</div>
             </div>
         </header>
 
@@ -2051,6 +2010,22 @@
             <button class="nav-item" data-tab="drivers"><i class="fas fa-user-md"></i><span>Drivers</span></button>
             <button class="nav-item" data-tab="reports"><i class="fas fa-file-alt"></i><span>Reports</span></button>
         </nav>
+    </div>
+
+    <!-- ===== USER POPUP ===== -->
+    <div class="user-popup" id="userPopup">
+        <div class="user-info">
+            <div class="avatar-large" id="popupAvatar">A</div>
+            <div class="details">
+                <div class="name" id="popupName">Admin</div>
+                <div class="email" id="popupEmail">admin@monitoring.com</div>
+            </div>
+        </div>
+        <div class="user-actions">
+            <button onclick="toggleUserPopup()"><i class="fas fa-user"></i> Profile</button>
+            <button onclick="toggleSidebar(); toggleUserPopup();"><i class="fas fa-cog"></i> Settings</button>
+            <button class="danger" onclick="logout(); toggleUserPopup();"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
     </div>
 
     <!-- ===== SIDEBAR ===== -->
@@ -2182,6 +2157,10 @@
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
+        function toggleUserPopup() {
+            document.getElementById('userPopup').classList.toggle('active');
+        }
+
         function openModal(id) {
             document.getElementById(id).classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2199,135 +2178,70 @@
             element.classList.toggle('expanded');
         }
 
-        function createExpandableForm(headerText, iconClass, formContent) {
-            const container = document.createElement('div');
-            container.className = 'form-expandable';
-            container.onclick = function(e) {
-                // Don't toggle if clicking on input or button
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
-                    e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
-                    return;
-                }
-                toggleFormExpand(this);
-            };
-
-            container.innerHTML = `
-                <div class="form-header">
-                    <h4><i class="fas ${iconClass}" style="color:var(--primary);"></i> ${headerText}</h4>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div class="form-body">
-                    ${formContent}
-                </div>
-            `;
-            return container;
-        }
-
         // ==============================================================
-        // UPLOAD PREVIEW BOXES
+        // UPLOAD BOX FUNCTIONALITY
         // ==============================================================
-        function createUploadPreviewContainer() {
-            const container = document.createElement('div');
-            container.className = 'upload-preview-container';
-            return container;
-        }
+        function setupUploadBox(boxId, hiddenInputId, callback) {
+            const box = document.getElementById(boxId);
+            const hiddenInput = document.getElementById(hiddenInputId);
 
-        function addUploadPreviewBox(container, imageUrl, onRemove) {
-            const box = document.createElement('div');
-            box.className = 'upload-preview-box has-image';
+            if (!box || !hiddenInput) return;
 
-            box.innerHTML = `
-                <img src="${imageUrl}" alt="Uploaded image">
-                <button class="remove-btn" onclick="removeUploadPreview(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-
-            if (onRemove) {
-                box.querySelector('.remove-btn').onclick = function(e) {
-                    e.stopPropagation();
-                    onRemove();
-                    box.remove();
+            box.onclick = function() {
+                const options = {
+                    cloudName: CLOUD_NAME,
+                    uploadPreset: UPLOAD_PRESET,
+                    sources: ['local', 'url'],
+                    maxFileSize: 155000000,
+                    resourceType: 'image',
+                    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                    maxFiles: 1
                 };
-            }
 
-            container.appendChild(box);
-            return box;
-        }
-
-        function removeUploadPreview(btn) {
-            const box = btn.closest('.upload-preview-box');
-            if (box) {
-                box.remove();
-            }
-        }
-
-        function addEmptyUploadPreviewBox(container, onClick) {
-            const box = document.createElement('div');
-            box.className = 'upload-preview-box';
-            box.onclick = onClick;
-
-            box.innerHTML = `
-                <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
-                <div class="placeholder-text">Tap to upload</div>
-            `;
-
-            container.appendChild(box);
-            return box;
-        }
-
-        // ==============================================================
-        // CLOUDINARY UPLOAD WITH PREVIEW
-        // ==============================================================
-        function openCloudinaryUploadWithPreview(containerId, callback, resourceType = 'image') {
-            const container = document.getElementById(containerId) || document.querySelector('.upload-preview-container');
-
-            if (!container) {
-                showToast('Upload container not found', 'error');
-                return;
-            }
-
-            const options = {
-                cloudName: CLOUD_NAME,
-                uploadPreset: UPLOAD_PRESET,
-                sources: ['local', 'url'],
-                maxFileSize: 155000000,
-                resourceType: resourceType,
-                clientAllowedFormats: resourceType === 'image' ? ['jpg', 'jpeg', 'png', 'gif', 'webp'] : ['mp4',
-                    'mov', 'avi', 'webm'
-                ],
-                maxFiles: 1
+                cloudinary.openUploadWidget(options, (err, res) => {
+                    if (err) {
+                        showToast('Upload error: ' + err.message, 'error');
+                        return;
+                    }
+                    if (res.event === 'success') {
+                        const info = res.info;
+                        const url = info.secure_url;
+                        
+                        // Update the box with the uploaded image
+                        box.classList.add('has-image');
+                        box.innerHTML = `
+                            <img src="${url}" alt="Uploaded image">
+                            <button class="remove-btn" onclick="removeUploadImage('${boxId}', '${hiddenInputId}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        
+                        hiddenInput.value = url;
+                        
+                        if (callback) callback(url);
+                        showToast('Upload successful!', 'success');
+                    }
+                });
             };
+        }
 
-            cloudinary.openUploadWidget(options, (err, res) => {
-                if (err) {
-                    showToast('Upload error: ' + err.message, 'error');
-                    return;
-                }
-                if (res.event === 'success') {
-                    const info = res.info;
-                    const url = info.secure_url;
-
-                    // Remove empty placeholder if exists
-                    const emptyBox = container.querySelector('.upload-preview-box:not(.has-image)');
-                    if (emptyBox) {
-                        emptyBox.remove();
-                    }
-
-                    // Add preview box
-                    addUploadPreviewBox(container, url, () => {
-                        // On remove, add back empty box
-                        addEmptyUploadPreviewBox(container, () => {
-                            openCloudinaryUploadWithPreview(containerId, callback, resourceType);
-                        });
-                    });
-
-                    if (callback) {
-                        callback(url);
-                    }
-                    showToast('Upload successful!', 'success');
-                }
-            });
+        function removeUploadImage(boxId, hiddenInputId) {
+            const box = document.getElementById(boxId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+            
+            if (box) {
+                box.classList.remove('has-image');
+                box.innerHTML = `
+                    <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                    <div class="placeholder-text">Tap to upload</div>
+                `;
+            }
+            
+            if (hiddenInput) {
+                hiddenInput.value = '';
+            }
+            
+            showToast('Image removed', 'info');
         }
 
         // ==============================================================
@@ -2372,6 +2286,9 @@
                 };
 
                 document.getElementById('avatarBtn').textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+                document.getElementById('popupAvatar').textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+                document.getElementById('popupName').textContent = currentUser.name || 'Admin';
+                document.getElementById('popupEmail').textContent = currentUser.email || 'admin@monitoring.com';
 
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appShell').classList.add('active');
@@ -2407,6 +2324,9 @@
                     email: user.email
                 };
                 document.getElementById('avatarBtn').textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+                document.getElementById('popupAvatar').textContent = (currentUser.name || 'A').charAt(0).toUpperCase();
+                document.getElementById('popupName').textContent = currentUser.name || 'Admin';
+                document.getElementById('popupEmail').textContent = currentUser.email || 'admin@monitoring.com';
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('appShell').classList.add('active');
                 await refreshAll();
@@ -2451,7 +2371,13 @@
                         image: data.image || '',
                         status: data.assignedDriver ? 'active' : 'inactive',
                         driverId: data.assignedDriver || '',
-                        driverName: ''
+                        driverName: '',
+                        // Calculate totals from stats
+                        totalFuel: 0,
+                        totalDistance: 0,
+                        totalRevenue: 0,
+                        totalHours: 0,
+                        statCount: 0
                     });
                 });
             }
@@ -2475,7 +2401,12 @@
                         image: data.image || '',
                         status: data.lat ? 'active' : 'inactive',
                         lat: data.lat || null,
-                        lng: data.lng || null
+                        lng: data.lng || null,
+                        // Calculate totals from stats
+                        totalHours: 0,
+                        totalRevenue: 0,
+                        totalStats: 0,
+                        assignedVehicles: []
                     });
                 });
             }
@@ -2546,6 +2477,39 @@
                 loadStats(),
                 loadReports()
             ]);
+            
+            // Calculate totals for vehicles
+            allVehicles.forEach(v => {
+                const vehicleStats = allStats.filter(s => s.vehicleId === v.id);
+                v.totalFuel = vehicleStats.reduce((sum, s) => sum + (s.fuelUsed || 0), 0);
+                v.totalDistance = vehicleStats.reduce((sum, s) => sum + (s.distanceTraveled || 0), 0);
+                v.totalRevenue = vehicleStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
+                v.totalHours = vehicleStats.reduce((sum, s) => sum + (s.hoursOut || 0), 0);
+                v.statCount = vehicleStats.length;
+                
+                // Get current driver
+                const currentStat = vehicleStats.filter(s => s.status === 'completed').sort((a,b) => b.endTime - a.endTime)[0];
+                if (currentStat) {
+                    v.driverName = currentStat.driverName;
+                    v.driverId = currentStat.driverId;
+                }
+            });
+            
+            // Calculate totals for drivers
+            allDrivers.forEach(d => {
+                const driverStats = allStats.filter(s => s.driverId === d.id);
+                d.totalHours = driverStats.reduce((sum, s) => sum + (s.hoursOut || 0), 0);
+                d.totalRevenue = driverStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
+                d.totalStats = driverStats.length;
+                
+                // Get assigned vehicles
+                const vehicleIds = [...new Set(driverStats.map(s => s.vehicleId))];
+                d.assignedVehicles = vehicleIds.map(id => {
+                    const v = allVehicles.find(veh => veh.id === id);
+                    return v ? v.name : 'Unknown';
+                });
+            });
+            
             renderCurrentTab();
             updateStats();
         }
@@ -2555,10 +2519,11 @@
                 vehicles: allVehicles.length,
                 drivers: allDrivers.length,
                 pendingStats: allStats.filter(s => s.status === 'pending').length,
+                signedStats: allStats.filter(s => s.status === 'signed').length,
                 completedStats: allStats.filter(s => s.status === 'completed').length
             };
             document.getElementById('statsText').textContent =
-                `${stats.vehicles} veh · ${stats.drivers} drv · ${stats.pendingStats} pending · ${stats.completedStats} complete`;
+                `${stats.vehicles} veh · ${stats.drivers} drv · ${stats.pendingStats} pending · ${stats.signedStats} signed · ${stats.completedStats} complete`;
         }
 
         // ==============================================================
@@ -2628,78 +2593,96 @@
                 </div>
 
                 <!-- Assign Vehicle - Expandable Form -->
-                ${createExpandableFormHTML('Assign Vehicle', 'fa-truck', `
-                    <div class="form-group">
-                        <label>Select Vehicle</label>
-                        <select id="vehicleSelect" onchange="onVehicleSelect(this.value)">
-                            <option value="">-- Select a vehicle --</option>
-                            ${allVehicles.map(v => `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`).join('')}
-                        </select>
+                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
+                    <div class="form-header">
+                        <h4><i class="fas fa-truck" style="color:var(--primary);"></i> Assign Vehicle</h4>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div id="vehiclePreview" class="selected-preview" style="display:none;">
-                        <img id="vehiclePreviewImg" src="" alt="Vehicle">
-                        <div class="info">
-                            <div class="name" id="vehiclePreviewName"></div>
-                            <div class="detail" id="vehiclePreviewDetail"></div>
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label>Select Vehicle</label>
+                            <select id="vehicleSelect" onchange="onVehicleSelect(this.value)">
+                                <option value="">-- Select a vehicle --</option>
+                                ${allVehicles.map(v => `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div id="vehiclePreview" class="selected-preview" style="display:none;">
+                            <img id="vehiclePreviewImg" src="" alt="Vehicle">
+                            <div class="info">
+                                <div class="name" id="vehiclePreviewName"></div>
+                                <div class="detail" id="vehiclePreviewDetail"></div>
+                            </div>
                         </div>
                     </div>
-                `)}
+                </div>
 
                 <!-- Assign Driver - Expandable Form -->
-                ${createExpandableFormHTML('Assign Driver', 'fa-user-md', `
-                    <div class="form-group">
-                        <label>Select Driver</label>
-                        <select id="driverSelect" onchange="onDriverSelect(this.value)">
-                            <option value="">-- Select a driver --</option>
-                            ${allDrivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.phone)})</option>`).join('')}
-                        </select>
+                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
+                    <div class="form-header">
+                        <h4><i class="fas fa-user-md" style="color:var(--secondary);"></i> Assign Driver</h4>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
-                    <div id="driverPreview" class="selected-preview" style="display:none;">
-                        <img id="driverPreviewImg" src="" alt="Driver">
-                        <div class="info">
-                            <div class="name" id="driverPreviewName"></div>
-                            <div class="detail" id="driverPreviewDetail"></div>
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label>Select Driver</label>
+                            <select id="driverSelect" onchange="onDriverSelect(this.value)">
+                                <option value="">-- Select a driver --</option>
+                                ${allDrivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.phone)})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div id="driverPreview" class="selected-preview" style="display:none;">
+                            <img id="driverPreviewImg" src="" alt="Driver">
+                            <div class="info">
+                                <div class="name" id="driverPreviewName"></div>
+                                <div class="detail" id="driverPreviewDetail"></div>
+                            </div>
                         </div>
                     </div>
-                `)}
+                </div>
 
                 <!-- Starting Statistics - Expandable Form -->
-                ${createExpandableFormHTML('Starting Statistics', 'fa-clipboard-list', `
-                    <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                        <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
-                            <div><span class="label">Name:</span> <span id="formVehicleName" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            <div><span class="label">Plate:</span> <span id="formVehiclePlate" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            <div><span class="label">Color:</span> <span id="formVehicleColor" style="font-weight:500;color:var(--gray-800);"></span></div>
+                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
+                    <div class="form-header">
+                        <h4><i class="fas fa-clipboard-list" style="color:var(--primary);"></i> Starting Statistics</h4>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="form-body">
+                        <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                            <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Vehicle Details</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                                <div><span class="label">Name:</span> <span id="formVehicleName" style="font-weight:500;color:var(--gray-800);"></span></div>
+                                <div><span class="label">Plate:</span> <span id="formVehiclePlate" style="font-weight:500;color:var(--gray-800);"></span></div>
+                                <div><span class="label">Color:</span> <span id="formVehicleColor" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            </div>
+                        </div>
+                        <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
+                            <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver Details</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                                <div><span class="label">Name:</span> <span id="formDriverName" style="font-weight:500;color:var(--gray-800);"></span></div>
+                                <div><span class="label">Phone:</span> <span id="formDriverPhone" style="font-weight:500;color:var(--gray-800);"></span></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Time Out</label>
+                            <input type="time" id="statsTimeOut" value="${new Date().toTimeString().slice(0,5)}">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-road"></i> KM (Mileage Out)</label>
+                            <input type="number" id="statsMileageOut" placeholder="e.g. 12345" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-gas-pump"></i> Fuel Out (Litres)</label>
+                            <input type="number" id="statsFuelOut" placeholder="e.g. 50" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Date & Time</label>
+                            <div class="readonly-value" id="statsDateTime">${new Date().toLocaleString()}</div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
                         </div>
                     </div>
-                    <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;margin-bottom:12px;border:1px solid var(--gray-200);">
-                        <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:6px;">Driver Details</div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
-                            <div><span class="label">Name:</span> <span id="formDriverName" style="font-weight:500;color:var(--gray-800);"></span></div>
-                            <div><span class="label">Phone:</span> <span id="formDriverPhone" style="font-weight:500;color:var(--gray-800);"></span></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-clock"></i> Time Out</label>
-                        <input type="time" id="statsTimeOut" value="${new Date().toTimeString().slice(0,5)}">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-road"></i> KM (Mileage Out)</label>
-                        <input type="number" id="statsMileageOut" placeholder="e.g. 12345" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-gas-pump"></i> Fuel Out (Litres)</label>
-                        <input type="number" id="statsFuelOut" placeholder="e.g. 50" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-calendar"></i> Date & Time</label>
-                        <div class="readonly-value" id="statsDateTime">${new Date().toLocaleString()}</div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn btn-primary" onclick="submitStats()"><i class="fas fa-paper-plane"></i> Submit Stats</button>
-                    </div>
-                `)}
+                </div>
 
                 <!-- Stats Cards -->
                 <div class="stats-cards-grid" id="statsCardsGrid">
@@ -2730,20 +2713,6 @@
             document.getElementById('contentArea').innerHTML = html;
         }
 
-        function createExpandableFormHTML(headerText, iconClass, content) {
-            return `
-                <div class="form-expandable" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='TEXTAREA')toggleFormExpand(this)">
-                    <div class="form-header">
-                        <h4><i class="fas ${iconClass}" style="color:var(--primary);"></i> ${headerText}</h4>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                    <div class="form-body">
-                        ${content}
-                    </div>
-                </div>
-            `;
-        }
-
         function renderVehicles() {
             let filtered = allVehicles.filter(v => {
                 const ms = (v.name || '').toLowerCase().includes(searchTerm) ||
@@ -2757,12 +2726,13 @@
                     <h2><i class="fas fa-truck" style="color:var(--primary);"></i> Vehicles</h2>
                     <div class="page-actions">
                         <button class="btn-primary" onclick="openAddVehicleModal()"><i class="fas fa-plus"></i> Add Vehicle</button>
+                        <button class="btn-success" onclick="exportVehiclesCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
                     </div>
                 </div>
                 <div class="grid-cards">
                     ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-truck"></i><h3>No vehicles found</h3></div>' :
                     filtered.map(v => `
-                        <div class="card">
+                        <div class="card" onclick="openVehicleDetail('${v.id}')">
                             <div class="card-header">
                                 <div class="icon-wrap teal">
                                     ${v.image ? `<img src="${v.image}" alt="Vehicle">` : `<i class="fas fa-car"></i>`}
@@ -2778,10 +2748,13 @@
                             <div class="card-body">
                                 <div class="detail-row"><span class="label">Color</span><span class="value">${escapeHtml(v.color || 'N/A')}</span></div>
                                 <div class="detail-row"><span class="label">Driver</span><span class="value">${escapeHtml(v.driverName || 'Unassigned')}</span></div>
+                                <div class="detail-row"><span class="label">Total Fuel</span><span class="value">${v.totalFuel.toFixed(1)} L</span></div>
+                                <div class="detail-row"><span class="label">Total Distance</span><span class="value">${v.totalDistance.toFixed(1)} km</span></div>
+                                <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${v.totalRevenue.toFixed(2)}</span></div>
                             </div>
                             <div class="card-actions">
-                                <button class="btn-icon teal" onclick="editVehicle('${v.id}')"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn-icon red" onclick="deleteVehicle('${v.id}')"><i class="fas fa-trash"></i> Delete</button>
+                                <button class="btn-icon teal" onclick="event.stopPropagation();editVehicle('${v.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-icon red" onclick="event.stopPropagation();deleteVehicle('${v.id}')"><i class="fas fa-trash"></i> Delete</button>
                             </div>
                         </div>
                     `).join('')}
@@ -2803,12 +2776,13 @@
                     <h2><i class="fas fa-user-md" style="color:var(--secondary);"></i> Drivers</h2>
                     <div class="page-actions">
                         <button class="btn-primary" onclick="openAddDriverModal()"><i class="fas fa-plus"></i> Add Driver</button>
+                        <button class="btn-success" onclick="exportDriversCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
                     </div>
                 </div>
                 <div class="grid-cards">
                     ${filtered.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-user-md"></i><h3>No drivers found</h3></div>' :
                     filtered.map(d => `
-                        <div class="card">
+                        <div class="card" onclick="openDriverDetail('${d.id}')">
                             <div class="card-header">
                                 <div class="icon-wrap purple">
                                     ${d.image ? `<img src="${d.image}" alt="Driver">` : `<i class="fas fa-user"></i>`}
@@ -2823,10 +2797,13 @@
                             </div>
                             <div class="card-body">
                                 <div class="detail-row"><span class="label">Email</span><span class="value">${escapeHtml(d.email || 'N/A')}</span></div>
+                                <div class="detail-row"><span class="label">Total Hours</span><span class="value">${d.totalHours.toFixed(1)} hrs</span></div>
+                                <div class="detail-row"><span class="label">Total Revenue</span><span class="value">ZMW ${d.totalRevenue.toFixed(2)}</span></div>
+                                <div class="detail-row"><span class="label">Total Trips</span><span class="value">${d.totalStats}</span></div>
                             </div>
                             <div class="card-actions">
-                                <button class="btn-icon teal" onclick="editDriver('${d.id}')"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn-icon red" onclick="deleteDriver('${d.id}')"><i class="fas fa-trash"></i> Delete</button>
+                                <button class="btn-icon teal" onclick="event.stopPropagation();editDriver('${d.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-icon red" onclick="event.stopPropagation();deleteDriver('${d.id}')"><i class="fas fa-trash"></i> Delete</button>
                             </div>
                         </div>
                     `).join('')}
@@ -2865,7 +2842,7 @@
                             </div>
                             <div class="card-actions">
                                 <button class="btn-icon teal" onclick="viewReportDetail('${r.id}')"><i class="fas fa-eye"></i> View</button>
-                                <button class="btn-icon blue" onclick="downloadReport('${r.id}')"><i class="fas fa-download"></i> Download</button>
+                                <button class="btn-icon blue" onclick="downloadReportCSV('${r.id}')"><i class="fas fa-download"></i> Download CSV</button>
                             </div>
                         </div>
                     `).join('')}
@@ -2881,6 +2858,95 @@
             selectedDate = date;
             document.getElementById('datePicker').value = date;
             renderStats();
+        };
+
+        // ==============================================================
+        // VEHICLE DETAIL VIEW
+        // ==============================================================
+        window.openVehicleDetail = function(vehicleId) {
+            const v = allVehicles.find(x => x.id === vehicleId);
+            if (!v) return;
+
+            // Get all stats for this vehicle
+            const vehicleStats = allStats.filter(s => s.vehicleId === vehicleId);
+            const completedStats = vehicleStats.filter(s => s.status === 'completed');
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '🚛 Vehicle Details';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="text-align:center;margin-bottom:16px;">
+                    ${v.image ? `<img src="${v.image}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);">` : `<div style="width:120px;height:120px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;margin:0 auto;"><i class="fas fa-car" style="font-size:3rem;color:var(--primary);"></i></div>`}
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;">
+                    <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.name)}</span></div>
+                    <div><span class="label">Plate:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.plate)}</span></div>
+                    <div><span class="label">Color:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.color)}</span></div>
+                    <div><span class="label">Status:</span> <span class="status-badge ${v.status}"><span class="dot"></span> ${v.status.charAt(0).toUpperCase() + v.status.slice(1)}</span></div>
+                    <div><span class="label">Current Driver:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(v.driverName || 'Unassigned')}</span></div>
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray-200);margin-bottom:12px;">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:8px;">📊 Lifetime Statistics</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Total Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${v.statCount}</span></div>
+                        <div><span class="label">Completed Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${completedStats.length}</span></div>
+                        <div><span class="label">Total Fuel Used:</span> <span style="font-weight:500;color:var(--gray-800);">${v.totalFuel.toFixed(1)} L</span></div>
+                        <div><span class="label">Total Distance:</span> <span style="font-weight:500;color:var(--gray-800);">${v.totalDistance.toFixed(1)} km</span></div>
+                        <div><span class="label">Total Revenue:</span> <span style="font-weight:700;color:var(--green);">ZMW ${v.totalRevenue.toFixed(2)}</span></div>
+                        <div><span class="label">Total Hours:</span> <span style="font-weight:500;color:var(--gray-800);">${v.totalHours.toFixed(1)} hrs</span></div>
+                    </div>
+                </div>
+                <div style="font-size:0.8rem;color:var(--gray-500);text-align:center;">
+                    <i class="fas fa-info-circle"></i> Tap on a stat card to view detailed trip information
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').style.display = 'none';
+            document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
+            openModal('detailModal');
+        };
+
+        // ==============================================================
+        // DRIVER DETAIL VIEW
+        // ==============================================================
+        window.openDriverDetail = function(driverId) {
+            const d = allDrivers.find(x => x.id === driverId);
+            if (!d) return;
+
+            // Get all stats for this driver
+            const driverStats = allStats.filter(s => s.driverId === driverId);
+            const completedStats = driverStats.filter(s => s.status === 'completed');
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '👤 Driver Details';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="text-align:center;margin-bottom:16px;">
+                    ${d.image ? `<img src="${d.image}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--secondary);">` : `<div style="width:120px;height:120px;border-radius:50%;background:var(--secondary-light);display:flex;align-items:center;justify-content:center;margin:0 auto;"><i class="fas fa-user" style="font-size:3rem;color:var(--secondary);"></i></div>`}
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;">
+                    <div><span class="label">Name:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(d.name)}</span></div>
+                    <div><span class="label">Phone:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(d.phone)}</span></div>
+                    <div><span class="label">Email:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(d.email)}</span></div>
+                    <div><span class="label">Status:</span> <span class="status-badge ${d.status}"><span class="dot"></span> ${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</span></div>
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray-200);margin-bottom:12px;">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:8px;">📊 Lifetime Statistics</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                        <div><span class="label">Total Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${d.totalStats}</span></div>
+                        <div><span class="label">Completed Trips:</span> <span style="font-weight:500;color:var(--gray-800);">${completedStats.length}</span></div>
+                        <div><span class="label">Total Hours Worked:</span> <span style="font-weight:500;color:var(--gray-800);">${d.totalHours.toFixed(1)} hrs</span></div>
+                        <div><span class="label">Total Revenue:</span> <span style="font-weight:700;color:var(--green);">ZMW ${d.totalRevenue.toFixed(2)}</span></div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray-200);">
+                    <div style="font-weight:600;font-size:0.9rem;color:var(--gray-700);margin-bottom:8px;">🚛 Assigned Vehicles</div>
+                    ${d.assignedVehicles.length > 0 ? 
+                        d.assignedVehicles.map(v => `<div style="padding:4px 0;font-size:0.85rem;color:var(--gray-600);border-bottom:1px solid var(--gray-100);">• ${escapeHtml(v)}</div>`).join('') :
+                        '<div style="font-size:0.85rem;color:var(--gray-500);text-align:center;">No vehicles assigned yet</div>'
+                    }
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').style.display = 'none';
+            document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
+            openModal('detailModal');
         };
 
         // ==============================================================
@@ -3081,6 +3147,7 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
+                // Update stats to completed
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'completed',
                     timeParked: timeParked,
@@ -3245,55 +3312,46 @@
             openModal('detailModal');
         };
 
-        window.downloadReport = function(reportId) {
+        window.downloadReportCSV = function(reportId) {
             const report = allReports.find(r => r.id === reportId);
             if (!report) return;
 
-            const content = `
-ZAMLIFT FLEET MANAGEMENT - DAILY REPORT
-========================================
-Date: ${formatDate(report.date)}
-Generated by: ${report.adminName || 'Admin'} (${report.adminEmail || 'admin@monitoring.com'})
+            const rows = [
+                ['ZAMLIFT FLEET MANAGEMENT - DAILY REPORT'],
+                [''],
+                ['Date', formatDate(report.date)],
+                ['Generated By', `${report.adminName || 'Admin'} (${report.adminEmail || 'admin@monitoring.com'})`],
+                [''],
+                ['VEHICLE DETAILS'],
+                ['Name', report.vehicleName],
+                ['Plate', report.vehiclePlate],
+                ['Color', report.vehicleColor],
+                [''],
+                ['DRIVER DETAILS'],
+                ['Name', report.driverName],
+                ['Phone', report.driverPhone],
+                [''],
+                ['STATISTICS'],
+                ['Time Out', report.timeOut || 'N/A'],
+                ['Time Parked', report.timeParked || 'N/A'],
+                ['Hours Out', report.hoursOut || 0],
+                ['Mileage Out', `${report.mileageOut || 0} km`],
+                ['Mileage Parked', `${report.mileageParked || 0} km`],
+                ['Distance Traveled', `${report.distanceTraveled || 0} km`],
+                ['Fuel Out', `${report.fuelOut || 0} L`],
+                ['Fuel Parked', `${report.fuelParked || 0} L`],
+                ['Fuel Used', `${report.fuelUsed || 0} L`],
+                ['Revenue', `ZMW ${report.revenue || 0}`],
+                ['Admin Comment', report.adminComment || 'No comment']
+            ];
 
-VEHICLE DETAILS
----------------
-Name: ${report.vehicleName}
-Plate: ${report.vehiclePlate}
-Color: ${report.vehicleColor}
-
-DRIVER DETAILS
---------------
-Name: ${report.driverName}
-Phone: ${report.driverPhone}
-
-STATISTICS
-----------
-Time Out: ${report.timeOut || 'N/A'}
-Time Parked: ${report.timeParked || 'N/A'}
-Hours Out: ${report.hoursOut || 0} hrs
-
-Mileage Out: ${report.mileageOut || 0} km
-Mileage Parked: ${report.mileageParked || 0} km
-Distance Traveled: ${report.distanceTraveled || 0} km
-
-Fuel Out: ${report.fuelOut || 0} L
-Fuel Parked: ${report.fuelParked || 0} L
-Fuel Used: ${report.fuelUsed || 0} L
-
-Revenue: ZMW ${report.revenue || 0}
-
-Admin Comment: ${report.adminComment || 'No comment'}
-
-========================================
-Report generated automatically by ZAMLIFT Fleet Management
-            `;
-
-            const blob = new Blob([content], { type: 'text/plain' });
+            const csvContent = rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `report_${report.vehicleName}_${formatDate(report.date)}.txt`;
+            a.download = `report_${report.vehicleName}_${formatDate(report.date)}.csv`;
             a.click();
-            showToast('Report downloaded!', 'success');
+            showToast('Report downloaded as CSV!', 'success');
         };
 
         window.deleteStat = async function(statId) {
@@ -3330,11 +3388,9 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Color</label><input id="vColor" placeholder="e.g. White"></div>
                 <div class="form-group">
                     <label>Vehicle Picture</label>
-                    <div id="vehicleUploadContainer" class="upload-preview-container">
-                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('vehicleUploadContainer', (url) => { document.getElementById('vImage').value = url; showToast('Image uploaded!', 'success'); })">
-                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
-                            <div class="placeholder-text">Tap to upload</div>
-                        </div>
+                    <div class="upload-box" id="vehicleUploadBox">
+                        <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                        <div class="placeholder-text">Tap to upload</div>
                     </div>
                     <input type="hidden" id="vImage">
                 </div>
@@ -3343,6 +3399,11 @@ Report generated automatically by ZAMLIFT Fleet Management
             document.getElementById('modalSaveBtn').textContent = 'Add Vehicle';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
+            
+            // Setup upload box
+            setTimeout(() => {
+                setupUploadBox('vehicleUploadBox', 'vImage');
+            }, 100);
         };
 
         window.saveVehicle = async function() {
@@ -3387,17 +3448,12 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Color</label><input id="vColor" value="${escapeHtml(v.color)}"></div>
                 <div class="form-group">
                     <label>Vehicle Picture</label>
-                    <div id="vehicleUploadContainer" class="upload-preview-container">
-                        ${v.image ? `<div class="upload-preview-box has-image">
-                            <img src="${v.image}" alt="Vehicle">
-                            <button class="remove-btn" onclick="this.closest('.upload-preview-box').remove(); document.getElementById('vImage').value = '';">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>` : ''}
-                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('vehicleUploadContainer', (url) => { document.getElementById('vImage').value = url; showToast('Image updated!', 'success'); })">
+                    <div class="upload-box" id="vehicleUploadBox">
+                        ${v.image ? `<img src="${v.image}" alt="Vehicle">` : `
                             <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
                             <div class="placeholder-text">Tap to upload</div>
-                        </div>
+                        `}
+                        ${v.image ? `<button class="remove-btn" onclick="removeUploadImage('vehicleUploadBox', 'vImage')"><i class="fas fa-times"></i></button>` : ''}
                     </div>
                     <input type="hidden" id="vImage" value="${escapeHtml(v.image)}">
                 </div>
@@ -3406,6 +3462,11 @@ Report generated automatically by ZAMLIFT Fleet Management
             document.getElementById('modalSaveBtn').textContent = 'Save Changes';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
+            
+            // Setup upload box
+            setTimeout(() => {
+                setupUploadBox('vehicleUploadBox', 'vImage');
+            }, 100);
         };
 
         window.saveVehicleEdit = async function(id) {
@@ -3461,11 +3522,9 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Password</label><input id="dPassword" type="password" placeholder="Min 6 characters"></div>
                 <div class="form-group">
                     <label>Driver Picture</label>
-                    <div id="driverUploadContainer" class="upload-preview-container">
-                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('driverUploadContainer', (url) => { document.getElementById('dImage').value = url; showToast('Image uploaded!', 'success'); })">
-                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
-                            <div class="placeholder-text">Tap to upload</div>
-                        </div>
+                    <div class="upload-box" id="driverUploadBox">
+                        <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                        <div class="placeholder-text">Tap to upload</div>
                     </div>
                     <input type="hidden" id="dImage">
                 </div>
@@ -3474,6 +3533,11 @@ Report generated automatically by ZAMLIFT Fleet Management
             document.getElementById('modalSaveBtn').textContent = 'Add Driver';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
+            
+            // Setup upload box
+            setTimeout(() => {
+                setupUploadBox('driverUploadBox', 'dImage');
+            }, 100);
         };
 
         window.saveDriver = async function() {
@@ -3533,17 +3597,12 @@ Report generated automatically by ZAMLIFT Fleet Management
                 <div class="form-group"><label>Email</label><input id="dEmail" value="${escapeHtml(d.email)}"></div>
                 <div class="form-group">
                     <label>Driver Picture</label>
-                    <div id="driverUploadContainer" class="upload-preview-container">
-                        ${d.image ? `<div class="upload-preview-box has-image">
-                            <img src="${d.image}" alt="Driver">
-                            <button class="remove-btn" onclick="this.closest('.upload-preview-box').remove(); document.getElementById('dImage').value = '';">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>` : ''}
-                        <div class="upload-preview-box" onclick="openCloudinaryUploadWithPreview('driverUploadContainer', (url) => { document.getElementById('dImage').value = url; showToast('Image updated!', 'success'); })">
+                    <div class="upload-box" id="driverUploadBox">
+                        ${d.image ? `<img src="${d.image}" alt="Driver">` : `
                             <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
                             <div class="placeholder-text">Tap to upload</div>
-                        </div>
+                        `}
+                        ${d.image ? `<button class="remove-btn" onclick="removeUploadImage('driverUploadBox', 'dImage')"><i class="fas fa-times"></i></button>` : ''}
                     </div>
                     <input type="hidden" id="dImage" value="${escapeHtml(d.image)}">
                 </div>
@@ -3552,6 +3611,11 @@ Report generated automatically by ZAMLIFT Fleet Management
             document.getElementById('modalSaveBtn').textContent = 'Save Changes';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
+            
+            // Setup upload box
+            setTimeout(() => {
+                setupUploadBox('driverUploadBox', 'dImage');
+            }, 100);
         };
 
         window.saveDriverEdit = async function(id) {
@@ -3593,6 +3657,71 @@ Report generated automatically by ZAMLIFT Fleet Management
             } catch (err) {
                 showToast('Error deleting driver: ' + err.message, 'error');
             }
+        };
+
+        // ==============================================================
+        // EXPORT FUNCTIONS (CSV)
+        // ==============================================================
+        window.exportVehiclesCSV = function() {
+            if (allVehicles.length === 0) {
+                showToast('No vehicles to export.', 'warning');
+                return;
+            }
+
+            const rows = [
+                ['Vehicle Name', 'Plate', 'Color', 'Status', 'Current Driver', 'Total Trips', 'Completed Trips', 'Total Fuel (L)', 'Total Distance (km)', 'Total Revenue (ZMW)', 'Total Hours'],
+                ...allVehicles.map(v => [
+                    v.name || 'Unnamed',
+                    v.plate || 'No plate',
+                    v.color || 'N/A',
+                    v.status || 'inactive',
+                    v.driverName || 'Unassigned',
+                    v.statCount || 0,
+                    allStats.filter(s => s.vehicleId === v.id && s.status === 'completed').length,
+                    v.totalFuel.toFixed(1),
+                    v.totalDistance.toFixed(1),
+                    v.totalRevenue.toFixed(2),
+                    v.totalHours.toFixed(1)
+                ])
+            ];
+
+            const csvContent = rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `vehicles_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Vehicles exported as CSV!', 'success');
+        };
+
+        window.exportDriversCSV = function() {
+            if (allDrivers.length === 0) {
+                showToast('No drivers to export.', 'warning');
+                return;
+            }
+
+            const rows = [
+                ['Driver Name', 'Phone', 'Email', 'Status', 'Total Trips', 'Completed Trips', 'Total Hours Worked', 'Total Revenue (ZMW)', 'Assigned Vehicles'],
+                ...allDrivers.map(d => [
+                    d.name || 'Unnamed',
+                    d.phone || 'N/A',
+                    d.email || 'N/A',
+                    d.status || 'inactive',
+                    d.totalStats || 0,
+                    allStats.filter(s => s.driverId === d.id && s.status === 'completed').length,
+                    d.totalHours.toFixed(1),
+                    d.totalRevenue.toFixed(2),
+                    (d.assignedVehicles || []).join('; ')
+                ])
+            ];
+
+            const csvContent = rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `drivers_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Drivers exported as CSV!', 'success');
         };
 
         // ==============================================================
