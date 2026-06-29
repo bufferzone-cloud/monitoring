@@ -3166,9 +3166,11 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
-                // Update to pending first
+                // Update to completed directly (bypassing signed)
                 await db.ref(`driverStats/${statId}`).update({
-                    status: 'pending',
+                    status: 'completed',
+                    signature: 'completed',
+                    signedAt: Date.now(),
                     timeParked: timeParked,
                     mileageParked: mileageParked,
                     fuelParked: fuelParked,
@@ -3178,35 +3180,6 @@
                     distanceTraveled: distanceTraveled,
                     fuelUsed: fuelUsed,
                     hoursOut: hoursOut,
-                    reportGenerated: false
-                });
-
-                closeModal('detailModal');
-                showToast('End of Day submitted! Waiting for driver signature.', 'success');
-                await refreshAll();
-                renderStats();
-            } catch (err) {
-                showToast('Error submitting end of day: ' + err.message, 'error');
-            }
-        };
-
-        window.signEndOfDay = async function(statId) {
-            if (!confirm('Sign this End of Day report?')) return;
-            try {
-                const stat = allStats.find(s => s.id === statId);
-                if (!stat) return;
-
-                // Check if all End of Day fields are filled
-                if (!stat.timeParked || !stat.mileageParked) {
-                    showToast('End of Day data incomplete. Please complete the End of Day form first.', 'error');
-                    return;
-                }
-
-                // Mark as completed (NOT signed)
-                await db.ref(`driverStats/${statId}`).update({
-                    status: 'completed',
-                    signature: 'completed',
-                    signedAt: Date.now(),
                     reportGenerated: true
                 });
 
@@ -3226,26 +3199,27 @@
                     timeOut: stat.timeOut,
                     mileageOut: stat.mileageOut,
                     fuelOut: stat.fuelOut,
-                    timeParked: stat.timeParked,
-                    mileageParked: stat.mileageParked,
-                    fuelParked: stat.fuelParked,
-                    revenue: stat.revenue,
-                    adminComment: stat.adminComment,
+                    timeParked: timeParked,
+                    mileageParked: mileageParked,
+                    fuelParked: fuelParked,
+                    revenue: revenue,
+                    adminComment: adminComment,
                     adminName: stat.adminName,
                     adminEmail: stat.adminEmail,
-                    distanceTraveled: stat.distanceTraveled,
-                    fuelUsed: stat.fuelUsed,
-                    hoursOut: stat.hoursOut,
+                    distanceTraveled: distanceTraveled,
+                    fuelUsed: fuelUsed,
+                    hoursOut: hoursOut,
                     date: Date.now(),
                     startTime: stat.startTime,
                     endTime: Date.now()
                 });
 
-                showToast('End of Day signed and completed! Report generated.', 'success');
+                closeModal('detailModal');
+                showToast('End of Day submitted! Report generated and stat completed.', 'success');
                 await refreshAll();
                 renderStats();
             } catch (err) {
-                showToast('Error signing End of Day: ' + err.message, 'error');
+                showToast('Error submitting end of day: ' + err.message, 'error');
             }
         };
 
