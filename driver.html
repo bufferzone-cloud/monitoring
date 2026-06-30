@@ -29,7 +29,7 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
       padding-bottom: 80px;
     }
 
@@ -211,7 +211,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      box-shadow: 0 8px 20px rgba(46, 92, 62, 0.3);
+      box-shadow: 0 8px 20px rgba(46,92,62,0.3);
       transition: transform 0.2s;
     }
     .shift-circle i {
@@ -222,7 +222,7 @@
     }
     .shift-circle.red {
       background: #dc2626;
-      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+      box-shadow: 0 8px 20px rgba(220,38,38,0.3);
     }
     .shift-circle.red.pulse {
       animation: pulse-red 1.5s infinite;
@@ -233,14 +233,14 @@
       cursor: default;
     }
     @keyframes pulse-green {
-      0% { box-shadow: 0 0 0 0 rgba(46, 92, 62, 0.5); }
-      70% { box-shadow: 0 0 0 20px rgba(46, 92, 62, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(46, 92, 62, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(46,92,62,0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(46,92,62,0); }
+      100% { box-shadow: 0 0 0 0 rgba(46,92,62,0); }
     }
     @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
-      70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(220,38,38,0); }
+      100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
     }
 
     .shift-timer {
@@ -264,7 +264,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0,0,0,0.4);
       backdrop-filter: blur(4px);
       z-index: 200;
       display: none;
@@ -596,8 +596,9 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-  import { getDatabase, ref, onValue, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+  import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
 
+  // ----- Firebase config (same as index.html) -----
   const firebaseConfig = {
     apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
     authDomain: "monitoring-1a105.firebaseapp.com",
@@ -612,15 +613,7 @@
   const auth = getAuth(app);
   const db = getDatabase(app);
 
-  let currentUser = null;
-  let driverData = null;
-  let currentStat = null;      // today's stat (if any)
-  let timerInterval = null;
-  let reportsCache = [];       // all stats/reports for this driver
-
-  // ==============================================================
-  // DOM refs
-  // ==============================================================
+  // ----- DOM shortcuts -----
   const $ = id => document.getElementById(id);
   const homePage = $('homePage');
   const reportsPage = $('reportsPage');
@@ -633,19 +626,21 @@
   const offdayFullscreen = $('offdayFullscreen');
   const offdayWorkerName = $('offdayWorkerName');
 
-  // ==============================================================
-  // Auth
-  // ==============================================================
+  // ----- State -----
+  let currentUser = null;
+  let driverData = null;
+  let currentStat = null;          // today's stat (if any)
+  let timerInterval = null;
+  let reportsCache = [];           // all stats/reports for this driver
+
+  // ----- Auth: rely on the login from index.html -----
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
+      // Not logged in → redirect to index
       window.location.href = 'index.html';
       return;
     }
-    // Must be a driver account (email starts with driver@? admin uses admin@)
-    if (!user.email.startsWith('driver@')) {
-      window.location.href = 'index.html';
-      return;
-    }
+    // User is logged in; we assume it's a driver (since index redirects to driver.html for non‑admin, non‑worker)
     currentUser = user;
     await loadDriverData();
     setupRealtimeListeners();
@@ -667,13 +662,14 @@
     });
   });
 
-  // ==============================================================
-  // Load driver data
-  // ==============================================================
+  // ----- Load driver data from Firebase -----
   async function loadDriverData() {
     const snap = await get(ref(db, `drivers/${currentUser.uid}`));
     if (!snap.exists()) {
-      // fallback
+      // Driver record missing – maybe show a message and log out?
+      $('driverName').textContent = 'Driver (no profile)';
+      $('driverPhone').textContent = '';
+      // Still allow basic functionality, but admin should create a driver record.
       driverData = { firstName: 'Driver', lastName: '', phone: '', image: '', offDay: false };
     } else {
       driverData = snap.val();
@@ -714,9 +710,7 @@
     $('currentDate').textContent = d.toLocaleDateString('en-GB', options);
   }
 
-  // ==============================================================
-  // Realtime listeners for today's stat and reports
-  // ==============================================================
+  // ----- Real‑time listeners for today's stat and reports -----
   function setupRealtimeListeners() {
     // Listen to driverStats for this driver
     const statsRef = ref(db, 'driverStats');
@@ -769,9 +763,7 @@
     });
   }
 
-  // ==============================================================
-  // Update UI based on current stat
-  // ==============================================================
+  // ----- Update UI based on current stat -----
   function updateUIForStat(stat) {
     if (!stat) {
       // No stat today
@@ -856,9 +848,7 @@
     }
   }
 
-  // ==============================================================
-  // Timer
-  // ==============================================================
+  // ----- Timer -----
   function startTimer(startTime) {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -870,9 +860,7 @@
     }, 1000);
   }
 
-  // ==============================================================
-  // Signature Modal
-  // ==============================================================
+  // ----- Signature Modal -----
   let sigCanvas, sigCtx, isDrawing = false;
 
   function setupSignatureCanvas() {
@@ -930,9 +918,7 @@
     return sigCanvas.toDataURL('image/png');
   }
 
-  // ==============================================================
-  // Open / Close Signature Modal
-  // ==============================================================
+  // ----- Open / Close Signature Modal -----
   function openSignModal() {
     if (!currentStat) return;
     // Fill modal with current stat details
@@ -991,9 +977,7 @@
     }
   }
 
-  // ==============================================================
-  // Reports (Daily Work)
-  // ==============================================================
+  // ----- Reports (Daily Work) -----
   function renderReports(dateStr) {
     const container = $('reportsList');
     if (!dateStr) dateStr = new Date().toISOString().split('T')[0];
@@ -1047,9 +1031,7 @@
     container.innerHTML = html;
   }
 
-  // ==============================================================
-  // Navigation
-  // ==============================================================
+  // ----- Navigation -----
   function setupNav() {
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => {
@@ -1073,10 +1055,7 @@
     renderReports(today);
   }
 
-  // ==============================================================
-  // Additional helpers
-  // ==============================================================
-  // Close modal on overlay click
+  // ----- Close modal on overlay click -----
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeSignModal();
