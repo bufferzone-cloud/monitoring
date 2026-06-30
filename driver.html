@@ -199,7 +199,7 @@
       margin-top: 2px;
     }
 
-    /* ===== SHIFT CARD ===== */
+    /* ===== SHIFT CARD (HOME) ===== */
     .shift-card {
       background: #f8fbf8;
       border-radius: 20px;
@@ -248,11 +248,43 @@
       color: #5a7a62;
       font-size: 14px;
     }
+    .shift-card .status-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #e0f0e0;
+      color: #2e5c3e;
+      flex-shrink: 0;
+    }
+    .shift-card .status-badge.signed {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+    .shift-card .status-badge.completed {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    /* Start stats (always visible) */
+    .shift-card .section-title {
+      font-weight: 600;
+      color: #1e3a2a;
+      font-size: 14px;
+      margin: 12px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shift-card .section-title i {
+      color: #2e5c3e;
+    }
     .shift-card .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
-      margin: 12px 0;
+      margin-bottom: 10px;
     }
     .shift-card .stats-grid .stat-item {
       background: #ffffff;
@@ -273,26 +305,8 @@
       color: #1e3a2a;
       margin-top: 2px;
     }
-    .shift-card .status-badge {
-      display: inline-block;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      background: #e0f0e0;
-      color: #2e5c3e;
-      flex-shrink: 0;
-    }
-    .shift-card .status-badge.signed {
-      background: #dbeafe;
-      color: #2563eb;
-    }
-    .shift-card .status-badge.completed {
-      background: #d1fae5;
-      color: #059669;
-    }
 
-    /* End-of-day details */
+    /* End-of-day details (only when completed) */
     #eodStats {
       margin-top: 14px;
       border-top: 1px solid #d0e0d0;
@@ -310,31 +324,10 @@
     #eodStats .eod-header i {
       color: #2e5c3e;
     }
-    #eodStats .eod-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
+    #eodStats .stats-grid {
       margin-bottom: 8px;
     }
-    #eodStats .eod-grid .stat-item {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 10px 8px;
-      text-align: center;
-      border: 1px solid #d0e0d0;
-    }
-    #eodStats .eod-grid .stat-item .label {
-      font-size: 11px;
-      color: #6b8a7a;
-      display: block;
-    }
-    #eodStats .eod-grid .stat-item .value {
-      font-size: 15px;
-      font-weight: 700;
-      color: #1e3a2a;
-      margin-top: 2px;
-    }
-    #eodStats .eod-row {
+    #eodStats .calc-row {
       display: flex;
       justify-content: space-between;
       padding: 5px 0;
@@ -342,15 +335,18 @@
       color: #4a6a5a;
       border-bottom: 1px solid #e8f0ea;
     }
-    #eodStats .eod-row:last-child {
+    #eodStats .calc-row:last-child {
       border-bottom: none;
     }
-    #eodStats .eod-row .label {
+    #eodStats .calc-row .label {
       color: #6b8a7a;
     }
-    #eodStats .eod-row .value {
+    #eodStats .calc-row .value {
       font-weight: 600;
       color: #1e3a2a;
+    }
+    #eodStats .calc-row .value.green {
+      color: #059669;
     }
     #eodStats .admin-comment {
       margin-top: 8px;
@@ -639,7 +635,7 @@
       background: #c8e0c8;
     }
 
-    /* Report cards */
+    /* Report cards with clear sections */
     .report-card {
       background: #f8fbf8;
       border-radius: 20px;
@@ -670,34 +666,61 @@
       font-size: 13px;
       white-space: nowrap;
     }
-    .report-card .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px 16px;
+    .report-card .section-title {
+      font-weight: 600;
+      color: #1e3a2a;
       font-size: 14px;
-      color: #4a6a5a;
-    }
-    .report-card .stats .stat-item {
+      margin: 10px 0 6px;
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 3px 0;
     }
-    .report-card .stats .stat-item .icon {
-      width: 18px;
+    .report-card .section-title i {
       color: #2e5c3e;
-      text-align: center;
-      flex-shrink: 0;
     }
-    .report-card .stats .stat-item .label {
+    .report-card .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .report-card .stats-grid .stat-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px 6px;
+      text-align: center;
+      border: 1px solid #d0e0d0;
+    }
+    .report-card .stats-grid .stat-item .label {
+      font-size: 11px;
+      color: #6b8a7a;
+      display: block;
+    }
+    .report-card .stats-grid .stat-item .value {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e3a2a;
+      margin-top: 2px;
+    }
+    .report-card .calc-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 14px;
+      color: #4a6a5a;
+      border-bottom: 1px solid #e8f0ea;
+    }
+    .report-card .calc-row:last-child {
+      border-bottom: none;
+    }
+    .report-card .calc-row .label {
       color: #6b8a7a;
     }
-    .report-card .stats .stat-item .value {
+    .report-card .calc-row .value {
       font-weight: 600;
       color: #1e3a2a;
-      margin-left: auto;
     }
-    .report-card .stats .stat-item .value.green {
+    .report-card .calc-row .value.green {
       color: #059669;
     }
     .report-card .footer {
@@ -843,22 +866,30 @@
             </div>
             <span class="status-badge" id="shiftStatus">Pending</span>
           </div>
+
+          <!-- STARTING STATS -->
+          <div class="section-title"><i class="fas fa-play-circle"></i> Starting Stats</div>
           <div class="stats-grid">
             <div class="stat-item"><span class="label">Time Out</span><span class="value" id="timeOut">-</span></div>
             <div class="stat-item"><span class="label">Mileage</span><span class="value" id="mileageOut">-</span></div>
             <div class="stat-item"><span class="label">Fuel</span><span class="value" id="fuelOut">-</span></div>
           </div>
-          <!-- End-of-day stats (only when completed) -->
+
+          <!-- END-OF-DAY STATS (only when completed) -->
           <div id="eodStats" style="display:none;">
-            <div class="eod-header"><i class="fas fa-flag-checkered"></i> End of Day Summary</div>
-            <div class="eod-grid">
-              <div class="stat-item"><span class="label">Parked</span><span class="value" id="timeParked">-</span></div>
+            <div class="section-title"><i class="fas fa-flag-checkered"></i> Parked Stats</div>
+            <div class="stats-grid">
+              <div class="stat-item"><span class="label">Time Parked</span><span class="value" id="timeParked">-</span></div>
               <div class="stat-item"><span class="label">Mileage</span><span class="value" id="mileageParked">-</span></div>
               <div class="stat-item"><span class="label">Fuel</span><span class="value" id="fuelParked">-</span></div>
             </div>
-            <div class="eod-row"><span class="label">Distance Traveled</span><span class="value" id="distanceTraveled">- km</span></div>
-            <div class="eod-row"><span class="label">Fuel Used</span><span class="value" id="fuelUsed">- L</span></div>
-            <div class="eod-row"><span class="label">Revenue</span><span class="value" id="revenue">ZMW -</span></div>
+
+            <div class="section-title"><i class="fas fa-calculator"></i> Calculations</div>
+            <div class="calc-row"><span class="label">Distance Traveled</span><span class="value" id="distanceTraveled">- km</span></div>
+            <div class="calc-row"><span class="label">Fuel Used</span><span class="value" id="fuelUsed">- L</span></div>
+            <div class="calc-row"><span class="label">Hours Out</span><span class="value" id="hoursOut">- hrs</span></div>
+            <div class="calc-row"><span class="label">Revenue</span><span class="value green" id="revenue">ZMW -</span></div>
+
             <div class="admin-comment"><strong>Admin Comment:</strong> <span id="adminComment">-</span></div>
           </div>
         </div>
@@ -996,7 +1027,6 @@
         renderReports(e.target.value);
       });
 
-      // Signature actions
       cancelSigBtn.addEventListener('click', hideSignatureSection);
       clearSigBtn.addEventListener('click', clearCanvas);
       submitSigBtn.addEventListener('click', submitSignature);
@@ -1128,6 +1158,7 @@
         $('fuelParked').textContent = stat.fuelParked ? `${stat.fuelParked} L` : '-';
         $('distanceTraveled').textContent = (stat.distanceTraveled || 0) + ' km';
         $('fuelUsed').textContent = (stat.fuelUsed || 0) + ' L';
+        $('hoursOut').textContent = (stat.hoursOut || 0) + ' hrs';
         $('revenue').textContent = `ZMW ${(stat.revenue || 0).toFixed(2)}`;
         $('adminComment').textContent = stat.adminComment || 'No comment';
       } else {
@@ -1328,22 +1359,34 @@
                 <span class="title"><i class="fas fa-truck" style="color:#2e5c3e;margin-right:6px;"></i>${s.vehicleName || 'Unknown'} · ${s.vehiclePlate || ''}</span>
                 <span class="date"><i class="far fa-calendar-alt" style="margin-right:4px;"></i>${new Date(s.startTime).toLocaleDateString()}</span>
               </div>
-              <div class="stats">
-                <div class="stat-item"><span class="icon"><i class="fas fa-clock"></i></span><span class="label">Out</span><span class="value">${s.timeOut || '-'}</span></div>
-                <div class="stat-item"><span class="icon"><i class="fas fa-clock"></i></span><span class="label">Parked</span><span class="value">${s.timeParked || '-'}</span></div>
-                <div class="stat-item"><span class="icon"><i class="fas fa-road"></i></span><span class="label">Mileage</span><span class="value">${s.mileageOut || 0} → ${s.mileageParked || 0} km</span></div>
-                <div class="stat-item"><span class="icon"><i class="fas fa-gas-pump"></i></span><span class="label">Fuel</span><span class="value">${s.fuelOut || 0} → ${s.fuelParked || 0} L</span></div>
-                ${isCompleted ? `
-                  <div class="stat-item"><span class="icon"><i class="fas fa-arrows-alt-h"></i></span><span class="label">Distance</span><span class="value">${s.distanceTraveled || 0} km</span></div>
-                  <div class="stat-item"><span class="icon"><i class="fas fa-fire"></i></span><span class="label">Fuel Used</span><span class="value">${s.fuelUsed || 0} L</span></div>
-                  <div class="stat-item"><span class="icon"><i class="fas fa-coins" style="color:#059669;"></i></span><span class="label">Revenue</span><span class="value green">ZMW ${(s.revenue || 0).toFixed(2)}</span></div>
-                  <div class="stat-item" style="grid-column:1/-1;"><span class="icon"><i class="fas fa-user-tie"></i></span><span class="label">Hours</span><span class="value">${s.hoursOut || 0} hrs</span></div>
-                ` : ''}
+
+              <div class="section-title"><i class="fas fa-play-circle"></i> Starting Stats</div>
+              <div class="stats-grid">
+                <div class="stat-item"><span class="label">Time Out</span><span class="value">${s.timeOut || '-'}</span></div>
+                <div class="stat-item"><span class="label">Mileage</span><span class="value">${s.mileageOut || 0} km</span></div>
+                <div class="stat-item"><span class="label">Fuel</span><span class="value">${s.fuelOut || 0} L</span></div>
               </div>
+
+              ${isCompleted ? `
+                <div class="section-title"><i class="fas fa-flag-checkered"></i> Parked Stats</div>
+                <div class="stats-grid">
+                  <div class="stat-item"><span class="label">Time Parked</span><span class="value">${s.timeParked || '-'}</span></div>
+                  <div class="stat-item"><span class="label">Mileage</span><span class="value">${s.mileageParked || 0} km</span></div>
+                  <div class="stat-item"><span class="label">Fuel</span><span class="value">${s.fuelParked || 0} L</span></div>
+                </div>
+
+                <div class="section-title"><i class="fas fa-calculator"></i> Calculations</div>
+                <div class="calc-row"><span class="label">Distance Traveled</span><span class="value">${s.distanceTraveled || 0} km</span></div>
+                <div class="calc-row"><span class="label">Fuel Used</span><span class="value">${s.fuelUsed || 0} L</span></div>
+                <div class="calc-row"><span class="label">Hours Out</span><span class="value">${s.hoursOut || 0} hrs</span></div>
+                <div class="calc-row"><span class="label">Revenue</span><span class="value green">ZMW ${(s.revenue || 0).toFixed(2)}</span></div>
+              ` : ''}
+
               <div class="footer">
                 <span class="status-badge ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
                 ${isCompleted ? `<span style="font-size:12px;color:#6b8a7a;"><i class="fas fa-check-circle" style="color:#059669;"></i> Completed</span>` : ''}
               </div>
+
               ${s.adminComment ? `
                 <div class="admin-comment"><strong><i class="fas fa-comment-dots" style="margin-right:4px;"></i> Admin:</strong> ${s.adminComment}</div>
               ` : ''}
