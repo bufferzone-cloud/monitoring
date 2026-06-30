@@ -2,281 +2,603 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Driver Monitoring · Login</title>
-  <!-- PWA Meta & Manifest -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f3d2e">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Driver Monitor">
-  <!-- Icons & Fonts -->
-  <link rel="apple-touch-icon" href="logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Driver · ZAMLIFT</title>
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
   <style>
+    /* ===== RESET & BASE ===== */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
-
     body {
-      background: #ffffff;
+      background: #f4f7f6;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
     }
-
-    /* CARD */
-    .login-card {
+    #app {
+      max-width: 450px;
       width: 100%;
-      max-width: 400px;
       background: #ffffff;
-      border-radius: 32px;
-      padding: 40px 26px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.02);
-      text-align: center;
-      overflow: hidden;
-      border: 1px solid #e8f0ea;
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      padding-bottom: 80px;
     }
 
-    /* LOGO */
-    .logo {
-      margin-bottom: 20px;
-    }
-    .logo img {
-      max-width: 150px;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-    }
-
-    /* HEADER */
-    h1 {
-      font-size: 28px;
-      color: #0f3d2e;
-      margin-bottom: 8px;
-    }
-
-    .subhead {
-      color: #5a7c70;
-      margin-bottom: 30px;
-    }
-
-    /* INSTALL BANNER */
-    .install-banner {
-      background: #0f3d2e;
-      color: white;
-      padding: 14px;
-      border-radius: 50px;
-      margin-bottom: 20px;
+    /* ===== OFF-DAY OVERLAY ===== */
+    .offday-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      z-index: 300;
       display: none;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      cursor: pointer;
+      text-align: center;
+      padding: 20px;
+    }
+    .offday-message {
+      font-size: 24px;
       font-weight: 600;
-      box-shadow: 0 4px 10px rgba(15,61,46,0.2);
+      color: #dc2626;
+      max-width: 350px;
     }
-    .install-banner i {
-      font-size: 18px;
-    }
-
-    /* LOGIN BUTTON (FADE IN) */
-    .tap-login {
-      background: #0f3d2e;
-      color: white;
-      padding: 16px;
-      border-radius: 50px;
-      font-weight: 600;
-      cursor: pointer;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.8s ease forwards;
-      animation-delay: 0.8s;
+    .offday-message .worker-name {
+      color: #2e5c3e;
+      font-weight: 700;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* DROPDOWN FORM */
-    .login-dropdown {
-      max-height: 0;
-      overflow: hidden;
-      transition: all 0.5s ease;
-    }
-    .login-dropdown.active {
-      max-height: 300px;
-      margin-top: 20px;
-    }
-
-    /* INPUTS */
-    .input-group {
-      background: #f4f8f6;
-      border-radius: 50px;
-      padding: 10px 18px;
-      margin-bottom: 14px;
+    /* ===== HEADER ===== */
+    .driver-header {
+      padding: 20px 16px 8px;
       display: flex;
       align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #e0e8e0;
     }
-    .input-group i {
-      color: #7aa395;
-      margin-right: 10px;
+    .driver-header .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #2e5c3e;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      overflow: hidden;
+      flex-shrink: 0;
     }
-    .input-group input {
-      border: none;
-      outline: none;
-      background: transparent;
+    .driver-header .avatar img {
       width: 100%;
-      padding: 10px 0;
+      height: 100%;
+      object-fit: cover;
+    }
+    .driver-header .info {
+      flex: 1;
+    }
+    .driver-header .info h2 {
+      font-weight: 700;
+      font-size: 22px;
+      color: #1e3a2a;
+    }
+    .driver-header .info .sub {
+      color: #5a7a62;
+      font-size: 14px;
+    }
+    .driver-header .info .date {
+      color: #6b8a7a;
+      font-size: 13px;
+      margin-top: 2px;
     }
 
-    /* LOGIN BUTTON */
-    .login-btn {
+    /* ===== MAIN CARD (today's shift) ===== */
+    .shift-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 18px;
+      margin: 16px;
+      border: 1px solid #d0e0d0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .shift-card .car-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .shift-card .car-info .car-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #e0f0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #2e5c3e;
+      overflow: hidden;
+    }
+    .shift-card .car-info .car-img img {
       width: 100%;
-      background: #0f3d2e;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shift-card .car-info .details {
+      flex: 1;
+    }
+    .shift-card .car-info .details .name {
+      font-weight: 700;
+      font-size: 18px;
+      color: #1e3a2a;
+    }
+    .shift-card .car-info .details .plate {
+      color: #5a7a62;
+      font-size: 14px;
+    }
+    .shift-card .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .shift-card .stats-grid .stat-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      border: 1px solid #d0e0d0;
+    }
+    .shift-card .stats-grid .stat-item .label {
+      font-size: 11px;
+      color: #6b8a7a;
+      display: block;
+    }
+    .shift-card .stats-grid .stat-item .value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e3a2a;
+    }
+    .shift-card .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #e0f0e0;
+      color: #2e5c3e;
+    }
+    .shift-card .status-badge.signed {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+    .shift-card .status-badge.completed {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    /* ===== PULSING START BUTTON ===== */
+    .shift-circle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0 10px;
+    }
+    .shift-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #2e5c3e;
       color: white;
       border: none;
-      padding: 14px;
-      border-radius: 50px;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 20px;
       cursor: pointer;
-      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 8px 20px rgba(46,92,62,0.3);
+      transition: transform 0.2s;
+    }
+    .shift-circle i {
+      font-size: 36px;
+    }
+    .shift-circle.pulse {
+      animation: pulse-green 2s infinite;
+    }
+    .shift-circle.red {
+      background: #dc2626;
+      box-shadow: 0 8px 20px rgba(220,38,38,0.3);
+    }
+    .shift-circle.red.pulse {
+      animation: pulse-red 1.5s infinite;
+    }
+    .shift-circle.gray {
+      background: #9ca3af;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      cursor: default;
+    }
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(46,92,62,0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(46,92,62,0); }
+      100% { box-shadow: 0 0 0 0 rgba(46,92,62,0); }
+    }
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(220,38,38,0); }
+      100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
     }
 
-    /* ERROR */
-    .error-msg {
-      color: #b91c1c;
-      margin-top: 10px;
+    .shift-timer {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e3a2a;
+      margin-top: 6px;
+    }
+    .shift-hint {
+      text-align: center;
+      color: #6b8a7a;
       font-size: 14px;
+      margin-top: 4px;
     }
 
-    /* iOS install instructions */
-    .ios-install-tip {
-      background: #f0f7f0;
-      border-radius: 30px;
+    /* ===== SIGNATURE MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 32px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-card h3 {
+      color: #1e3a2a;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+    .modal-card .car-summary {
+      background: #f8fbf8;
+      border-radius: 16px;
       padding: 14px;
       margin-bottom: 16px;
+      border: 1px solid #d0e0d0;
+    }
+    .modal-card .car-summary .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
       font-size: 14px;
-      color: #0f3d2e;
+      color: #4a6a5a;
+    }
+    .modal-card .car-summary .row .val {
+      font-weight: 600;
+      color: #1e3a2a;
+    }
+    .signature-area {
+      border: 2px dashed #cbdcd0;
+      border-radius: 16px;
+      padding: 8px;
+      margin: 12px 0;
+      background: #fafdfa;
+      position: relative;
+      height: 150px;
+    }
+    .signature-area canvas {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .signature-area .clear-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #fee2e2;
+      border: none;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      cursor: pointer;
+    }
+    .pill-btn {
+      background: #2e5c3e;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 14px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .pill-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .outline-btn {
+      background: white;
+      border: 1.5px solid #2e5c3e;
+      color: #2e5c3e;
+      border-radius: 40px;
+      padding: 12px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* ===== DAILY WORK (Reports) ===== */
+    .page-view {
+      padding: 8px 16px;
       display: none;
     }
-    .ios-install-tip i {
-      margin-right: 6px;
+    .page-view.active {
+      display: block;
+    }
+    .date-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 0 16px;
+    }
+    .date-picker input[type="date"] {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 30px;
+      border: 1.5px solid #cbdcd0;
+      font-size: 14px;
+      background: #f8fbf8;
+    }
+    .date-picker .today-btn {
+      background: #e0f0e0;
+      border: none;
+      border-radius: 30px;
+      padding: 8px 16px;
+      font-weight: 600;
+      color: #2e5c3e;
+      cursor: pointer;
+    }
+    .report-card {
+      background: #f8fbf8;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid #d0e0d0;
+    }
+    .report-card .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .report-card .header .title {
+      font-weight: 700;
+      color: #1e3a2a;
+    }
+    .report-card .header .date {
+      color: #6b8a7a;
+      font-size: 13px;
+    }
+    .report-card .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+      font-size: 14px;
+      color: #4a6a5a;
+    }
+    .report-card .stats .label {
+      color: #6b8a7a;
+    }
+    .empty-state {
+      text-align: center;
+      color: #6b8a7a;
+      padding: 40px 20px;
+    }
+    .empty-state i {
+      font-size: 48px;
+      color: #c0dcc0;
+      margin-bottom: 12px;
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 450px;
+      margin: 0 auto;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 16px 16px;
+      border-top: 1px solid #e0e8e0;
+    }
+    .nav-item {
+      text-align: center;
+      color: #7e8b9c;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      background: none;
+      border: none;
+      flex: 1;
+    }
+    .nav-item.active {
+      color: #2e5c3e;
+      font-weight: 700;
+    }
+    .nav-item i {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 4px;
     }
   </style>
 </head>
 <body>
+<div id="app">
 
-<div class="login-card">
-
-  <!-- Large Logo -->
-  <div class="logo">
-    <img src="logo.png" alt="Driver Monitor Logo">
-  </div>
-
-  <h1>Welcome</h1>
-  <div class="subhead">Driver Monitoring System</div>
-
-  <!-- Install Button / Banner -->
-  <div class="install-banner" id="installBanner">
-    <i class="fas fa-download"></i>
-    <span>Install App</span>
-  </div>
-  <!-- iOS manual install guide -->
-  <div class="ios-install-tip" id="iosInstallTip">
-    <i class="fas fa-share-square"></i> Tap <strong>Share</strong> then <strong>"Add to Home Screen"</strong>
-  </div>
-
-  <div class="tap-login" id="tapLoginBtn">
-    Tap to Login
-  </div>
-
-  <div class="login-dropdown" id="loginDropdown">
-    <div class="input-group">
-      <i class="fas fa-envelope"></i>
-      <input type="email" id="emailInput" placeholder="Email" value="">
+  <!-- Off-day overlay -->
+  <div id="offdayFullscreen" class="offday-fullscreen" style="display:none;">
+    <div class="offday-message">
+      <span id="offdayWorkerName"></span><br>
+      Today is your day off.<br>
+      Please report early tomorrow.
     </div>
-    <div class="input-group">
-      <i class="fas fa-lock"></i>
-      <input type="password" id="passwordInput" placeholder="Password" value="">
-    </div>
-    <button class="login-btn" id="loginSubmit">Login</button>
-    <div class="error-msg" id="loginError"></div>
   </div>
 
+  <!-- ===== HEADER ===== -->
+  <div class="driver-header">
+    <div class="avatar" id="driverAvatar">👤</div>
+    <div class="info">
+      <h2 id="driverName">Loading...</h2>
+      <div class="sub" id="driverPhone"></div>
+      <div class="date" id="currentDate"></div>
+    </div>
+  </div>
+
+  <!-- ===== HOME PAGE ===== -->
+  <div id="homePage" class="page-view active">
+    <!-- Shift Card (today's shift) -->
+    <div id="shiftCardContainer" style="display:none;">
+      <div class="shift-card" id="shiftCard">
+        <div class="car-info">
+          <div class="car-img" id="carImage"><i class="fas fa-car"></i></div>
+          <div class="details">
+            <div class="name" id="carName">-</div>
+            <div class="plate" id="carPlate">-</div>
+          </div>
+          <span class="status-badge" id="shiftStatus">Pending</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item"><span class="label">⏱ Time Out</span><span class="value" id="timeOut">-</span></div>
+          <div class="stat-item"><span class="label">📏 Mileage</span><span class="value" id="mileageOut">-</span></div>
+          <div class="stat-item"><span class="label">⛽ Fuel</span><span class="value" id="fuelOut">-</span></div>
+        </div>
+        <!-- End-of-day stats (only when completed) -->
+        <div id="eodStats" style="display:none; margin-top: 12px; border-top: 1px solid #d0e0d0; padding-top: 12px;">
+          <div style="font-weight:600; color:#1e3a2a; margin-bottom:6px;">📊 End of Day</div>
+          <div class="stats-grid">
+            <div class="stat-item"><span class="label">⏱ Parked</span><span class="value" id="timeParked">-</span></div>
+            <div class="stat-item"><span class="label">📏 Mileage</span><span class="value" id="mileageParked">-</span></div>
+            <div class="stat-item"><span class="label">⛽ Fuel</span><span class="value" id="fuelParked">-</span></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:14px; color:#4a6a5a;">
+            <span>Distance</span>
+            <span id="distanceTraveled" style="font-weight:600; color:#1e3a2a;">- km</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:14px; color:#4a6a5a;">
+            <span>Fuel Used</span>
+            <span id="fuelUsed" style="font-weight:600; color:#1e3a2a;">- L</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:14px; color:#4a6a5a;">
+            <span>Revenue</span>
+            <span id="revenue" style="font-weight:700; color:#059669;">ZMW -</span>
+          </div>
+          <div style="margin-top:6px; font-size:13px; color:#5a7a62; background:#f0f5f0; padding:8px; border-radius:12px;">
+            <span style="font-weight:600;">Admin:</span> <span id="adminComment">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pulsing Start Button + Timer -->
+    <div id="shiftSection">
+      <div class="shift-circle-container">
+        <button class="shift-circle pulse" id="actionBtn">
+          <i class="fas fa-play"></i>
+          <span id="actionBtnText">Start Shift</span>
+        </button>
+      </div>
+      <div class="shift-timer" id="shiftTimer" style="display:none;">00:00:00</div>
+      <div class="shift-hint" id="shiftHint">Only start when your shift is assigned</div>
+    </div>
+  </div>
+
+  <!-- ===== REPORTS PAGE ===== -->
+  <div id="reportsPage" class="page-view">
+    <h3 style="color:#1e3a2a; margin-bottom:8px;">Daily Work</h3>
+    <div class="date-picker">
+      <input type="date" id="reportDatePicker">
+      <button class="today-btn" id="reportTodayBtn">Today</button>
+    </div>
+    <div id="reportsList"></div>
+  </div>
+
+  <!-- ===== SETTINGS PAGE ===== -->
+  <div id="settingsPage" class="page-view">
+    <button class="pill-btn" id="logoutBtn" style="margin-top:20px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottom-nav">
+    <button class="nav-item active" data-page="home"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" data-page="reports"><i class="fas fa-calendar-alt"></i><span>Reports</span></button>
+    <button class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+
+  <!-- ===== SIGNATURE MODAL ===== -->
+  <div class="modal-overlay" id="signModal">
+    <div class="modal-card">
+      <h3>✍️ Sign & Start Shift</h3>
+      <div class="car-summary">
+        <div class="row"><span>Vehicle</span><span class="val" id="modalCarName">-</span></div>
+        <div class="row"><span>Plate</span><span class="val" id="modalCarPlate">-</span></div>
+        <div class="row"><span>Time Out</span><span class="val" id="modalTimeOut">-</span></div>
+        <div class="row"><span>Mileage Out</span><span class="val" id="modalMileageOut">-</span></div>
+        <div class="row"><span>Fuel Out</span><span class="val" id="modalFuelOut">-</span></div>
+      </div>
+      <p style="font-size:14px; color:#4a6a5a; margin-bottom:8px;">Sign below to confirm start</p>
+      <div class="signature-area">
+        <canvas id="sigCanvas"></canvas>
+        <button class="clear-btn" id="clearSigBtn"><i class="fas fa-undo"></i> Clear</button>
+      </div>
+      <button class="pill-btn" id="submitSigBtn">Submit Signature</button>
+      <button class="outline-btn" onclick="closeSignModal()">Cancel</button>
+    </div>
+  </div>
 </div>
-
-<script>
-  // Register Service Worker for PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('SW registered', reg))
-      .catch(err => console.log('SW registration failed', err));
-  }
-
-  // PWA Install Prompt Logic
-  let deferredPrompt;
-  const installBanner = document.getElementById('installBanner');
-  const iosTip = document.getElementById('iosInstallTip');
-
-  // Detect if already in standalone mode (installed)
-  function isPWAInstalled() {
-    return window.matchMedia('(display-mode: standalone)').matches || 
-           window.navigator.standalone || 
-           document.referrer.includes('android-app://');
-  }
-
-  // Show install UI if not installed
-  if (!isPWAInstalled()) {
-    // For iOS (no beforeinstallprompt)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isIOS && !isPWAInstalled()) {
-      iosTip.style.display = 'block';
-    }
-  }
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!isPWAInstalled()) {
-      installBanner.style.display = 'flex';
-    }
-  });
-
-  installBanner.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      installBanner.style.display = 'none';
-      iosTip.style.display = 'none';
-    }
-    deferredPrompt = null;
-  });
-
-  // Hide install UI if app gets installed later
-  window.addEventListener('appinstalled', () => {
-    installBanner.style.display = 'none';
-    iosTip.style.display = 'none';
-  });
-
-  // Dropdown animation
-  document.getElementById('tapLoginBtn').addEventListener('click', () => {
-    document.getElementById('loginDropdown').classList.toggle('active');
-  });
-</script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
 
+  // ----- Firebase config (same as index.html) -----
   const firebaseConfig = {
     apiKey: "AIzaSyAkPoi1NX0ERuHOmFcwt6KxF5Ewj4KGZT8",
     authDomain: "monitoring-1a105.firebaseapp.com",
@@ -284,157 +606,462 @@
     projectId: "monitoring-1a105",
     storageBucket: "monitoring-1a105.firebasestorage.app",
     messagingSenderId: "1095363656731",
-    appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe",
-    measurementId: "G-2CJHNPR6YZ"
+    appId: "1:1095363656731:web:6d45d0a49ec2f90cdd8cbe"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getDatabase(app);
 
-  document.getElementById('loginSubmit').addEventListener('click', async () => {
-    const email = document.getElementById('emailInput').value.trim();
-    const password = document.getElementById('passwordInput').value;
-    const errorDiv = document.getElementById('loginError');
-    errorDiv.textContent = '';
+  // ----- DOM shortcuts -----
+  const $ = id => document.getElementById(id);
+  const homePage = $('homePage');
+  const reportsPage = $('reportsPage');
+  const settingsPage = $('settingsPage');
+  const shiftCardContainer = $('shiftCardContainer');
+  const actionBtn = $('actionBtn');
+  const actionBtnText = $('actionBtnText');
+  const shiftTimer = $('shiftTimer');
+  const shiftHint = $('shiftHint');
+  const offdayFullscreen = $('offdayFullscreen');
+  const offdayWorkerName = $('offdayWorkerName');
 
-    if (!email || !password) {
-      errorDiv.textContent = 'Please enter both email and password';
+  // ----- State -----
+  let currentUser = null;
+  let driverData = null;
+  let currentStat = null;          // today's stat (if any)
+  let timerInterval = null;
+  let reportsCache = [];           // all stats/reports for this driver
+
+  // ----- Auth: rely on the login from index.html -----
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      // Not logged in → redirect to index
+      window.location.href = 'index.html';
+      return;
+    }
+    // User is logged in; we assume it's a driver (since index redirects to driver.html for non‑admin, non‑worker)
+    currentUser = user;
+    await loadDriverData();
+    setupRealtimeListeners();
+    setupNav();
+    setupDatePicker();
+    setupSignatureCanvas();
+    $('logoutBtn').addEventListener('click', () => {
+      if (confirm('Logout?')) {
+        signOut(auth).then(() => window.location.href = 'index.html');
+      }
+    });
+    $('reportTodayBtn').addEventListener('click', () => {
+      const today = new Date().toISOString().split('T')[0];
+      $('reportDatePicker').value = today;
+      renderReports(today);
+    });
+    $('reportDatePicker').addEventListener('change', (e) => {
+      renderReports(e.target.value);
+    });
+  });
+
+  // ----- Load driver data from Firebase -----
+  async function loadDriverData() {
+    const snap = await get(ref(db, `drivers/${currentUser.uid}`));
+    if (!snap.exists()) {
+      // Driver record missing – maybe show a message and log out?
+      $('driverName').textContent = 'Driver (no profile)';
+      $('driverPhone').textContent = '';
+      // Still allow basic functionality, but admin should create a driver record.
+      driverData = { firstName: 'Driver', lastName: '', phone: '', image: '', offDay: false };
+    } else {
+      driverData = snap.val();
+    }
+    // Display name & avatar
+    const fullName = `${driverData.firstName || ''} ${driverData.lastName || ''}`.trim() || 'Driver';
+    $('driverName').textContent = fullName;
+    $('driverPhone').textContent = driverData.phone || '';
+    // Avatar
+    const avatarEl = $('driverAvatar');
+    if (driverData.image) {
+      avatarEl.innerHTML = `<img src="${driverData.image}" alt="avatar">`;
+    } else {
+      avatarEl.textContent = fullName.charAt(0).toUpperCase();
+      avatarEl.style.background = '#2e5c3e';
+      avatarEl.style.color = 'white';
+    }
+    // Date
+    setCurrentDate();
+
+    // Off-day check
+    if (driverData.offDay) {
+      offdayFullscreen.style.display = 'flex';
+      offdayWorkerName.innerHTML = `<span class="worker-name">${fullName}</span>`;
+      shiftCardContainer.style.display = 'none';
+      actionBtn.style.display = 'none';
+      shiftTimer.style.display = 'none';
+      shiftHint.textContent = 'You are off duty today.';
+      return;
+    }
+    offdayFullscreen.style.display = 'none';
+    actionBtn.style.display = 'flex';
+  }
+
+  function setCurrentDate() {
+    const d = new Date();
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    $('currentDate').textContent = d.toLocaleDateString('en-GB', options);
+  }
+
+  // ----- Real‑time listeners for today's stat and reports -----
+  function setupRealtimeListeners() {
+    // Listen to driverStats for this driver
+    const statsRef = ref(db, 'driverStats');
+    onValue(statsRef, (snap) => {
+      if (!snap.exists()) {
+        currentStat = null;
+        updateUIForStat(null);
+        return;
+      }
+      const allStats = snap.val();
+      // Find stat for this driver and today (startTime within today)
+      const todayStart = new Date();
+      todayStart.setHours(0,0,0,0);
+      const todayEnd = new Date();
+      todayEnd.setHours(23,59,59,999);
+      let found = null;
+      Object.keys(allStats).forEach(key => {
+        const s = allStats[key];
+        if (s.driverId === currentUser.uid) {
+          const st = new Date(s.startTime || 0);
+          if (st >= todayStart && st <= todayEnd) {
+            found = { id: key, ...s };
+          }
+        }
+      });
+      currentStat = found;
+      updateUIForStat(found);
+    });
+
+    // Listen to all stats (for reports) – we'll cache them for date filtering
+    const reportsRef = ref(db, 'driverStats');
+    onValue(reportsRef, (snap) => {
+      if (!snap.exists()) {
+        reportsCache = [];
+        renderReports($('reportDatePicker').value || new Date().toISOString().split('T')[0]);
+        return;
+      }
+      const all = snap.val();
+      const list = [];
+      Object.keys(all).forEach(key => {
+        const s = all[key];
+        if (s.driverId === currentUser.uid) {
+          list.push({ id: key, ...s });
+        }
+      });
+      reportsCache = list;
+      // Render reports for selected date
+      const selectedDate = $('reportDatePicker').value || new Date().toISOString().split('T')[0];
+      renderReports(selectedDate);
+    });
+  }
+
+  // ----- Update UI based on current stat -----
+  function updateUIForStat(stat) {
+    if (!stat) {
+      // No stat today
+      shiftCardContainer.style.display = 'none';
+      actionBtn.style.display = 'flex';
+      actionBtn.className = 'shift-circle pulse';
+      actionBtnText.textContent = 'Start Shift';
+      shiftTimer.style.display = 'none';
+      shiftHint.textContent = 'No shift assigned for today. Please contact admin.';
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
       return;
     }
 
-    try {
-      // Show loading state
-      const loginBtn = document.getElementById('loginSubmit');
-      loginBtn.textContent = 'Logging in...';
-      loginBtn.disabled = true;
+    // Show shift card
+    shiftCardContainer.style.display = 'block';
+    // Car info
+    $('carImage').innerHTML = stat.vehicleImage ? `<img src="${stat.vehicleImage}" alt="car">` : '<i class="fas fa-car"></i>';
+    $('carName').textContent = stat.vehicleName || 'Unknown';
+    $('carPlate').textContent = stat.vehiclePlate || '';
+    // Starting stats
+    $('timeOut').textContent = stat.timeOut || '-';
+    $('mileageOut').textContent = stat.mileageOut ? `${stat.mileageOut} km` : '-';
+    $('fuelOut').textContent = stat.fuelOut ? `${stat.fuelOut} L` : '-';
 
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCred.user;
+    // Status badge
+    const statusEl = $('shiftStatus');
+    const status = stat.status || 'pending';
+    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    statusEl.className = `status-badge ${status}`;
 
-      // Fetch admin details from database if admin
-      let adminData = null;
-      let redirectUrl = '';
-      
-      if (user.email.startsWith('admin@')) {
-        // Fetch admin details from Firebase Database
-        const adminRef = ref(db, `admins/${user.uid}`);
-        const snapshot = await get(adminRef);
-        
-        if (snapshot.exists()) {
-          adminData = snapshot.val();
-        } else {
-          // If admin not found in database, create minimal record
-          adminData = {
-            fullName: 'Admin',
-            email: user.email,
-            phone: '',
-            createdAt: Date.now()
-          };
-        }
-        
-        // Store admin data in localStorage for the admin page to use
-        const adminSessionData = {
-          uid: user.uid,
-          email: user.email,
-          fullName: adminData.fullName || 'Admin',
-          phone: adminData.phone || '',
-          isAdmin: true,
-          loginTime: Date.now()
-        };
-        
-        localStorage.setItem('adminSession', JSON.stringify(adminSessionData));
-        sessionStorage.setItem('adminSession', JSON.stringify(adminSessionData));
-        
-        redirectUrl = 'admin.html';
-      } else if (user.email.startsWith('worker@')) {
-        redirectUrl = 'workers.html';
+    // End-of-day stats (only if completed)
+    const eodDiv = $('eodStats');
+    if (status === 'completed') {
+      eodDiv.style.display = 'block';
+      $('timeParked').textContent = stat.timeParked || '-';
+      $('mileageParked').textContent = stat.mileageParked ? `${stat.mileageParked} km` : '-';
+      $('fuelParked').textContent = stat.fuelParked ? `${stat.fuelParked} L` : '-';
+      $('distanceTraveled').textContent = (stat.distanceTraveled || 0) + ' km';
+      $('fuelUsed').textContent = (stat.fuelUsed || 0) + ' L';
+      $('revenue').textContent = `ZMW ${(stat.revenue || 0).toFixed(2)}`;
+      $('adminComment').textContent = stat.adminComment || 'No comment';
+    } else {
+      eodDiv.style.display = 'none';
+    }
+
+    // Update button and timer based on status
+    if (status === 'pending') {
+      // Pending: show pulsing start button to sign
+      actionBtn.style.display = 'flex';
+      actionBtn.className = 'shift-circle pulse';
+      actionBtnText.textContent = 'Sign & Start';
+      shiftTimer.style.display = 'none';
+      shiftHint.textContent = 'Tap to sign and start the shift';
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      // Attach click handler to open signature modal
+      actionBtn.onclick = openSignModal;
+    } else if (status === 'signed') {
+      // Signed: show timer
+      actionBtn.style.display = 'none';
+      shiftTimer.style.display = 'block';
+      shiftHint.textContent = 'Shift in progress...';
+      startTimer(stat.startTime);
+    } else if (status === 'completed') {
+      // Completed: show timer stopped, show final duration
+      actionBtn.style.display = 'none';
+      shiftTimer.style.display = 'block';
+      shiftHint.textContent = 'Shift completed';
+      // Show total duration
+      if (stat.startTime && stat.endTime) {
+        const elapsed = stat.endTime - stat.startTime;
+        const h = Math.floor(elapsed / 3600000);
+        const m = Math.floor((elapsed % 3600000) / 60000);
+        const s = Math.floor((elapsed % 60000) / 1000);
+        shiftTimer.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
       } else {
-        redirectUrl = 'driver.html';
+        shiftTimer.textContent = '00:00:00';
       }
-
-      // Clear any existing session data for other user types
-      if (!user.email.startsWith('admin@')) {
-        localStorage.removeItem('adminSession');
-        sessionStorage.removeItem('adminSession');
-      }
-
-      // Redirect after successful login
-      window.location.href = redirectUrl;
-
-    } catch (e) {
-      console.error('Login error:', e);
-      let errorMessage = 'Login failed: ';
-      
-      switch (e.code) {
-        case 'auth/user-not-found':
-          errorMessage += 'No account found with this email';
-          break;
-        case 'auth/wrong-password':
-          errorMessage += 'Incorrect password';
-          break;
-        case 'auth/invalid-email':
-          errorMessage += 'Invalid email address';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage += 'Too many attempts. Please try again later';
-          break;
-        default:
-          errorMessage += e.message;
-      }
-      
-      errorDiv.textContent = errorMessage;
-    } finally {
-      // Reset button state
-      const loginBtn = document.getElementById('loginSubmit');
-      loginBtn.textContent = 'Login';
-      loginBtn.disabled = false;
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
     }
+  }
+
+  // ----- Timer -----
+  function startTimer(startTime) {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const h = Math.floor(elapsed / 3600000);
+      const m = Math.floor((elapsed % 3600000) / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
+      shiftTimer.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  // ----- Signature Modal -----
+  let sigCanvas, sigCtx, isDrawing = false;
+
+  function setupSignatureCanvas() {
+    sigCanvas = $('sigCanvas');
+    sigCtx = sigCanvas.getContext('2d');
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Mouse events
+    sigCanvas.addEventListener('mousedown', startDraw);
+    sigCanvas.addEventListener('mousemove', draw);
+    sigCanvas.addEventListener('mouseup', endDraw);
+    sigCanvas.addEventListener('mouseleave', endDraw);
+    // Touch events
+    sigCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); });
+    sigCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+    sigCanvas.addEventListener('touchend', (e) => { e.preventDefault(); endDraw(); });
+
+    $('clearSigBtn').addEventListener('click', clearCanvas);
+  }
+
+  function resizeCanvas() {
+    const rect = sigCanvas.parentElement.getBoundingClientRect();
+    sigCanvas.width = rect.width - 16;
+    sigCanvas.height = rect.height - 16;
+    sigCtx.lineWidth = 3;
+    sigCtx.strokeStyle = '#1e3a2a';
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const rect = sigCanvas.getBoundingClientRect();
+    sigCtx.beginPath();
+    sigCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    const rect = sigCanvas.getBoundingClientRect();
+    sigCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    sigCtx.stroke();
+  }
+
+  function endDraw() {
+    isDrawing = false;
+  }
+
+  function clearCanvas() {
+    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+  }
+
+  function getSignatureDataURL() {
+    return sigCanvas.toDataURL('image/png');
+  }
+
+  // ----- Open / Close Signature Modal -----
+  function openSignModal() {
+    if (!currentStat) return;
+    // Fill modal with current stat details
+    $('modalCarName').textContent = currentStat.vehicleName || 'Unknown';
+    $('modalCarPlate').textContent = currentStat.vehiclePlate || '';
+    $('modalTimeOut').textContent = currentStat.timeOut || '-';
+    $('modalMileageOut').textContent = currentStat.mileageOut ? `${currentStat.mileageOut} km` : '-';
+    $('modalFuelOut').textContent = currentStat.fuelOut ? `${currentStat.fuelOut} L` : '-';
+    clearCanvas();
+    $('signModal').classList.add('active');
+    $('submitSigBtn').disabled = false;
+    $('submitSigBtn').onclick = submitSignature;
+  }
+
+  function closeSignModal() {
+    $('signModal').classList.remove('active');
+  }
+
+  async function submitSignature() {
+    const dataURL = getSignatureDataURL();
+    // Check if signature is empty (only white)
+    const img = new Image();
+    img.src = dataURL;
+    await new Promise(r => img.onload = r);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let hasBlack = false;
+    for (let i = 3; i < pixelData.length; i += 4) {
+      if (pixelData[i] > 0) { hasBlack = true; break; }
+    }
+    if (!hasBlack) {
+      alert('Please sign before submitting.');
+      return;
+    }
+
+    $('submitSigBtn').disabled = true;
+    $('submitSigBtn').textContent = 'Submitting...';
+
+    try {
+      // Update stat: status -> signed, signature -> dataURL
+      await update(ref(db, `driverStats/${currentStat.id}`), {
+        status: 'signed',
+        signature: dataURL,
+        signedAt: Date.now()
+      });
+      closeSignModal();
+      // UI will update via listener
+    } catch (err) {
+      alert('Error submitting signature: ' + err.message);
+      $('submitSigBtn').disabled = false;
+      $('submitSigBtn').textContent = 'Submit Signature';
+    }
+  }
+
+  // ----- Reports (Daily Work) -----
+  function renderReports(dateStr) {
+    const container = $('reportsList');
+    if (!dateStr) dateStr = new Date().toISOString().split('T')[0];
+    $('reportDatePicker').value = dateStr;
+
+    const start = new Date(dateStr);
+    start.setHours(0,0,0,0);
+    const end = new Date(dateStr);
+    end.setHours(23,59,59,999);
+
+    const filtered = reportsCache.filter(s => {
+      const st = new Date(s.startTime || 0);
+      return st >= start && st <= end;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-day"></i><p>No work records for this day</p></div>`;
+      return;
+    }
+
+    // Sort by startTime descending
+    filtered.sort((a,b) => (b.startTime || 0) - (a.startTime || 0));
+
+    let html = '';
+    filtered.forEach(s => {
+      const status = s.status || 'pending';
+      const isCompleted = status === 'completed';
+      html += `
+        <div class="report-card">
+          <div class="header">
+            <span class="title">${s.vehicleName || 'Unknown'} · ${s.vehiclePlate || ''}</span>
+            <span class="date">${new Date(s.startTime).toLocaleDateString()}</span>
+          </div>
+          <div class="stats">
+            <span><span class="label">⏱ Out</span> ${s.timeOut || '-'}</span>
+            <span><span class="label">⏱ Parked</span> ${s.timeParked || '-'}</span>
+            <span><span class="label">📏 Mileage</span> ${s.mileageOut || 0} → ${s.mileageParked || 0} km</span>
+            <span><span class="label">⛽ Fuel</span> ${s.fuelOut || 0} → ${s.fuelParked || 0} L</span>
+            ${isCompleted ? `
+              <span><span class="label">📏 Distance</span> ${s.distanceTraveled || 0} km</span>
+              <span><span class="label">⛽ Used</span> ${s.fuelUsed || 0} L</span>
+              <span><span class="label">💰 Revenue</span> ZMW ${(s.revenue || 0).toFixed(2)}</span>
+            ` : ''}
+          </div>
+          <div style="margin-top:6px;">
+            <span class="status-badge ${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  // ----- Navigation -----
+  function setupNav() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        const page = item.dataset.page;
+        document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+        document.getElementById(page + 'Page').classList.add('active');
+        if (page === 'reports') {
+          const today = new Date().toISOString().split('T')[0];
+          $('reportDatePicker').value = today;
+          renderReports(today);
+        }
+      });
+    });
+  }
+
+  function setupDatePicker() {
+    const today = new Date().toISOString().split('T')[0];
+    $('reportDatePicker').value = today;
+    renderReports(today);
+  }
+
+  // ----- Close modal on overlay click -----
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeSignModal();
+    });
   });
 
-  // Handle Enter key on password field
-  document.getElementById('passwordInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      document.getElementById('loginSubmit').click();
-    }
-  });
-
-  // Handle Enter key on email field
-  document.getElementById('emailInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      document.getElementById('passwordInput').focus();
-    }
-  });
-
-  // Check if already logged in (for session persistence)
-  onAuthStateChanged(auth, (user) => {
-    if (user && user.email.startsWith('admin@')) {
-      // Check if we have stored admin data
-      const storedAdmin = localStorage.getItem('adminSession');
-      if (!storedAdmin) {
-        // If not stored, fetch and store it
-        const adminRef = ref(db, `admins/${user.uid}`);
-        get(adminRef).then((snapshot) => {
-          if (snapshot.exists()) {
-            const adminData = snapshot.val();
-            const adminSessionData = {
-              uid: user.uid,
-              email: user.email,
-              fullName: adminData.fullName || 'Admin',
-              phone: adminData.phone || '',
-              isAdmin: true,
-              loginTime: Date.now()
-            };
-            localStorage.setItem('adminSession', JSON.stringify(adminSessionData));
-            sessionStorage.setItem('adminSession', JSON.stringify(adminSessionData));
-          }
-        });
-      }
-    }
-  });
-
-  // Import onAuthStateChanged
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 </script>
 </body>
 </html>
