@@ -36,7 +36,7 @@
       margin: 0 auto;
     }
 
-    /* ===== RESPONSIVE TWEAKS ===== */
+    /* ===== RESPONSIVE ===== */
     @media (min-width: 640px) {
       #app {
         max-width: 720px;
@@ -73,9 +73,6 @@
       }
       .report-card {
         padding: 20px;
-      }
-      .modal-card {
-        max-width: 440px;
       }
     }
 
@@ -119,9 +116,6 @@
       }
       .report-card {
         padding: 24px;
-      }
-      .modal-card {
-        max-width: 480px;
       }
       .date-picker input[type="date"] {
         font-size: 16px;
@@ -453,85 +447,65 @@
       margin-top: 4px;
     }
 
-    /* ===== SIGNATURE MODAL ===== */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.40);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      z-index: 200;
+    /* ===== INLINE SIGNATURE SECTION ===== */
+    #signatureSection {
       display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+      margin: 16px 16px 0;
+      padding: 18px;
+      background: #f8fbf8;
+      border-radius: 20px;
+      border: 1px solid #d0e0d0;
+      animation: fadeIn 0.3s ease;
     }
-    .modal-overlay.active {
-      display: flex;
-    }
-    .modal-card {
-      background: white;
-      border-radius: 32px;
-      padding: 28px;
-      width: 100%;
-      max-width: 400px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.20);
-    }
-    .modal-card h3 {
+    #signatureSection .sig-header {
+      font-weight: 600;
       color: #1e3a2a;
-      margin-bottom: 18px;
-      font-size: 22px;
+      font-size: 17px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-    .modal-card h3 i {
+    #signatureSection .sig-header i {
       color: #2e5c3e;
     }
-    .modal-card .car-summary {
-      background: #f8fbf8;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 18px;
+    #signatureSection .sig-summary {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
       border: 1px solid #d0e0d0;
-    }
-    .modal-card .car-summary .row {
-      display: flex;
-      justify-content: space-between;
-      padding: 5px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 20px;
       font-size: 14px;
       color: #4a6a5a;
-      border-bottom: 1px solid #e8f0ea;
     }
-    .modal-card .car-summary .row:last-child {
-      border-bottom: none;
+    #signatureSection .sig-summary .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
     }
-    .modal-card .car-summary .row .val {
+    #signatureSection .sig-summary .row .val {
       font-weight: 600;
       color: #1e3a2a;
     }
-    .signature-area {
+    #signatureSection .sig-canvas-wrap {
       border: 2px dashed #cbdcd0;
       border-radius: 16px;
       padding: 6px;
-      margin: 14px 0;
       background: #fafdfa;
       position: relative;
-      height: 160px;
+      height: 150px;
     }
-    .signature-area canvas {
+    #signatureSection .sig-canvas-wrap canvas {
       width: 100%;
       height: 100%;
       touch-action: none;
       cursor: crosshair;
       border-radius: 10px;
     }
-    .signature-area .clear-btn {
+    #signatureSection .sig-canvas-wrap .clear-btn {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -546,51 +520,61 @@
       transition: background 0.2s;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
-    .signature-area .clear-btn:hover {
+    #signatureSection .sig-canvas-wrap .clear-btn:hover {
       background: #fecaca;
     }
-    .modal-card .sign-hint {
-      font-size: 14px;
-      color: #4a6a5a;
-      margin-bottom: 4px;
+    #signatureSection .sig-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
     }
-    .pill-btn {
+    #signatureSection .sig-actions .pill-btn {
+      flex: 1;
       background: #2e5c3e;
       color: white;
       border: none;
       border-radius: 40px;
-      padding: 16px;
+      padding: 14px;
       font-weight: 700;
-      width: 100%;
-      cursor: pointer;
       font-size: 16px;
+      cursor: pointer;
       transition: background 0.2s, transform 0.15s;
       box-shadow: 0 4px 12px rgba(46, 92, 62, 0.20);
     }
-    .pill-btn:hover {
+    #signatureSection .sig-actions .pill-btn:hover {
       background: #1f4a2e;
       transform: translateY(-1px);
     }
-    .pill-btn:disabled {
+    #signatureSection .sig-actions .pill-btn:disabled {
       background: #9ca3af;
       cursor: not-allowed;
       box-shadow: none;
       transform: none;
     }
-    .outline-btn {
+    #signatureSection .sig-actions .outline-btn {
+      flex: 1;
       background: white;
       border: 1.5px solid #2e5c3e;
       color: #2e5c3e;
       border-radius: 40px;
       padding: 14px;
       font-weight: 600;
-      width: 100%;
       cursor: pointer;
-      margin-top: 12px;
       transition: background 0.2s;
     }
-    .outline-btn:hover {
+    #signatureSection .sig-actions .outline-btn:hover {
       background: #f0f7f0;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ===== DAILY WORK (Reports) ===== */
@@ -820,11 +804,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #a0c0a0;
     }
-
-    /* ===== UTILITY ===== */
-    .flex-grow {
-      flex: 1;
-    }
   </style>
 </head>
 <body>
@@ -896,6 +875,27 @@
         <div class="shift-timer" id="shiftTimer" style="display:none;">00:00:00</div>
         <div class="shift-hint" id="shiftHint">Only start when your shift is assigned</div>
       </div>
+
+      <!-- ===== INLINE SIGNATURE SECTION ===== -->
+      <div id="signatureSection">
+        <div class="sig-header"><i class="fas fa-pen-fancy"></i> Sign & Start Shift</div>
+        <div class="sig-summary">
+          <div class="row"><span>Vehicle</span><span class="val" id="sigCarName">-</span></div>
+          <div class="row"><span>Plate</span><span class="val" id="sigCarPlate">-</span></div>
+          <div class="row"><span>Time Out</span><span class="val" id="sigTimeOut">-</span></div>
+          <div class="row"><span>Mileage Out</span><span class="val" id="sigMileageOut">-</span></div>
+          <div class="row"><span>Fuel Out</span><span class="val" id="sigFuelOut">-</span></div>
+        </div>
+        <p style="font-size:14px;color:#4a6a5a;margin-bottom:8px;"><i class="fas fa-hand-paper" style="margin-right:6px;color:#2e5c3e;"></i>Sign below to confirm start</p>
+        <div class="sig-canvas-wrap">
+          <canvas id="sigCanvas"></canvas>
+          <button class="clear-btn" id="clearSigBtn"><i class="fas fa-undo-alt"></i> Clear</button>
+        </div>
+        <div class="sig-actions">
+          <button class="pill-btn" id="submitSigBtn">Submit Signature</button>
+          <button class="outline-btn" id="cancelSigBtn">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <!-- ===== REPORTS PAGE ===== -->
@@ -921,26 +921,6 @@
       <button class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></button>
     </div>
 
-    <!-- ===== SIGNATURE MODAL ===== -->
-    <div class="modal-overlay" id="signModal">
-      <div class="modal-card">
-        <h3><i class="fas fa-pen-fancy"></i> Sign & Start Shift</h3>
-        <div class="car-summary">
-          <div class="row"><span>Vehicle</span><span class="val" id="modalCarName">-</span></div>
-          <div class="row"><span>Plate</span><span class="val" id="modalCarPlate">-</span></div>
-          <div class="row"><span>Time Out</span><span class="val" id="modalTimeOut">-</span></div>
-          <div class="row"><span>Mileage Out</span><span class="val" id="modalMileageOut">-</span></div>
-          <div class="row"><span>Fuel Out</span><span class="val" id="modalFuelOut">-</span></div>
-        </div>
-        <p class="sign-hint"><i class="fas fa-hand-paper" style="margin-right:6px;color:#2e5c3e;"></i>Sign below to confirm start</p>
-        <div class="signature-area">
-          <canvas id="sigCanvas"></canvas>
-          <button class="clear-btn" id="clearSigBtn"><i class="fas fa-undo-alt"></i> Clear</button>
-        </div>
-        <button class="pill-btn" id="submitSigBtn">Submit Signature</button>
-        <button class="outline-btn" onclick="closeSignModal()">Cancel</button>
-      </div>
-    </div>
   </div>
 
   <script type="module">
@@ -975,6 +955,11 @@
     const shiftHint = $('shiftHint');
     const offdayFullscreen = $('offdayFullscreen');
     const offdayWorkerName = $('offdayWorkerName');
+    const signatureSection = $('signatureSection');
+    const sigCanvas = $('sigCanvas');
+    const submitSigBtn = $('submitSigBtn');
+    const cancelSigBtn = $('cancelSigBtn');
+    const clearSigBtn = $('clearSigBtn');
 
     // ----- State -----
     let currentUser = null;
@@ -982,6 +967,8 @@
     let currentStat = null;
     let timerInterval = null;
     let reportsCache = [];
+    let sigCtx = null;
+    let isDrawing = false;
 
     // ----- Auth -----
     onAuthStateChanged(auth, async (user) => {
@@ -1008,6 +995,11 @@
       $('reportDatePicker').addEventListener('change', (e) => {
         renderReports(e.target.value);
       });
+
+      // Signature actions
+      cancelSigBtn.addEventListener('click', hideSignatureSection);
+      clearSigBtn.addEventListener('click', clearCanvas);
+      submitSigBtn.addEventListener('click', submitSignature);
     });
 
     // ----- Load driver data -----
@@ -1110,6 +1102,7 @@
         shiftHint.textContent = 'No shift assigned for today. Please contact admin.';
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = null;
+        hideSignatureSection();
         return;
       }
 
@@ -1149,12 +1142,13 @@
         shiftHint.textContent = 'Tap to sign and start the shift';
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = null;
-        actionBtn.onclick = openSignModal;
+        actionBtn.onclick = showSignatureSection;
       } else if (status === 'signed') {
         actionBtn.style.display = 'none';
         shiftTimer.style.display = 'block';
         shiftHint.textContent = 'Shift in progress...';
         startTimer(stat.startTime);
+        hideSignatureSection();
       } else if (status === 'completed') {
         actionBtn.style.display = 'none';
         shiftTimer.style.display = 'block';
@@ -1170,6 +1164,7 @@
         }
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = null;
+        hideSignatureSection();
       }
     }
 
@@ -1186,10 +1181,7 @@
     }
 
     // ----- Signature Canvas -----
-    let sigCanvas, sigCtx, isDrawing = false;
-
     function setupSignatureCanvas() {
-      sigCanvas = $('sigCanvas');
       sigCtx = sigCanvas.getContext('2d');
       resizeCanvas();
       window.addEventListener('resize', resizeCanvas);
@@ -1204,8 +1196,6 @@
         draw(e.touches[0]); });
       sigCanvas.addEventListener('touchend', (e) => { e.preventDefault();
         endDraw(); });
-
-      $('clearSigBtn').addEventListener('click', clearCanvas);
     }
 
     function resizeCanvas() {
@@ -1244,25 +1234,29 @@
       return sigCanvas.toDataURL('image/png');
     }
 
-    // ----- Signature Modal -----
-    function openSignModal() {
+    // ----- Show / Hide Signature Section -----
+    function showSignatureSection() {
       if (!currentStat) return;
-      $('modalCarName').textContent = currentStat.vehicleName || 'Unknown';
-      $('modalCarPlate').textContent = currentStat.vehiclePlate || '';
-      $('modalTimeOut').textContent = currentStat.timeOut || '-';
-      $('modalMileageOut').textContent = currentStat.mileageOut ? `${currentStat.mileageOut} km` : '-';
-      $('modalFuelOut').textContent = currentStat.fuelOut ? `${currentStat.fuelOut} L` : '-';
+      $('sigCarName').textContent = currentStat.vehicleName || 'Unknown';
+      $('sigCarPlate').textContent = currentStat.vehiclePlate || '';
+      $('sigTimeOut').textContent = currentStat.timeOut || '-';
+      $('sigMileageOut').textContent = currentStat.mileageOut ? `${currentStat.mileageOut} km` : '-';
+      $('sigFuelOut').textContent = currentStat.fuelOut ? `${currentStat.fuelOut} L` : '-';
       clearCanvas();
-      $('signModal').classList.add('active');
-      $('submitSigBtn').disabled = false;
-      $('submitSigBtn').textContent = 'Submit Signature';
-      $('submitSigBtn').onclick = submitSignature;
+      signatureSection.style.display = 'block';
+      submitSigBtn.disabled = false;
+      submitSigBtn.textContent = 'Submit Signature';
+      actionBtn.style.display = 'none';
     }
 
-    window.closeSignModal = function() {
-      $('signModal').classList.remove('active');
-    };
+    function hideSignatureSection() {
+      signatureSection.style.display = 'none';
+      if (currentStat && currentStat.status === 'pending') {
+        actionBtn.style.display = 'flex';
+      }
+    }
 
+    // ----- Submit Signature -----
     async function submitSignature() {
       const dataURL = getSignatureDataURL();
       const img = new Image();
@@ -1283,8 +1277,8 @@
         return;
       }
 
-      $('submitSigBtn').disabled = true;
-      $('submitSigBtn').textContent = 'Submitting...';
+      submitSigBtn.disabled = true;
+      submitSigBtn.textContent = 'Submitting...';
 
       try {
         await update(ref(db, `driverStats/${currentStat.id}`), {
@@ -1292,11 +1286,11 @@
           signature: dataURL,
           signedAt: Date.now()
         });
-        closeSignModal();
+        hideSignatureSection();
       } catch (err) {
         alert('Error submitting signature: ' + err.message);
-        $('submitSigBtn').disabled = false;
-        $('submitSigBtn').textContent = 'Submit Signature';
+        submitSigBtn.disabled = false;
+        submitSigBtn.textContent = 'Submit Signature';
       }
     }
 
@@ -1382,19 +1376,6 @@
       $('reportDatePicker').value = today;
       renderReports(today);
     }
-
-    // ----- Close modal on overlay click -----
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeSignModal();
-      });
-    });
-
-    // Close modal with Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeSignModal();
-    });
   </script>
-
 </body>
 </html>
