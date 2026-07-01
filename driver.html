@@ -361,6 +361,65 @@
       color: #1e3a2a;
     }
 
+    /* ===== DAMAGE PHOTOS (driver view) ===== */
+    .damage-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #d0e0d0;
+    }
+    .damage-section .damage-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #1e3a2a;
+      margin-bottom: 6px;
+    }
+    .damage-section .damage-header i {
+      color: #dc2626;
+    }
+    .damage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 6px;
+    }
+    .damage-grid .thumb {
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #d0e0d0;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      background: #f0f5f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .damage-grid .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .damage-grid .thumb:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    }
+    .damage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .damage-badge i {
+      font-size: 13px;
+    }
+
     /* ===== PULSING START BUTTON ===== */
     .shift-circle-container {
       display: flex;
@@ -566,6 +625,71 @@
       from {
         opacity: 0;
         transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== LIGHTBOX (for damage photos) ===== */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.25s ease;
+    }
+    .lightbox-overlay.active {
+      display: flex;
+    }
+    .lightbox-overlay .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .lightbox-overlay .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+    .lightbox-overlay .lightbox-image {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+      animation: fadeInUp 0.3s ease;
+    }
+    .lightbox-overlay .lightbox-caption {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.8rem;
+      font-weight: 400;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
       to {
         opacity: 1;
@@ -891,6 +1015,15 @@
             <div class="calc-row"><span class="label">Revenue</span><span class="value green" id="revenue">ZMW -</span></div>
 
             <div class="admin-comment"><strong>Admin Comment:</strong> <span id="adminComment">-</span></div>
+
+            <!-- DAMAGE PHOTOS (only when completed and present) -->
+            <div id="damageSectionShift" class="damage-section" style="display:none;">
+              <div class="damage-header">
+                <i class="fas fa-camera"></i> Damage Photos
+                <span class="damage-badge" id="damageCountShift">0</span>
+              </div>
+              <div class="damage-grid" id="damageGridShift"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -952,6 +1085,13 @@
       <button class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></button>
     </div>
 
+    <!-- ===== LIGHTBOX (damage photos) ===== -->
+    <div class="lightbox-overlay" id="lightboxOverlay">
+      <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+      <img class="lightbox-image" id="lightboxImage" src="" alt="Damage photo" />
+      <div class="lightbox-caption" id="lightboxCaption">Damage photo</div>
+    </div>
+
   </div>
 
   <script type="module">
@@ -991,6 +1131,9 @@
     const submitSigBtn = $('submitSigBtn');
     const cancelSigBtn = $('cancelSigBtn');
     const clearSigBtn = $('clearSigBtn');
+    const lightboxOverlay = $('lightboxOverlay');
+    const lightboxImage = $('lightboxImage');
+    const lightboxCaption = $('lightboxCaption');
 
     // ----- State -----
     let currentUser = null;
@@ -1000,6 +1143,20 @@
     let reportsCache = [];
     let sigCtx = null;
     let isDrawing = false;
+
+    // ----- Lightbox functions (exposed globally for inline onclick) -----
+    window.openLightbox = function(src, caption) {
+      lightboxImage.src = src;
+      lightboxCaption.textContent = caption || 'Damage photo';
+      lightboxOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeLightbox = function() {
+      lightboxOverlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+      lightboxImage.src = '';
+    };
 
     // ----- Auth -----
     onAuthStateChanged(auth, async (user) => {
@@ -1121,6 +1278,28 @@
       });
     }
 
+    // ----- Helper to render damage photos -----
+    function renderDamagePhotos(containerId, badgeId, images) {
+      const container = document.getElementById(containerId);
+      const badge = document.getElementById(badgeId);
+      if (!container) return;
+
+      const valid = (images || []).filter(url => url && url.trim() !== '');
+      if (valid.length === 0) {
+        container.parentElement.style.display = 'none';
+        return;
+      }
+
+      container.parentElement.style.display = 'block';
+      badge.textContent = valid.length;
+
+      container.innerHTML = valid.map(url =>
+        `<div class="thumb" onclick="openLightbox('${url}', 'Damage photo')">
+           <img src="${url}" alt="Damage" loading="lazy">
+         </div>`
+      ).join('');
+    }
+
     // ----- Update UI based on stat -----
     function updateUIForStat(stat) {
       if (!stat) {
@@ -1161,8 +1340,12 @@
         $('hoursOut').textContent = (stat.hoursOut || 0) + ' hrs';
         $('revenue').textContent = `ZMW ${(stat.revenue || 0).toFixed(2)}`;
         $('adminComment').textContent = stat.adminComment || 'No comment';
+
+        // Damage photos
+        renderDamagePhotos('damageGridShift', 'damageCountShift', stat.damageImages);
       } else {
         eodDiv.style.display = 'none';
+        document.getElementById('damageSectionShift').style.display = 'none';
       }
 
       if (status === 'pending') {
@@ -1353,6 +1536,9 @@
       filtered.forEach(s => {
         const status = s.status || 'pending';
         const isCompleted = status === 'completed';
+        const damageImages = (s.damageImages || []).filter(url => url && url.trim() !== '');
+        const hasDamage = damageImages.length > 0;
+
         html += `
             <div class="report-card">
               <div class="header">
@@ -1385,10 +1571,27 @@
               <div class="footer">
                 <span class="status-badge ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
                 ${isCompleted ? `<span style="font-size:12px;color:#6b8a7a;"><i class="fas fa-check-circle" style="color:#059669;"></i> Completed</span>` : ''}
+                ${hasDamage ? `<span class="damage-badge"><i class="fas fa-camera"></i> ${damageImages.length}</span>` : ''}
               </div>
 
               ${s.adminComment ? `
                 <div class="admin-comment"><strong><i class="fas fa-comment-dots" style="margin-right:4px;"></i> Admin:</strong> ${s.adminComment}</div>
+              ` : ''}
+
+              ${hasDamage ? `
+                <div class="damage-section" style="border-top:1px solid #d0e0d0;margin-top:10px;padding-top:10px;">
+                  <div class="damage-header" style="margin-bottom:6px;">
+                    <i class="fas fa-camera"></i> Damage Photos
+                    <span class="damage-badge">${damageImages.length}</span>
+                  </div>
+                  <div class="damage-grid">
+                    ${damageImages.map(url => `
+                      <div class="thumb" onclick="openLightbox('${url}', 'Damage photo')">
+                        <img src="${url}" alt="Damage" loading="lazy">
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
               ` : ''}
             </div>
           `;
