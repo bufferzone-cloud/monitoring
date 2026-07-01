@@ -640,6 +640,80 @@
             display: flex;
         }
 
+        /* ===== DAMAGE UPLOAD GRID (2x2) ===== */
+        .damage-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .damage-grid .upload-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 160px;
+            margin: 0 auto;
+        }
+        @media (max-width: 480px) {
+            .damage-grid .upload-box {
+                max-width: 120px;
+            }
+        }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+        .lightbox-overlay.active {
+            display: flex;
+        }
+        .lightbox-overlay .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .lightbox-overlay .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+        .lightbox-overlay .lightbox-image {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.3s ease;
+        }
+        .lightbox-overlay .lightbox-caption {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
         /* ===== EXPANDABLE FORMS ===== */
         .form-expandable {
             background: var(--white);
@@ -1526,6 +1600,22 @@
             display: inline-block;
         }
 
+        /* ===== DAMAGE BADGE ===== */
+        .damage-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: 0.55rem;
+            font-weight: 600;
+            background: var(--red-light);
+            color: var(--red);
+        }
+        .damage-badge i {
+            font-size: 0.65rem;
+        }
+
         /* ===== STATS SECTION ===== */
         .stats-header {
             display: flex;
@@ -1992,6 +2082,9 @@
             .upload-box .placeholder-icon {
                 font-size: 1.6rem;
             }
+            .damage-grid .upload-box {
+                max-width: 100px;
+            }
         }
         @media (min-width: 600px) {
             .grid-cards {
@@ -2012,6 +2105,13 @@
 
     <!-- ===== TOAST CONTAINER ===== -->
     <div id="toastContainer"></div>
+
+    <!-- ===== LIGHTBOX ===== -->
+    <div class="lightbox-overlay" id="lightboxOverlay">
+        <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+        <img class="lightbox-image" id="lightboxImage" src="" alt="Damage photo" />
+        <div class="lightbox-caption" id="lightboxCaption">Damage photo</div>
+    </div>
 
     <!-- ===== LOGIN SCREEN ===== -->
     <div id="loginScreen">
@@ -2261,6 +2361,36 @@
         }
 
         // ==============================================================
+        // LIGHTBOX
+        // ==============================================================
+        function openLightbox(src, caption) {
+            const overlay = document.getElementById('lightboxOverlay');
+            const img = document.getElementById('lightboxImage');
+            const captionEl = document.getElementById('lightboxCaption');
+            img.src = src;
+            captionEl.textContent = caption || 'Damage photo';
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const overlay = document.getElementById('lightboxOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('lightboxImage').src = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        document.getElementById('lightboxOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeLightbox();
+        });
+
+        // ==============================================================
         // UPLOAD BOX FUNCTIONALITY
         // ==============================================================
         function setupUploadBox(boxId, hiddenInputId, callback) {
@@ -2269,7 +2399,19 @@
 
             if (!box || !hiddenInput) return;
 
-            box.onclick = function() {
+            // If box already has an image, wire up the click to open lightbox
+            const existingImg = box.querySelector('img');
+            if (existingImg) {
+                box.onclick = function(e) {
+                    if (e.target.closest('.remove-btn')) return;
+                    openLightbox(existingImg.src, 'Damage photo');
+                };
+                return;
+            }
+
+            box.onclick = function(e) {
+                if (e.target.closest('.remove-btn')) return;
+
                 const options = {
                     cloudName: CLOUD_NAME,
                     uploadPreset: UPLOAD_PRESET,
@@ -2291,13 +2433,19 @@
 
                         box.classList.add('has-image');
                         box.innerHTML = `
-                            <img src="${url}" alt="Uploaded image">
+                            <img src="${url}" alt="Damage photo">
                             <button class="remove-btn" onclick="removeUploadImage('${boxId}', '${hiddenInputId}')">
                                 <i class="fas fa-times"></i>
                             </button>
                         `;
 
                         hiddenInput.value = url;
+
+                        // Wire up the image click to open lightbox
+                        box.querySelector('img').onclick = function(e) {
+                            e.stopPropagation();
+                            openLightbox(url, 'Damage photo');
+                        };
 
                         if (callback) callback(url);
                         showToast('Upload successful!', 'success');
@@ -2316,6 +2464,8 @@
                     <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
                     <div class="placeholder-text">Tap to upload</div>
                 `;
+                // Re-bind click handler
+                setupUploadBox(boxId, hiddenInputId);
             }
 
             if (hiddenInput) {
@@ -2482,7 +2632,6 @@
                 document.getElementById('appShell').classList.remove('active');
                 document.getElementById('loginScreen').style.display = 'flex';
                 showToast('Logged out', 'info');
-                // Redirect to index.html (login page)
                 window.location.href = 'index.html';
             }
         }
@@ -2577,7 +2726,9 @@
                         reportGenerated: data.reportGenerated || false,
                         distanceTraveled: data.distanceTraveled || 0,
                         fuelUsed: data.fuelUsed || 0,
-                        hoursOut: data.hoursOut || 0
+                        hoursOut: data.hoursOut || 0,
+                        // Damage images array
+                        damageImages: data.damageImages || []
                     });
                 });
             }
@@ -2593,7 +2744,8 @@
                     result.push({
                         id,
                         ...data,
-                        date: data.date || Date.now()
+                        date: data.date || Date.now(),
+                        damageImages: data.damageImages || []
                     });
                 });
             }
@@ -2796,6 +2948,7 @@
                                 <div class="detail-row"><span class="label">Mileage Out</span><span class="value">${s.mileageOut || 'N/A'} km</span></div>
                                 <div class="detail-row"><span class="label">Fuel Out</span><span class="value">${s.fuelOut || 'N/A'} L</span></div>
                                 <div class="detail-row"><span class="label">Date</span><span class="value">${formatDate(s.startTime)}</span></div>
+                                ${s.damageImages && s.damageImages.some(url => url) ? `<div class="detail-row"><span class="label">Damage</span><span class="value"><span class="damage-badge"><i class="fas fa-camera"></i> ${s.damageImages.filter(url => url).length} photo(s)</span></span></div>` : ''}
                             </div>
                             <div class="stats-card-actions">
                                 ${s.status === 'pending' ? `<button class="btn-icon primary" onclick="event.stopPropagation();signStat('${s.id}')"><i class="fas fa-check"></i> Sign</button>` : ''}
@@ -3058,7 +3211,8 @@
                     reportGenerated: false,
                     distanceTraveled: 0,
                     fuelUsed: 0,
-                    hoursOut: 0
+                    hoursOut: 0,
+                    damageImages: []
                 });
 
                 document.getElementById('vehicleDropdownContainer').innerHTML = '';
@@ -3092,6 +3246,9 @@
             }
         };
 
+        // ==============================================================
+        // END OF DAY WITH DAMAGE IMAGES (4 upload boxes in 2x2 grid)
+        // ==============================================================
         window.openEndOfDay = function(statId) {
             const stat = allStats.find(s => s.id === statId);
             if (!stat) return;
@@ -3103,6 +3260,40 @@
 
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '🚩 End of Day Stats';
+
+            // Build the damage upload grid with 4 boxes (2x2)
+            const damageGridHtml = `
+                <div style="margin-top:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <i class="fas fa-camera" style="color:var(--red);"></i>
+                        <span style="font-weight:600;font-size:0.8rem;color:var(--gray-700);">Damage Photos (optional)</span>
+                        <span style="font-size:0.65rem;color:var(--gray-400);">— tap to upload</span>
+                    </div>
+                    <div class="damage-grid">
+                        <div class="upload-box" id="damageBox1">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Photo 1</div>
+                        </div>
+                        <div class="upload-box" id="damageBox2">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Photo 2</div>
+                        </div>
+                        <div class="upload-box" id="damageBox3">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Photo 3</div>
+                        </div>
+                        <div class="upload-box" id="damageBox4">
+                            <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="placeholder-text">Photo 4</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="damageImage1" value="">
+                    <input type="hidden" id="damageImage2" value="">
+                    <input type="hidden" id="damageImage3" value="">
+                    <input type="hidden" id="damageImage4" value="">
+                </div>
+            `;
+
             document.getElementById('modalBody').innerHTML = `
                 <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
                     <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Vehicle Details</div>
@@ -3137,13 +3328,22 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-comment"></i> Admin Comment</label>
-                    <textarea id="eodAdminComment" placeholder="Any notes about this shift" rows="3"></textarea>
+                    <textarea id="eodAdminComment" placeholder="Any notes about this shift" rows="2"></textarea>
                 </div>
+                ${damageGridHtml}
             `;
             document.getElementById('modalSaveBtn').onclick = () => submitEndOfDay(statId);
             document.getElementById('modalSaveBtn').textContent = 'Submit End of Day';
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
+
+            // Set up the 4 upload boxes after the modal is rendered
+            setTimeout(() => {
+                setupUploadBox('damageBox1', 'damageImage1');
+                setupUploadBox('damageBox2', 'damageImage2');
+                setupUploadBox('damageBox3', 'damageImage3');
+                setupUploadBox('damageBox4', 'damageImage4');
+            }, 150);
         };
 
         window.submitEndOfDay = async function(statId) {
@@ -3152,6 +3352,14 @@
             const fuelParked = parseFloat(document.getElementById('eodFuelParked').value) || 0;
             const revenue = parseFloat(document.getElementById('eodRevenue').value) || 0;
             const adminComment = document.getElementById('eodAdminComment').value.trim();
+
+            // Collect damage images
+            const damageImages = [
+                document.getElementById('damageImage1').value || '',
+                document.getElementById('damageImage2').value || '',
+                document.getElementById('damageImage3').value || '',
+                document.getElementById('damageImage4').value || ''
+            ].filter(url => url);
 
             if (!timeParked || mileageParked === 0) {
                 showToast('Please fill in Time Parked and Mileage Parked.', 'error');
@@ -3166,7 +3374,7 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
-                // Update to completed directly (bypassing signed)
+                // Update to completed
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'completed',
                     signature: 'completed',
@@ -3180,10 +3388,11 @@
                     distanceTraveled: distanceTraveled,
                     fuelUsed: fuelUsed,
                     hoursOut: hoursOut,
-                    reportGenerated: true
+                    reportGenerated: true,
+                    damageImages: damageImages
                 });
 
-                // Generate report
+                // Generate report with damage images
                 const reportRef = db.ref('driverReports').push();
                 await reportRef.set({
                     statId: statId,
@@ -3211,11 +3420,16 @@
                     hoursOut: hoursOut,
                     date: Date.now(),
                     startTime: stat.startTime,
-                    endTime: Date.now()
+                    endTime: Date.now(),
+                    damageImages: damageImages
                 });
 
                 closeModal('detailModal');
-                showToast('End of Day submitted! Report generated and stat completed.', 'success');
+                showToast(damageImages.length > 0 ?
+                    `End of Day submitted! ${damageImages.length} damage photo(s) saved.` :
+                    'End of Day submitted! No damage photos taken.',
+                    'success'
+                );
                 await refreshAll();
                 renderStats();
             } catch (err) {
@@ -3244,6 +3458,22 @@
 
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '📊 Stat Details';
+            let damageHtml = '';
+            if (stat.damageImages && stat.damageImages.length > 0) {
+                damageHtml = `
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-200);">
+                        <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:6px;"><i class="fas fa-camera" style="color:var(--red);"></i> Damage Photos (${stat.damageImages.length})</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;">
+                            ${stat.damageImages.map(url => `
+                                <div style="cursor:pointer;" onclick="openLightbox('${url}', 'Damage photo')">
+                                    <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);border:1px solid var(--gray-200);">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             document.getElementById('modalBody').innerHTML = `
                 <div style="background:var(--gray-50);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--gray-200);">
                     <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:4px;">Vehicle</div>
@@ -3276,6 +3506,7 @@
                         <div><span class="label">Admin Comment:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(stat.adminComment || 'No comment')}</span></div>
                     ` : ''}
                 </div>
+                ${damageHtml}
             `;
             document.getElementById('modalSaveBtn').style.display = 'none';
             document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
@@ -3302,6 +3533,23 @@
 
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '📄 Full Report';
+
+            let damageHtml = '';
+            if (report.damageImages && report.damageImages.length > 0) {
+                damageHtml = `
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-200);">
+                        <div style="font-weight:600;font-size:0.8rem;color:var(--gray-700);margin-bottom:6px;"><i class="fas fa-camera" style="color:var(--red);"></i> Damage Photos (${report.damageImages.length})</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;">
+                            ${report.damageImages.map(url => `
+                                <div style="cursor:pointer;" onclick="openLightbox('${url}', 'Damage photo')">
+                                    <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);border:1px solid var(--gray-200);">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             document.getElementById('modalBody').innerHTML = `
                 <div style="background:var(--gray-50);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--gray-200);">
                     <div style="font-weight:700;font-size:1rem;color:var(--gray-800);margin-bottom:6px;">${escapeHtml(report.vehicleName)}</div>
@@ -3332,6 +3580,7 @@
                     <div style="grid-column:1/-1;"><span class="label">Admin:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.adminName || 'N/A')} (${escapeHtml(report.adminEmail || 'N/A')})</span></div>
                     <div style="grid-column:1/-1;"><span class="label">Admin Comment:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(report.adminComment || 'No comment')}</span></div>
                 </div>
+                ${damageHtml}
             `;
             document.getElementById('modalSaveBtn').style.display = 'none';
             document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
@@ -3339,16 +3588,19 @@
         };
 
         // ==============================================================
-        // DOWNLOAD SINGLE REPORT CSV
+        // DOWNLOAD SINGLE REPORT CSV (damage images NOT included)
         // ==============================================================
         window.downloadReportCSV = function(reportId) {
             const report = allReports.find(r => r.id === reportId);
             if (!report) return;
 
             const rows = [
-                ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email', 
-                 'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)', 'Distance Traveled (km)', 
-                 'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)', 'Admin Name', 'Admin Email', 'Admin Comment'],
+                ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email',
+                    'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)',
+                    'Distance Traveled (km)',
+                    'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)', 'Admin Name', 'Admin Email',
+                    'Admin Comment'
+                ],
                 [
                     formatDate(report.date),
                     report.vehicleName || '',
@@ -3383,17 +3635,16 @@
         };
 
         // ==============================================================
-        // DOWNLOAD DAILY REPORT CSV (ALL CARDS FOR SELECTED DATE)
+        // DOWNLOAD DAILY REPORT CSV (damage images NOT included)
         // ==============================================================
         window.downloadDailyReportCSV = function() {
             const date = document.getElementById('reportsDatePicker').value || reportsSelectedDate;
-            
+
             if (!date) {
                 showToast('Please select a date first.', 'error');
                 return;
             }
 
-            // Filter reports for the selected date
             const dateStart = new Date(date);
             dateStart.setHours(0, 0, 0, 0);
             const dateEnd = new Date(date);
@@ -3409,14 +3660,15 @@
                 return;
             }
 
-            // Create CSV with headers
             const rows = [
-                ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email', 
-                 'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)', 'Distance Traveled (km)', 
-                 'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)', 'Admin Name', 'Admin Email', 'Admin Comment']
+                ['Report Date', 'Vehicle Name', 'Vehicle Plate', 'Vehicle Color', 'Driver Name', 'Driver Phone', 'Driver Email',
+                    'Time Out', 'Time Parked', 'Hours Out', 'Mileage Out (km)', 'Mileage Parked (km)',
+                    'Distance Traveled (km)',
+                    'Fuel Out (L)', 'Fuel Parked (L)', 'Fuel Used (L)', 'Revenue (ZMW)', 'Admin Name', 'Admin Email',
+                    'Admin Comment'
+                ]
             ];
 
-            // Add data rows
             dailyReports.sort((a, b) => a.date - b.date).forEach(r => {
                 rows.push([
                     formatDate(r.date),
@@ -3752,7 +4004,7 @@
         };
 
         // ==============================================================
-        // EXPORT FUNCTIONS (CSV)
+        // EXPORT FUNCTIONS (CSV) — damage images NOT included
         // ==============================================================
         window.exportVehiclesCSV = function() {
             if (allVehicles.length === 0) {
@@ -3828,7 +4080,6 @@
             const totalFuel = allStats.reduce((sum, s) => sum + (s.fuelUsed || 0), 0);
             const totalRevenue = allStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
 
-            // Calculate fuel cost based on ERB prices
             const dieselPrice = ERB_FUEL_PRICES.diesel;
             const petrolPrice = ERB_FUEL_PRICES.petrol;
             const avgFuelPrice = (dieselPrice + petrolPrice) / 2;
@@ -4004,7 +4255,6 @@
         // RENDER REPORTS
         // ==============================================================
         function renderReports() {
-            // Filter reports by selected date
             const reportsDateStart = new Date(reportsSelectedDate);
             reportsDateStart.setHours(0, 0, 0, 0);
             const reportsDateEnd = new Date(reportsSelectedDate);
@@ -4050,7 +4300,8 @@
                                     <div class="card-title">${escapeHtml(r.vehicleName)}</div>
                                     <div class="card-subtitle">${escapeHtml(r.driverName)}</div>
                                 </div>
-                                <div style="margin-left:auto;">
+                                <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+                                    ${r.damageImages && r.damageImages.length > 0 ? `<span class="damage-badge"><i class="fas fa-camera"></i> ${r.damageImages.length}</span>` : ''}
                                     <span style="font-size:0.65rem;color:var(--gray-500);">${formatDate(r.date)}</span>
                                 </div>
                             </div>
@@ -4198,6 +4449,7 @@
                     m.classList.remove('active');
                     document.body.style.overflow = 'auto';
                 });
+                closeLightbox();
             }
         });
 
