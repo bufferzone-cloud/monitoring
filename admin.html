@@ -202,6 +202,15 @@
                 transform: rotate(360deg);
             }
         }
+        @keyframes countdown-pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
 
         /* ===== TOAST CONTAINER ===== */
         #toastContainer {
@@ -2144,6 +2153,97 @@
             font-size: 1rem;
             color: var(--gray-500);
         }
+
+        /* ===== MAINTENANCE CARD (countdown) ===== */
+        .maint-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+        .maint-badge.urgent {
+            background: var(--red-light);
+            color: var(--red);
+            animation: countdown-pulse 1.5s infinite;
+        }
+        .maint-badge.warning {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .maint-badge.safe {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        /* ===== WEEKLY DROPDOWN ===== */
+        .week-dropdown-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .week-dropdown-wrap .week-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 220px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 50;
+            margin-top: 4px;
+            padding: 4px 0;
+        }
+        .week-dropdown-wrap .week-dropdown-menu.open {
+            display: block;
+            animation: fadeInUp 0.2s ease;
+        }
+        .week-dropdown-wrap .week-dropdown-menu .week-item {
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.78rem;
+            color: var(--gray-700);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .week-dropdown-wrap .week-dropdown-menu .week-item:last-child {
+            border-bottom: none;
+        }
+        .week-dropdown-wrap .week-dropdown-menu .week-item:hover {
+            background: var(--gray-50);
+        }
+        .week-dropdown-wrap .week-dropdown-menu .week-item .days-badge {
+            font-size: 0.6rem;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+        }
+        .week-dropdown-wrap .dropdown-toggle-btn {
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.7rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .week-dropdown-wrap .dropdown-toggle-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -2343,6 +2443,7 @@
         let allDrivers = [];
         let allStats = [];
         let allReports = [];
+        let allMaintenance = [];
         let currentUser = null;
         let currentTab = 'dashboard';
         let searchTerm = '';
@@ -2455,7 +2556,6 @@
 
             if (!box || !hiddenInput) return;
 
-            // If box already has an image, wire up the click to open lightbox
             const existingImg = box.querySelector('img');
             if (existingImg) {
                 box.onclick = function(e) {
@@ -2497,7 +2597,6 @@
 
                         hiddenInput.value = url;
 
-                        // Wire up the image click to open lightbox
                         box.querySelector('img').onclick = function(e) {
                             e.stopPropagation();
                             openLightbox(url, 'Damage photo');
@@ -2520,7 +2619,6 @@
                     <div class="placeholder-icon"><i class="fas fa-plus-circle"></i></div>
                     <div class="placeholder-text">Tap to upload</div>
                 `;
-                // Re-bind click handler
                 setupUploadBox(boxId, hiddenInputId);
             }
 
@@ -2783,7 +2881,6 @@
                         distanceTraveled: data.distanceTraveled || 0,
                         fuelUsed: data.fuelUsed || 0,
                         hoursOut: data.hoursOut || 0,
-                        // Damage images array
                         damageImages: data.damageImages || []
                     });
                 });
@@ -2809,12 +2906,34 @@
             return result;
         }
 
+        async function loadMaintenance() {
+            const snap = await db.ref('maintenance').once('value');
+            const result = [];
+            if (snap.val()) {
+                Object.entries(snap.val()).forEach(([id, data]) => {
+                    result.push({
+                        id,
+                        ...data,
+                        scheduledDate: data.scheduledDate || '',
+                        carName: data.carName || '',
+                        carId: data.carId || '',
+                        description: data.description || '',
+                        status: data.status || 'scheduled',
+                        createdAt: data.createdAt || Date.now()
+                    });
+                });
+            }
+            allMaintenance = result;
+            return result;
+        }
+
         async function refreshAll() {
             await Promise.all([
                 loadVehicles(),
                 loadDrivers(),
                 loadStats(),
-                loadReports()
+                loadReports(),
+                loadMaintenance()
             ]);
 
             allVehicles.forEach(v => {
@@ -2856,10 +2975,16 @@
                 drivers: allDrivers.length,
                 pendingStats: allStats.filter(s => s.status === 'pending').length,
                 signedStats: allStats.filter(s => s.status === 'signed').length,
-                completedStats: allStats.filter(s => s.status === 'completed').length
+                completedStats: allStats.filter(s => s.status === 'completed').length,
+                maintenanceDue: allMaintenance.filter(m => {
+                    if (!m.scheduledDate) return false;
+                    const days = daysUntil(m.scheduledDate);
+                    return days <= 7 && days >= 0;
+                }).length
             };
+            let maintText = stats.maintenanceDue > 0 ? ` · 🔧 ${stats.maintenanceDue} due` : '';
             document.getElementById('statsText').textContent =
-                `${stats.vehicles} veh · ${stats.drivers} drv · ${stats.pendingStats} pending · ${stats.signedStats} signed · ${stats.completedStats} complete`;
+                `${stats.vehicles} veh · ${stats.drivers} drv · ${stats.pendingStats} pending · ${stats.signedStats} signed · ${stats.completedStats} complete${maintText}`;
         }
 
         // ==============================================================
@@ -2869,6 +2994,49 @@
             const pendingStats = allStats.filter(s => s.status === 'pending');
             const signedStats = allStats.filter(s => s.status === 'signed');
             const completedStats = allStats.filter(s => s.status === 'completed');
+
+            // Maintenance countdown cards
+            const upcomingMaint = allMaintenance
+                .filter(m => m.scheduledDate && daysUntil(m.scheduledDate) >= -1)
+                .sort((a, b) => daysUntil(a.scheduledDate) - daysUntil(b.scheduledDate))
+                .slice(0, 6);
+
+            let maintHtml = '';
+            if (upcomingMaint.length > 0) {
+                maintHtml = `
+                    <div style="margin-top:14px;margin-bottom:4px;">
+                        <h3 style="font-size:0.85rem;font-weight:700;color:var(--gray-700);display:flex;align-items:center;gap:6px;">
+                            <i class="fas fa-wrench" style="color:var(--accent);"></i> Upcoming Maintenance
+                            <span style="font-size:0.6rem;font-weight:400;color:var(--gray-400);">(${upcomingMaint.length})</span>
+                        </h3>
+                    </div>
+                    <div class="grid-cards" style="margin-top:6px;">
+                        ${upcomingMaint.map(m => {
+                            const days = daysUntil(m.scheduledDate);
+                            const badgeClass = days <= 2 ? 'urgent' : days <= 7 ? 'warning' : 'safe';
+                            const badgeText = days < 0 ? 'Overdue!' : days === 0 ? 'Today!' : `${days}d`;
+                            return `
+                                <div class="card" onclick="viewMaintenanceDetail('${m.id}')" style="cursor:pointer;border-left:4px solid ${days <= 2 ? 'var(--red)' : days <= 7 ? 'var(--accent)' : 'var(--green)'};">
+                                    <div class="card-header">
+                                        <div class="icon-wrap amber"><i class="fas fa-car"></i></div>
+                                        <div>
+                                            <div class="card-title">${escapeHtml(m.carName || 'Unnamed')}</div>
+                                            <div class="card-subtitle">${escapeHtml(m.description || 'No description')}</div>
+                                        </div>
+                                        <div style="margin-left:auto;">
+                                            <span class="maint-badge ${badgeClass}"><i class="fas fa-clock"></i> ${badgeText}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="detail-row"><span class="label">Scheduled</span><span class="value">${formatDate(m.scheduledDate)}</span></div>
+                                        <div class="detail-row"><span class="label">Status</span><span class="value">${m.status === 'completed' ? '✅ Done' : m.status === 'in-progress' ? '🔧 In progress' : '⏳ Scheduled'}</span></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
 
             let html = `
                 <div class="page-header">
@@ -2887,11 +3055,70 @@
                         <div class="card-header"><div class="icon-wrap amber"><i class="fas fa-chart-bar"></i></div><div><div class="card-title">Stats</div><div class="card-subtitle">Today's activity</div></div></div>
                         <div class="card-body"><div class="detail-row"><span class="label">Pending</span><span class="value">${pendingStats.length}</span></div><div class="detail-row"><span class="label">Signed</span><span class="value">${signedStats.length}</span></div><div class="detail-row"><span class="label">Completed</span><span class="value">${completedStats.length}</span></div></div>
                     </div>
+                    <div class="card">
+                        <div class="card-header"><div class="icon-wrap red"><i class="fas fa-wrench"></i></div><div><div class="card-title">Maintenance</div><div class="card-subtitle">Scheduled</div></div></div>
+                        <div class="card-body"><div class="detail-row"><span class="label">Upcoming (≤7d)</span><span class="value">${allMaintenance.filter(m => m.scheduledDate && daysUntil(m.scheduledDate) <= 7 && daysUntil(m.scheduledDate) >= 0).length}</span></div><div class="detail-row"><span class="label">Overdue</span><span class="value">${allMaintenance.filter(m => m.scheduledDate && daysUntil(m.scheduledDate) < 0).length}</span></div><div class="detail-row"><span class="label">Total scheduled</span><span class="value">${allMaintenance.length}</span></div></div>
+                    </div>
                 </div>
+                ${maintHtml}
             `;
             document.getElementById('contentArea').innerHTML = html;
         }
 
+        // ==============================================================
+        // MAINTENANCE HELPERS
+        // ==============================================================
+        function daysUntil(dateStr) {
+            if (!dateStr) return 999;
+            const target = new Date(dateStr);
+            target.setHours(0, 0, 0, 0);
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+            return diff;
+        }
+
+        function getWeeksInMonth(year, month) {
+            // month is 0-based
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const weeks = [];
+            let start = new Date(firstDay);
+            // Align to Monday
+            const dayOfWeek = start.getDay();
+            const diffToMonday = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+            start.setDate(start.getDate() - diffToMonday);
+
+            let weekNum = 1;
+            while (start <= lastDay) {
+                const weekEnd = new Date(start);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                // Clip to month
+                const weekStartClipped = new Date(Math.max(start.getTime(), firstDay.getTime()));
+                const weekEndClipped = new Date(Math.min(weekEnd.getTime(), lastDay.getTime()));
+                // Count days in this week that fall within the month
+                let daysInMonth = 0;
+                for (let d = new Date(weekStartClipped); d <= weekEndClipped; d.setDate(d.getDate() + 1)) {
+                    daysInMonth++;
+                }
+                if (daysInMonth > 0) {
+                    weeks.push({
+                        weekNum,
+                        start: new Date(weekStartClipped),
+                        end: new Date(weekEndClipped),
+                        days: daysInMonth,
+                        label: `Week ${weekNum}`
+                    });
+                    weekNum++;
+                }
+                start.setDate(start.getDate() + 7);
+            }
+            return weeks;
+        }
+
+        // ==============================================================
+        // STATS PAGE (unchanged, kept as-is)
+        // ==============================================================
         function renderStats() {
             const selectedDateStart = new Date(selectedDate);
             selectedDateStart.setHours(0, 0, 0, 0);
@@ -3045,8 +3272,8 @@
             const container = document.getElementById('vehicleDropdownContainer');
             if (!container) return;
 
-            // Filter out vehicles that are already assigned (pending or signed stat)
-            const availableVehicles = allVehicles.filter(v => !allStats.some(s => s.vehicleId === v.id && (s.status === 'pending' || s.status === 'signed')));
+            const availableVehicles = allVehicles.filter(v => !allStats.some(s => s.vehicleId === v.id && (s.status ===
+                'pending' || s.status === 'signed')));
 
             const dropdown = createCustomDropdown(
                 availableVehicles,
@@ -3082,8 +3309,8 @@
             const container = document.getElementById('driverDropdownContainer');
             if (!container) return;
 
-            // Filter out drivers that are already assigned (pending or signed stat)
-            const availableDrivers = allDrivers.filter(d => !allStats.some(s => s.driverId === d.id && (s.status === 'pending' || s.status === 'signed')));
+            const availableDrivers = allDrivers.filter(d => !allStats.some(s => s.driverId === d.id && (s.status ===
+                'pending' || s.status === 'signed')));
 
             const dropdown = createCustomDropdown(
                 availableDrivers,
@@ -3309,7 +3536,7 @@
         };
 
         // ==============================================================
-        // END OF DAY WITH DAMAGE IMAGES (4 upload boxes in 2x2 grid)
+        // END OF DAY WITH DAMAGE IMAGES
         // ==============================================================
         window.openEndOfDay = function(statId) {
             const stat = allStats.find(s => s.id === statId);
@@ -3323,7 +3550,6 @@
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').textContent = '🚩 End of Day Stats';
 
-            // Build the damage upload grid with 4 boxes (2x2)
             const damageGridHtml = `
                 <div style="margin-top:8px;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -3399,7 +3625,6 @@
             document.getElementById('modalSaveBtn').style.display = 'block';
             openModal('detailModal');
 
-            // Set up the 4 upload boxes after the modal is rendered
             setTimeout(() => {
                 setupUploadBox('damageBox1', 'damageImage1');
                 setupUploadBox('damageBox2', 'damageImage2');
@@ -3415,7 +3640,6 @@
             const revenue = parseFloat(document.getElementById('eodRevenue').value) || 0;
             const adminComment = document.getElementById('eodAdminComment').value.trim();
 
-            // Collect damage images
             const damageImages = [
                 document.getElementById('damageImage1').value || '',
                 document.getElementById('damageImage2').value || '',
@@ -3436,7 +3660,6 @@
                 const fuelUsed = (stat.fuelOut || 0) - fuelParked;
                 const hoursOut = calculateHours(stat.timeOut, timeParked);
 
-                // Update to completed
                 await db.ref(`driverStats/${statId}`).update({
                     status: 'completed',
                     signature: 'completed',
@@ -3454,7 +3677,6 @@
                     damageImages: damageImages
                 });
 
-                // Generate report with damage images
                 const reportRef = db.ref('driverReports').push();
                 await reportRef.set({
                     statId: statId,
@@ -3650,7 +3872,7 @@
         };
 
         // ==============================================================
-        // DOWNLOAD SINGLE REPORT CSV (damage images NOT included)
+        // DOWNLOAD SINGLE REPORT CSV
         // ==============================================================
         window.downloadReportCSV = function(reportId) {
             const report = allReports.find(r => r.id === reportId);
@@ -3697,7 +3919,7 @@
         };
 
         // ==============================================================
-        // DOWNLOAD DAILY REPORT CSV (damage images NOT included)
+        // DOWNLOAD DAILY REPORT CSV
         // ==============================================================
         window.downloadDailyReportCSV = function() {
             const date = document.getElementById('reportsDatePicker').value || reportsSelectedDate;
@@ -4066,7 +4288,7 @@
         };
 
         // ==============================================================
-        // EXPORT FUNCTIONS (CSV) — damage images NOT included
+        // EXPORT FUNCTIONS (CSV)
         // ==============================================================
         window.exportVehiclesCSV = function() {
             if (allVehicles.length === 0) {
@@ -4193,19 +4415,286 @@
         };
 
         // ==============================================================
-        // MAINTENANCE
+        // MAINTENANCE MODULE (full implementation)
         // ==============================================================
         window.openMaintenance = function() {
             const container = document.getElementById('contentArea');
+
             let html = `
                 <div class="page-header">
                     <h2><i class="fas fa-wrench" style="color:var(--accent);"></i> Maintenance</h2>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <button class="btn-primary" onclick="openAddMaintenanceModal()" style="padding:6px 14px;font-size:0.75rem;">
+                            <i class="fas fa-plus"></i> Schedule Maintenance
+                        </button>
+                    </div>
                 </div>
-                <div class="empty-state"><i class="fas fa-wrench"></i><h3>Maintenance module coming soon</h3></div>
+
+                <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+                    <span style="font-size:0.75rem;color:var(--gray-600);">
+                        <i class="fas fa-wrench"></i> Total scheduled: ${allMaintenance.length}
+                    </span>
+                    <span style="font-size:0.75rem;color:var(--gray-600);">
+                        <i class="fas fa-clock"></i> Overdue: ${allMaintenance.filter(m => m.scheduledDate && daysUntil(m.scheduledDate) < 0).length}
+                    </span>
+                    <span style="font-size:0.75rem;color:var(--gray-600);">
+                        <i class="fas fa-check-circle"></i> Completed: ${allMaintenance.filter(m => m.status === 'completed').length}
+                    </span>
+                </div>
+
+                <div class="grid-cards">
+                    ${allMaintenance.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-wrench"></i><h3>No maintenance records</h3><p>Schedule your first maintenance task.</p></div>' :
+                    allMaintenance.sort((a,b) => {
+                        const da = a.scheduledDate ? daysUntil(a.scheduledDate) : 999;
+                        const db = b.scheduledDate ? daysUntil(b.scheduledDate) : 999;
+                        return da - db;
+                    }).map(m => {
+                        const days = m.scheduledDate ? daysUntil(m.scheduledDate) : 999;
+                        const badgeClass = days < 0 ? 'urgent' : days <= 7 ? 'warning' : 'safe';
+                        const badgeText = days < 0 ? 'Overdue!' : days === 0 ? 'Today!' : `${days} days`;
+                        const statusText = m.status === 'completed' ? '✅ Done' : m.status === 'in-progress' ? '🔧 In progress' : '⏳ Scheduled';
+                        const isOverdue = days < 0;
+                        return `
+                            <div class="card" style="border-left:4px solid ${isOverdue ? 'var(--red)' : days <= 7 ? 'var(--accent)' : 'var(--green)'};">
+                                <div class="card-header">
+                                    <div class="icon-wrap amber"><i class="fas fa-car"></i></div>
+                                    <div>
+                                        <div class="card-title">${escapeHtml(m.carName || 'Unnamed Vehicle')}</div>
+                                        <div class="card-subtitle">${escapeHtml(m.description || 'No description')}</div>
+                                    </div>
+                                    <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                                        <span class="maint-badge ${badgeClass}"><i class="fas fa-clock"></i> ${badgeText}</span>
+                                        <span style="font-size:0.6rem;color:var(--gray-500);">${statusText}</span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="detail-row"><span class="label">Scheduled Date</span><span class="value">${m.scheduledDate ? formatDate(m.scheduledDate) : 'N/A'}</span></div>
+                                    <div class="detail-row"><span class="label">Vehicle</span><span class="value">${escapeHtml(m.carName)}</span></div>
+                                    <div class="detail-row"><span class="label">Status</span><span class="value">${statusText}</span></div>
+                                    ${m.notes ? `<div class="detail-row"><span class="label">Notes</span><span class="value">${escapeHtml(m.notes)}</span></div>` : ''}
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn-icon teal" onclick="editMaintenance('${m.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                    ${m.status !== 'completed' ? `<button class="btn-icon green" onclick="completeMaintenance('${m.id}')"><i class="fas fa-check"></i> Done</button>` : ''}
+                                    <button class="btn-icon red" onclick="deleteMaintenance('${m.id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
             `;
             container.innerHTML = html;
             document.getElementById('statsText').textContent = '🔧 Maintenance';
             toggleSidebar();
+        };
+
+        // ==============================================================
+        // MAINTENANCE CRUD
+        // ==============================================================
+        window.openAddMaintenanceModal = function() {
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '🔧 Schedule Maintenance';
+
+            // Build vehicle options
+            const vehicleOpts = allVehicles.map(v =>
+                `<option value="${v.id}">${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`
+            ).join('');
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Vehicle</label>
+                    <select id="maintVehicle">
+                        <option value="">Select a vehicle...</option>
+                        ${vehicleOpts}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Scheduled Date</label>
+                    <input type="date" id="maintDate" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input id="maintDesc" placeholder="e.g. Oil change, brake pads, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="maintNotes" placeholder="Additional details..." rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="maintStatus">
+                        <option value="scheduled">Scheduled</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = saveMaintenance;
+            document.getElementById('modalSaveBtn').textContent = 'Schedule';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        window.saveMaintenance = async function() {
+            const carId = document.getElementById('maintVehicle').value;
+            const scheduledDate = document.getElementById('maintDate').value;
+            const description = document.getElementById('maintDesc').value.trim();
+            const notes = document.getElementById('maintNotes').value.trim();
+            const status = document.getElementById('maintStatus').value;
+
+            if (!carId || !scheduledDate || !description) {
+                showToast('Vehicle, date, and description are required.', 'error');
+                return;
+            }
+
+            const vehicle = allVehicles.find(v => v.id === carId);
+            const carName = vehicle ? vehicle.name : 'Unknown';
+
+            try {
+                const newRef = db.ref('maintenance').push();
+                await newRef.set({
+                    carId,
+                    carName,
+                    scheduledDate,
+                    description,
+                    notes,
+                    status,
+                    createdAt: Date.now()
+                });
+                closeModal('detailModal');
+                showToast(`Maintenance scheduled for ${carName}!`, 'success');
+                await refreshAll();
+                openMaintenance();
+            } catch (err) {
+                showToast('Error scheduling maintenance: ' + err.message, 'error');
+            }
+        };
+
+        window.editMaintenance = async function(id) {
+            const m = allMaintenance.find(x => x.id === id);
+            if (!m) return;
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '✏️ Edit Maintenance';
+
+            const vehicleOpts = allVehicles.map(v =>
+                `<option value="${v.id}" ${v.id === m.carId ? 'selected' : ''}>${escapeHtml(v.name)} (${escapeHtml(v.plate)})</option>`
+            ).join('');
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label>Vehicle</label>
+                    <select id="maintVehicle">
+                        <option value="">Select a vehicle...</option>
+                        ${vehicleOpts}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Scheduled Date</label>
+                    <input type="date" id="maintDate" value="${m.scheduledDate || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input id="maintDesc" value="${escapeHtml(m.description || '')}" placeholder="e.g. Oil change, brake pads, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="maintNotes" placeholder="Additional details..." rows="2">${escapeHtml(m.notes || '')}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="maintStatus">
+                        <option value="scheduled" ${m.status === 'scheduled' ? 'selected' : ''}>Scheduled</option>
+                        <option value="in-progress" ${m.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                        <option value="completed" ${m.status === 'completed' ? 'selected' : ''}>Completed</option>
+                    </select>
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').onclick = () => updateMaintenance(id);
+            document.getElementById('modalSaveBtn').textContent = 'Save Changes';
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            openModal('detailModal');
+        };
+
+        window.updateMaintenance = async function(id) {
+            const carId = document.getElementById('maintVehicle').value;
+            const scheduledDate = document.getElementById('maintDate').value;
+            const description = document.getElementById('maintDesc').value.trim();
+            const notes = document.getElementById('maintNotes').value.trim();
+            const status = document.getElementById('maintStatus').value;
+
+            if (!carId || !scheduledDate || !description) {
+                showToast('Vehicle, date, and description are required.', 'error');
+                return;
+            }
+
+            const vehicle = allVehicles.find(v => v.id === carId);
+            const carName = vehicle ? vehicle.name : 'Unknown';
+
+            try {
+                await db.ref(`maintenance/${id}`).update({
+                    carId,
+                    carName,
+                    scheduledDate,
+                    description,
+                    notes,
+                    status
+                });
+                closeModal('detailModal');
+                showToast('Maintenance updated!', 'success');
+                await refreshAll();
+                openMaintenance();
+            } catch (err) {
+                showToast('Error updating maintenance: ' + err.message, 'error');
+            }
+        };
+
+        window.completeMaintenance = async function(id) {
+            if (!confirm('Mark this maintenance as completed?')) return;
+            try {
+                await db.ref(`maintenance/${id}`).update({ status: 'completed' });
+                showToast('Maintenance marked as completed!', 'success');
+                await refreshAll();
+                openMaintenance();
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteMaintenance = async function(id) {
+            if (!confirm('Delete this maintenance record?')) return;
+            try {
+                await db.ref(`maintenance/${id}`).remove();
+                showToast('Maintenance record deleted.', 'success');
+                await refreshAll();
+                openMaintenance();
+            } catch (err) {
+                showToast('Error deleting: ' + err.message, 'error');
+            }
+        };
+
+        window.viewMaintenanceDetail = function(id) {
+            const m = allMaintenance.find(x => x.id === id);
+            if (!m) return;
+            const days = m.scheduledDate ? daysUntil(m.scheduledDate) : 999;
+            const badgeClass = days < 0 ? 'urgent' : days <= 7 ? 'warning' : 'safe';
+            const badgeText = days < 0 ? 'Overdue!' : days === 0 ? 'Today!' : `${days} days`;
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').textContent = '🔧 Maintenance Details';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;color:var(--gray-600);">
+                    <div><span class="label">Vehicle:</span> <span style="font-weight:600;color:var(--gray-800);">${escapeHtml(m.carName)}</span></div>
+                    <div><span class="label">Scheduled:</span> <span style="font-weight:600;color:var(--gray-800);">${m.scheduledDate ? formatDate(m.scheduledDate) : 'N/A'}</span></div>
+                    <div><span class="label">Status:</span> <span style="font-weight:600;color:var(--gray-800);">${m.status === 'completed' ? '✅ Done' : m.status === 'in-progress' ? '🔧 In progress' : '⏳ Scheduled'}</span></div>
+                    <div><span class="label">Countdown:</span> <span class="maint-badge ${badgeClass}">${badgeText}</span></div>
+                    <div style="grid-column:1/-1;"><span class="label">Description:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(m.description || 'No description')}</span></div>
+                    ${m.notes ? `<div style="grid-column:1/-1;"><span class="label">Notes:</span> <span style="font-weight:500;color:var(--gray-800);">${escapeHtml(m.notes)}</span></div>` : ''}
+                </div>
+            `;
+            document.getElementById('modalSaveBtn').style.display = 'none';
+            document.getElementById('modalFooter').querySelector('.btn-secondary').textContent = 'Close';
+            openModal('detailModal');
         };
 
         // ==============================================================
@@ -4314,7 +4803,7 @@
         }
 
         // ==============================================================
-        // RENDER REPORTS
+        // RENDER REPORTS (unchanged)
         // ==============================================================
         function renderReports() {
             const reportsDateStart = new Date(reportsSelectedDate);
@@ -4388,7 +4877,7 @@
         }
 
         // ==============================================================
-        // REVENUE PAGE
+        // REVENUE PAGE (unchanged)
         // ==============================================================
         function renderRevenue() {
             const start = new Date(revenueStartDate);
@@ -4462,9 +4951,11 @@
         window.onRevenueQuickDate = function(type) {
             const today = new Date();
             let start, end;
-            if (type === 'today') { start = today; end = today; }
-            else if (type === 'week') { start = new Date(today); start.setDate(today.getDate() - 6); end = today; }
-            else if (type === 'month') { start = new Date(today.getFullYear(), today.getMonth(), 1); end = today; }
+            if (type === 'today') { start = today;
+                end = today; } else if (type === 'week') { start = new Date(today);
+                start.setDate(today.getDate() - 6);
+                end = today; } else if (type === 'month') { start = new Date(today.getFullYear(), today.getMonth(), 1);
+                end = today; }
             revenueStartDate = start.toISOString().split('T')[0];
             revenueEndDate = end.toISOString().split('T')[0];
             document.getElementById('revenueStartDate').value = revenueStartDate;
@@ -4485,7 +4976,9 @@
                 ['Date', 'Driver Name', 'Driver Phone', 'Vehicle Plate', 'Revenue (ZMW)']
             ];
             completed.sort((a, b) => b.startTime - a.startTime).forEach(s => {
-                rows.push([formatDate(s.startTime), s.driverName || '', s.driverPhone || '', s.vehiclePlate || '', (s.revenue || 0).toFixed(2)]);
+                rows.push([formatDate(s.startTime), s.driverName || '', s.driverPhone || '', s.vehiclePlate || '',
+                    (s.revenue || 0).toFixed(2)
+                ]);
             });
             rows.push(['', '', '', 'Total', completed.reduce((sum, s) => sum + (s.revenue || 0), 0).toFixed(2)]);
             const csv = rows.map(r => r.join(',')).join('\n');
@@ -4498,12 +4991,40 @@
         };
 
         // ==============================================================
-        // DRIVER REGISTER PAGE
+        // DRIVER REGISTER PAGE (with weekly & custom range downloads)
         // ==============================================================
         function renderDriverRegister() {
             const [year, monthNum] = registerSelectedMonth.split('-').map(Number);
             const daysInMonth = new Date(year, monthNum, 0).getDate();
             const dayCols = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+            // Generate weeks for dropdown
+            const weeks = getWeeksInMonth(year, monthNum - 1);
+            const weekItemsHtml = weeks.map(w => {
+                const startStr = w.start.toISOString().split('T')[0];
+                const endStr = w.end.toISOString().split('T')[0];
+                const label = `${w.label} (${startStr} → ${endStr}) · ${w.days} days`;
+                return `
+                    <div class="week-item" onclick="downloadWeeklyRegister('${startStr}', '${endStr}', '${w.label}')">
+                        <span>${label}</span>
+                        <span class="days-badge">${w.days} days</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Custom range download
+            const customRangeHtml = `
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
+                    <span style="font-size:0.7rem;font-weight:600;color:var(--gray-600);">Custom Range:</span>
+                    <input type="date" id="registerFromDate" value="${registerSelectedMonth}-01" style="padding:4px 8px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:0.7rem;">
+                    <span style="font-size:0.7rem;color:var(--gray-400);">→</span>
+                    <input type="date" id="registerToDate" value="${new Date().toISOString().split('T')[0]}" style="padding:4px 8px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:0.7rem;">
+                    <button class="btn-success" onclick="downloadRegisterRange()" style="padding:4px 12px;font-size:0.7rem;">
+                        <i class="fas fa-file-excel"></i> Download Range
+                    </button>
+                </div>
+            `;
+
             let html = `
                 <div class="page-header">
                     <h2><i class="fas fa-clipboard-user" style="color:var(--secondary);"></i> Driver Register</h2>
@@ -4512,10 +5033,26 @@
                     <span class="date-label"><i class="fas fa-calendar-alt"></i> Month:</span>
                     <input type="month" id="registerMonth" value="${registerSelectedMonth}" onchange="onRegisterMonthChange(this.value)">
                     <button class="btn-date" onclick="onRegisterMonthChange(new Date().toISOString().slice(0,7))">Current</button>
+
+                    <div class="week-dropdown-wrap" style="margin-left:auto;">
+                        <button class="dropdown-toggle-btn" onclick="toggleWeekDropdown()">
+                            <i class="fas fa-file-excel"></i> Download Week
+                            <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
+                        </button>
+                        <div class="week-dropdown-menu" id="weekDropdownMenu">
+                            ${weekItemsHtml || '<div class="week-item" style="color:var(--gray-400);">No weeks available</div>'}
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex;gap:10px;margin-bottom:14px;">
-                    <button class="btn-success" onclick="downloadRegisterCSV()" style="padding:4px 12px;font-size:.7rem;"><i class="fas fa-file-excel"></i> Download CSV (Monthly)</button>
+
+                ${customRangeHtml}
+
+                <div style="display:flex;gap:10px;margin:10px 0 14px 0;flex-wrap:wrap;">
+                    <button class="btn-success" onclick="downloadFullMonthRegister()" style="padding:4px 12px;font-size:0.7rem;">
+                        <i class="fas fa-file-excel"></i> Download Full Month
+                    </button>
                 </div>
+
                 <div style="overflow-x:auto;background:var(--white);border-radius:var(--radius-lg);padding:14px;border:1px solid var(--gray-200);">
                     <table style="width:100%;border-collapse:collapse;font-size:.75rem;">
                         <thead>
@@ -4523,25 +5060,29 @@
                                 <th style="padding:8px;text-align:left;">Driver</th>
                                 <th style="padding:8px;text-align:left;">Phone</th>
                                 ${dayCols.map(d => `<th style="padding:4px;text-align:center;font-size:.6rem;">${d}</th>`).join('')}
+                                <th style="padding:4px;text-align:center;font-weight:700;font-size:.65rem;color:var(--primary);">Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${allDrivers.length === 0 ? '<tr><td colspan="' + (2 + daysInMonth) + '" style="text-align:center;padding:20px;color:var(--gray-400);">No drivers found</td></tr>' :
+                            ${allDrivers.length === 0 ? '<tr><td colspan="' + (3 + daysInMonth) + '" style="text-align:center;padding:20px;color:var(--gray-400);">No drivers found</td></tr>' :
                             allDrivers.map(driver => {
+                                let totalDays = 0;
                                 const attendance = dayCols.map(day => {
                                     const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                                     const hasStat = allStats.some(s => {
                                         if (s.driverId !== driver.id || s.status !== 'completed' || !s.startTime) return false;
-                                        const d = new Date(s.startTime);
-                                        const dstr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                                        const d2 = new Date(s.startTime);
+                                        const dstr = `${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,'0')}-${String(d2.getDate()).padStart(2,'0')}`;
                                         return dstr === dateStr;
                                     });
+                                    if (hasStat) totalDays++;
                                     return hasStat ? 1 : 0;
                                 });
                                 return `<tr style="border-bottom:1px solid var(--gray-100);">
                                     <td style="padding:6px 8px;font-weight:600;">${escapeHtml(driver.name)}</td>
                                     <td style="padding:6px 8px;">${escapeHtml(driver.phone)}</td>
                                     ${attendance.map(a => `<td style="padding:4px;text-align:center;${a===1?'background:var(--green-light);color:var(--green);font-weight:700;':'background:var(--gray-50);color:var(--gray-400);'}">${a}</td>`).join('')}
+                                    <td style="padding:4px;text-align:center;font-weight:700;color:var(--primary);">${totalDays}</td>
                                 </tr>`;
                             }).join('')}
                         </tbody>
@@ -4551,39 +5092,133 @@
             document.getElementById('contentArea').innerHTML = html;
         }
 
-        window.onRegisterMonthChange = function(month) {
-            registerSelectedMonth = month;
-            document.getElementById('registerMonth').value = month;
-            renderDriverRegister();
+        // ==============================================================
+        // REGISTER DOWNLOAD FUNCTIONS
+        // ==============================================================
+        window.toggleWeekDropdown = function() {
+            const menu = document.getElementById('weekDropdownMenu');
+            if (menu) menu.classList.toggle('open');
         };
 
-        window.downloadRegisterCSV = function() {
-            const [year, monthNum] = registerSelectedMonth.split('-').map(Number);
-            const daysInMonth = new Date(year, monthNum, 0).getDate();
-            const rows = [
-                ['Driver Name', 'Phone', ...Array.from({ length: daysInMonth }, (_, i) => `Day ${i+1}`)]
-            ];
-            allDrivers.forEach(driver => {
-                const row = [driver.name || 'Unnamed', driver.phone || ''];
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                    const hasStat = allStats.some(s => {
-                        if (s.driverId !== driver.id || s.status !== 'completed' || !s.startTime) return false;
-                        const d = new Date(s.startTime);
-                        const dstr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                        return dstr === dateStr;
-                    });
-                    row.push(hasStat ? 1 : 0);
-                }
-                rows.push(row);
-            });
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const wrap = document.querySelector('.week-dropdown-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                const menu = document.getElementById('weekDropdownMenu');
+                if (menu) menu.classList.remove('open');
+            }
+        });
+
+        window.downloadWeeklyRegister = function(startDate, endDate, label) {
+            const rows = buildRegisterRows(startDate, endDate);
+            if (rows.length <= 1) {
+                showToast('No data for this week.', 'warning');
+                return;
+            }
             const csv = rows.map(r => r.join(',')).join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `driver_register_${registerSelectedMonth}.csv`;
+            a.download = `register_${label}_${startDate}_to_${endDate}.csv`;
             a.click();
-            showToast('Driver register CSV downloaded!', 'success');
+            const menu = document.getElementById('weekDropdownMenu');
+            if (menu) menu.classList.remove('open');
+            showToast(`Week ${label} downloaded! (${rows.length - 1} drivers)`, 'success');
+        };
+
+        window.downloadFullMonthRegister = function() {
+            const [year, month] = registerSelectedMonth.split('-').map(Number);
+            const startDate = `${registerSelectedMonth}-01`;
+            const lastDay = new Date(year, month, 0).getDate();
+            const endDate = `${registerSelectedMonth}-${String(lastDay).padStart(2,'0')}`;
+            const rows = buildRegisterRows(startDate, endDate);
+            if (rows.length <= 1) {
+                showToast('No data for this month.', 'warning');
+                return;
+            }
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `register_full_${registerSelectedMonth}.csv`;
+            a.click();
+            showToast(`Full month downloaded! (${rows.length - 1} drivers)`, 'success');
+        };
+
+        window.downloadRegisterRange = function() {
+            const from = document.getElementById('registerFromDate').value;
+            const to = document.getElementById('registerToDate').value;
+            if (!from || !to) {
+                showToast('Please select both from and to dates.', 'error');
+                return;
+            }
+            if (from > to) {
+                showToast('From date must be before to date.', 'error');
+                return;
+            }
+            const rows = buildRegisterRows(from, to);
+            if (rows.length <= 1) {
+                showToast('No data for this range.', 'warning');
+                return;
+            }
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `register_${from}_to_${to}.csv`;
+            a.click();
+            showToast(`Range downloaded! (${rows.length - 1} drivers)`, 'success');
+        };
+
+        function buildRegisterRows(fromDate, toDate) {
+            const from = new Date(fromDate);
+            from.setHours(0, 0, 0, 0);
+            const to = new Date(toDate);
+            to.setHours(23, 59, 59, 999);
+
+            // Build all days in range
+            const days = [];
+            let current = new Date(from);
+            while (current <= to) {
+                days.push(new Date(current));
+                current.setDate(current.getDate() + 1);
+            }
+
+            if (days.length === 0) return [];
+
+            const headers = ['Driver Name', 'Phone', ...days.map(d => d.toISOString().split('T')[0]), 'Total Days'];
+            const rows = [headers];
+
+            allDrivers.forEach(driver => {
+                let total = 0;
+                const row = [driver.name || 'Unnamed', driver.phone || ''];
+                days.forEach(day => {
+                    const dateStr = day.toISOString().split('T')[0];
+                    const hasStat = allStats.some(s => {
+                        if (s.driverId !== driver.id || s.status !== 'completed' || !s.startTime) return false;
+                        const d2 = new Date(s.startTime);
+                        const dstr = `${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,'0')}-${String(d2.getDate()).padStart(2,'0')}`;
+                        return dstr === dateStr;
+                    });
+                    row.push(hasStat ? 1 : 0);
+                    if (hasStat) total++;
+                });
+                row.push(total);
+                rows.push(row);
+            });
+
+            return rows;
+        }
+
+        window.onRegisterMonthChange = function(month) {
+            registerSelectedMonth = month;
+            document.getElementById('registerMonth').value = month;
+            // Update from/to date pickers to match month
+            const [year, monthNum] = month.split('-').map(Number);
+            const lastDay = new Date(year, monthNum, 0).getDate();
+            document.getElementById('registerFromDate').value = `${month}-01`;
+            document.getElementById('registerToDate').value = `${month}-${String(lastDay).padStart(2,'0')}`;
+            renderDriverRegister();
         };
 
         // ==============================================================
