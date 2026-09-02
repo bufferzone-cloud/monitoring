@@ -2099,6 +2099,51 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* ===== TABLE CONTAINER (for revenue & register) ===== */
+        .table-container {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            border: 1px solid var(--gray-200);
+            margin-top: 14px;
+            overflow-x: auto;
+        }
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        .table-container th {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 2px solid var(--gray-200);
+            font-weight: 700;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        .table-container td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .table-container tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-400);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .empty-state h3 {
+            font-size: 1rem;
+            color: var(--gray-500);
+        }
     </style>
 </head>
 <body>
@@ -2186,6 +2231,8 @@
             <button class="nav-item" data-tab="vehicles"><i class="fas fa-truck"></i><span>Vehicles</span></button>
             <button class="nav-item" data-tab="drivers"><i class="fas fa-user-md"></i><span>Drivers</span></button>
             <button class="nav-item" data-tab="reports"><i class="fas fa-file-alt"></i><span>Reports</span></button>
+            <button class="nav-item" data-tab="revenue"><i class="fas fa-money-bill-wave"></i><span>Revenue</span></button>
+            <button class="nav-item" data-tab="register"><i class="fas fa-clipboard-user"></i><span>Register</span></button>
         </nav>
     </div>
 
@@ -2218,6 +2265,12 @@
             <button class="sidebar-item" onclick="switchTab('vehicles');toggleSidebar();"><i class="fas fa-truck"></i> Vehicles</button>
             <button class="sidebar-item" onclick="switchTab('drivers');toggleSidebar();"><i class="fas fa-user-md"></i> Drivers</button>
             <button class="sidebar-item" onclick="switchTab('reports');toggleSidebar();"><i class="fas fa-file-alt"></i> Reports</button>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-title">Finance</div>
+            <button class="sidebar-item" onclick="switchTab('revenue');toggleSidebar();"><i class="fas fa-money-bill-wave"></i> Revenue</button>
+            <button class="sidebar-item" onclick="switchTab('register');toggleSidebar();"><i class="fas fa-clipboard-user"></i> Driver Register</button>
         </div>
 
         <div class="sidebar-section">
@@ -2298,6 +2351,9 @@
         let selectedDriver = null;
         let selectedDate = new Date().toISOString().split('T')[0];
         let reportsSelectedDate = new Date().toISOString().split('T')[0];
+        let revenueStartDate = new Date().toISOString().split('T')[0];
+        let revenueEndDate = new Date().toISOString().split('T')[0];
+        let registerSelectedMonth = new Date().toISOString().slice(0, 7);
         let isShutdown = false;
         let shutdownListeners = [];
 
@@ -2989,8 +3045,11 @@
             const container = document.getElementById('vehicleDropdownContainer');
             if (!container) return;
 
+            // Filter out vehicles that are already assigned (pending or signed stat)
+            const availableVehicles = allVehicles.filter(v => !allStats.some(s => s.vehicleId === v.id && (s.status === 'pending' || s.status === 'signed')));
+
             const dropdown = createCustomDropdown(
-                allVehicles,
+                availableVehicles,
                 (vehicle) => {
                     selectedVehicle = vehicle;
                     const preview = document.getElementById('vehiclePreview');
@@ -3023,8 +3082,11 @@
             const container = document.getElementById('driverDropdownContainer');
             if (!container) return;
 
+            // Filter out drivers that are already assigned (pending or signed stat)
+            const availableDrivers = allDrivers.filter(d => !allStats.some(s => s.driverId === d.id && (s.status === 'pending' || s.status === 'signed')));
+
             const dropdown = createCustomDropdown(
-                allDrivers,
+                availableDrivers,
                 (driver) => {
                     selectedDriver = driver;
                     const preview = document.getElementById('driverPreview');
@@ -4326,6 +4388,205 @@
         }
 
         // ==============================================================
+        // REVENUE PAGE
+        // ==============================================================
+        function renderRevenue() {
+            const start = new Date(revenueStartDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(revenueEndDate);
+            end.setHours(23, 59, 59, 999);
+            const completedStats = allStats.filter(s => {
+                const d = new Date(s.startTime);
+                return d >= start && d <= end && s.status === 'completed';
+            });
+            const totalRevenue = completedStats.reduce((sum, s) => sum + (s.revenue || 0), 0);
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-money-bill-wave" style="color:var(--green);"></i> Revenue</h2>
+                </div>
+                <div class="date-picker-container">
+                    <span class="date-label"><i class="fas fa-calendar-alt"></i> From:</span>
+                    <input type="date" id="revenueStartDate" value="${revenueStartDate}" onchange="onRevenueDateChange()">
+                    <span class="date-label"><i class="fas fa-calendar-alt"></i> To:</span>
+                    <input type="date" id="revenueEndDate" value="${revenueEndDate}" onchange="onRevenueDateChange()">
+                    <button class="btn-date" onclick="onRevenueQuickDate('today')">Today</button>
+                    <button class="btn-date" onclick="onRevenueQuickDate('week')">Week</button>
+                    <button class="btn-date" onclick="onRevenueQuickDate('month')">Month</button>
+                </div>
+                <div class="grid-cards">
+                    <div class="card">
+                        <div class="card-header"><div class="icon-wrap green"><i class="fas fa-money-bill-wave"></i></div><div><div class="card-title">Total Revenue</div><div class="card-subtitle">${completedStats.length} trips</div></div></div>
+                        <div class="card-body"><div class="detail-row"><span class="label">Total</span><span class="value" style="font-size:1.2rem;font-weight:800;color:var(--green);">ZMW ${totalRevenue.toFixed(2)}</span></div></div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+                        <h3 style="font-size:.9rem;font-weight:700;">Revenue Breakdown</h3>
+                        <button class="btn-success" onclick="downloadRevenueCSV()" style="padding:4px 12px;font-size:.7rem;"><i class="fas fa-file-excel"></i> Download CSV</button>
+                    </div>
+                    ${completedStats.length === 0 ? '<div class="empty-state"><i class="fas fa-money-bill-wave"></i><h3>No revenue data for this period</h3></div>' : `
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:.75rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid var(--gray-200);"><th style="padding:8px;text-align:left;">Driver</th><th style="padding:8px;text-align:left;">Phone</th><th style="padding:8px;text-align:left;">Plate</th><th style="padding:8px;text-align:left;">Date</th><th style="padding:8px;text-align:right;">Revenue</th></tr>
+                            </thead>
+                            <tbody>
+                                ${completedStats.sort((a, b) => b.startTime - a.startTime).map(s => `
+                                    <tr style="border-bottom:1px solid var(--gray-100);">
+                                        <td style="padding:6px 8px;">${escapeHtml(s.driverName)}</td>
+                                        <td style="padding:6px 8px;">${escapeHtml(s.driverPhone)}</td>
+                                        <td style="padding:6px 8px;">${escapeHtml(s.vehiclePlate)}</td>
+                                        <td style="padding:6px 8px;">${formatDate(s.startTime)}</td>
+                                        <td style="padding:6px 8px;text-align:right;font-weight:600;color:var(--green);">ZMW ${(s.revenue || 0).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top:2px solid var(--gray-200);font-weight:700;background:var(--gray-50);">
+                                    <td colspan="4" style="padding:8px;text-align:right;">Total</td>
+                                    <td style="padding:8px;text-align:right;color:var(--green);font-size:1rem;">ZMW ${totalRevenue.toFixed(2)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>`}
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        window.onRevenueDateChange = function() {
+            revenueStartDate = document.getElementById('revenueStartDate').value || new Date().toISOString().split('T')[0];
+            revenueEndDate = document.getElementById('revenueEndDate').value || new Date().toISOString().split('T')[0];
+            renderRevenue();
+        };
+        window.onRevenueQuickDate = function(type) {
+            const today = new Date();
+            let start, end;
+            if (type === 'today') { start = today; end = today; }
+            else if (type === 'week') { start = new Date(today); start.setDate(today.getDate() - 6); end = today; }
+            else if (type === 'month') { start = new Date(today.getFullYear(), today.getMonth(), 1); end = today; }
+            revenueStartDate = start.toISOString().split('T')[0];
+            revenueEndDate = end.toISOString().split('T')[0];
+            document.getElementById('revenueStartDate').value = revenueStartDate;
+            document.getElementById('revenueEndDate').value = revenueEndDate;
+            renderRevenue();
+        };
+
+        window.downloadRevenueCSV = function() {
+            const start = new Date(revenueStartDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(revenueEndDate);
+            end.setHours(23, 59, 59, 999);
+            const completed = allStats.filter(s => {
+                const d = new Date(s.startTime);
+                return d >= start && d <= end && s.status === 'completed';
+            });
+            const rows = [
+                ['Date', 'Driver Name', 'Driver Phone', 'Vehicle Plate', 'Revenue (ZMW)']
+            ];
+            completed.sort((a, b) => b.startTime - a.startTime).forEach(s => {
+                rows.push([formatDate(s.startTime), s.driverName || '', s.driverPhone || '', s.vehiclePlate || '', (s.revenue || 0).toFixed(2)]);
+            });
+            rows.push(['', '', '', 'Total', completed.reduce((sum, s) => sum + (s.revenue || 0), 0).toFixed(2)]);
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `revenue_${revenueStartDate}_to_${revenueEndDate}.csv`;
+            a.click();
+            showToast('Revenue CSV downloaded!', 'success');
+        };
+
+        // ==============================================================
+        // DRIVER REGISTER PAGE
+        // ==============================================================
+        function renderDriverRegister() {
+            const [year, monthNum] = registerSelectedMonth.split('-').map(Number);
+            const daysInMonth = new Date(year, monthNum, 0).getDate();
+            const dayCols = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+            let html = `
+                <div class="page-header">
+                    <h2><i class="fas fa-clipboard-user" style="color:var(--secondary);"></i> Driver Register</h2>
+                </div>
+                <div class="date-picker-container">
+                    <span class="date-label"><i class="fas fa-calendar-alt"></i> Month:</span>
+                    <input type="month" id="registerMonth" value="${registerSelectedMonth}" onchange="onRegisterMonthChange(this.value)">
+                    <button class="btn-date" onclick="onRegisterMonthChange(new Date().toISOString().slice(0,7))">Current</button>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:14px;">
+                    <button class="btn-success" onclick="downloadRegisterCSV()" style="padding:4px 12px;font-size:.7rem;"><i class="fas fa-file-excel"></i> Download CSV (Monthly)</button>
+                </div>
+                <div style="overflow-x:auto;background:var(--white);border-radius:var(--radius-lg);padding:14px;border:1px solid var(--gray-200);">
+                    <table style="width:100%;border-collapse:collapse;font-size:.75rem;">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--gray-200);">
+                                <th style="padding:8px;text-align:left;">Driver</th>
+                                <th style="padding:8px;text-align:left;">Phone</th>
+                                ${dayCols.map(d => `<th style="padding:4px;text-align:center;font-size:.6rem;">${d}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allDrivers.length === 0 ? '<tr><td colspan="' + (2 + daysInMonth) + '" style="text-align:center;padding:20px;color:var(--gray-400);">No drivers found</td></tr>' :
+                            allDrivers.map(driver => {
+                                const attendance = dayCols.map(day => {
+                                    const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                                    const hasStat = allStats.some(s => {
+                                        if (s.driverId !== driver.id || s.status !== 'completed' || !s.startTime) return false;
+                                        const d = new Date(s.startTime);
+                                        const dstr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                                        return dstr === dateStr;
+                                    });
+                                    return hasStat ? 1 : 0;
+                                });
+                                return `<tr style="border-bottom:1px solid var(--gray-100);">
+                                    <td style="padding:6px 8px;font-weight:600;">${escapeHtml(driver.name)}</td>
+                                    <td style="padding:6px 8px;">${escapeHtml(driver.phone)}</td>
+                                    ${attendance.map(a => `<td style="padding:4px;text-align:center;${a===1?'background:var(--green-light);color:var(--green);font-weight:700;':'background:var(--gray-50);color:var(--gray-400);'}">${a}</td>`).join('')}
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        window.onRegisterMonthChange = function(month) {
+            registerSelectedMonth = month;
+            document.getElementById('registerMonth').value = month;
+            renderDriverRegister();
+        };
+
+        window.downloadRegisterCSV = function() {
+            const [year, monthNum] = registerSelectedMonth.split('-').map(Number);
+            const daysInMonth = new Date(year, monthNum, 0).getDate();
+            const rows = [
+                ['Driver Name', 'Phone', ...Array.from({ length: daysInMonth }, (_, i) => `Day ${i+1}`)]
+            ];
+            allDrivers.forEach(driver => {
+                const row = [driver.name || 'Unnamed', driver.phone || ''];
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const hasStat = allStats.some(s => {
+                        if (s.driverId !== driver.id || s.status !== 'completed' || !s.startTime) return false;
+                        const d = new Date(s.startTime);
+                        const dstr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                        return dstr === dateStr;
+                    });
+                    row.push(hasStat ? 1 : 0);
+                }
+                rows.push(row);
+            });
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `driver_register_${registerSelectedMonth}.csv`;
+            a.click();
+            showToast('Driver register CSV downloaded!', 'success');
+        };
+
+        // ==============================================================
         // TAB SWITCHING
         // ==============================================================
         function renderCurrentTab() {
@@ -4344,6 +4605,12 @@
                     break;
                 case 'reports':
                     renderReports();
+                    break;
+                case 'revenue':
+                    renderRevenue();
+                    break;
+                case 'register':
+                    renderDriverRegister();
                     break;
                 default:
                     renderDashboard();
